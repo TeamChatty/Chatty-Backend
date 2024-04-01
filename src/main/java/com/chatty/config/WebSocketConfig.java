@@ -22,11 +22,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
     private final JwtTokenProvider jwtTokenProvider;
     private final ChatHandler chatHandler;
     private final StompHandler stompHandler;
+    private final StompExceptionHandler stompExceptionHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
 
-        registry.addEndpoint("/ws")
+        registry.setErrorHandler(stompExceptionHandler)
+                .addEndpoint("/ws")
 //                .addInterceptors(new WebSocketMatchInterceptor(tokenValidator, jwtTokenProvider))
                 .setAllowedOriginPatterns("*");
 
