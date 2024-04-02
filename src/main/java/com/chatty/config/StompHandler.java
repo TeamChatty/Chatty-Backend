@@ -26,20 +26,16 @@ public class StompHandler implements ChannelInterceptor {
     @Override
     public Message<?> preSend(final Message<?> message, final MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        log.info("PreSend = gdgd");
+        log.info("PreSendMethod");
         System.out.println("message:" + message);
-        System.out.println("헤더 : " + message.getHeaders());
-        System.out.println("토큰" + accessor.getNativeHeader("Authorization"));
         System.out.println("accessor.getFirstNativeHeader(\"Authorization\") = " + accessor.getFirstNativeHeader("Authorization"));
         // apic 이랑 websocket 테스트 툴이랑 다름.
         if (StompCommand.CONNECT.equals(accessor.getCommand()) || StompCommand.SEND.equals(accessor.getCommand())) {
-            System.out.println("검증을 제대로 하나요?");
-//            tokenValidator.validateAccessToken(Objects.requireNonNull(accessor.getFirstNativeHeader("Authorization")));
+            log.info("CONNECT AND SEND 검증");
+            tokenValidator.validateAccessToken(Objects.requireNonNull(accessor.getFirstNativeHeader("Authorization")));
 //            throw new AccessDeniedException("invalid token");
-            throw new MessageDeliveryException("invalid token");
+//            throw new MessageDeliveryException("invalid token");
         }
-        System.out.println("message = " + message);
-        log.info("message = {}", message);
         return message;
     }
 }
