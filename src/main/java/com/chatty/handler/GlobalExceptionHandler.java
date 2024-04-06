@@ -55,13 +55,4 @@ public class GlobalExceptionHandler {
     public ErrorResponse userException(UsernameNotFoundException e){
         return ErrorResponse.of(NOT_EXIST_USER.getErrorCode(),e.getMessage());
     }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ErrorResponse exception(AccessDeniedException e){
-        System.out.println("e = " + e);
-        System.out.println("e = " + e);
-        System.out.println("e = " + e);
-        System.out.println("e = " + e);
-        return ErrorResponse.of(NOT_EXIST_USER.getErrorCode(),e.getMessage());
-    }
 }
