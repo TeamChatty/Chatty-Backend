@@ -2,6 +2,8 @@ package com.chatty.config;
 
 import com.chatty.constants.Code;
 import com.chatty.exception.CustomException;
+import com.chatty.jwt.JwtTokenProvider;
+import com.chatty.utils.jwt.JwtTokenUtils;
 import com.chatty.validator.TokenValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,26 +18,33 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class StompHandler implements ChannelInterceptor {
 
     private final TokenValidator tokenValidator;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public Message<?> preSend(final Message<?> message, final MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        String accessToken = accessor.getFirstNativeHeader("Authorization");
         log.info("PreSendMethod");
-        System.out.println("message:" + message);
-        System.out.println("accessor.getFirstNativeHeader(\"Authorization\") = " + accessor.getFirstNativeHeader("Authorization"));
+        log.info(accessor.getCommand().toString());
         // apic 이랑 websocket 테스트 툴이랑 다름.
-        if (StompCommand.CONNECT.equals(accessor.getCommand()) || StompCommand.SEND.equals(accessor.getCommand())) {
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             log.info("CONNECT AND SEND 검증");
-            tokenValidator.validateAccessToken(Objects.requireNonNull(accessor.getFirstNativeHeader("Authorization")));
-//            throw new AccessDeniedException("invalid token");
-//            throw new MessageDeliveryException("invalid token");
+            tokenValidator.validateAccessToken(accessToken);
+
+            accessToken = JwtTokenUtils.getAccessToken(accessToken);
+            String mobileNumber = jwtTokenProvider.getMobileNumber(accessToken);
+            log.info("입력된 유저 번호 = {}", mobileNumber);
+            accessor.getSessionAttributes().put("mobileNumber", mobileNumber);
         }
+
+        log.info("preSend End");
         return message;
     }
 }

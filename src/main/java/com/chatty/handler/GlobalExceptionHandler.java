@@ -12,6 +12,9 @@ import java.security.NoSuchAlgorithmException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,7 +26,7 @@ import org.springframework.web.client.RestClientException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({CustomException.class})
-    protected ResponseEntity<ErrorResponse> handleNormalException(CustomException e){
+    public ResponseEntity<ErrorResponse> handleNormalException(CustomException e){
         return ResponseEntity.status(e.getCode().getHttpStatus())
                 .body(ErrorResponse.builder()
                         .errorCode(e.getCode().getErrorCode())

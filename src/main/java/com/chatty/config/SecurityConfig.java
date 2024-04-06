@@ -57,7 +57,7 @@ public class SecurityConfig {
                 "/users/join",
                 "/users/login",
                 "/check/**",
-//                "/ws",
+                "/ws",
 //                "/auth/**",
                 "/auth/mobile",
                 "/auth/refresh",
@@ -65,7 +65,7 @@ public class SecurityConfig {
                 "/v3/api-docs/**",
                 "/index.html",
                 "/matching/**",
-//                "/ws/**",
+                "/ws/**",
                 "/signaling/**"
         );
     }

@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,11 +34,23 @@ public class MessageController {
     @SendTo(value = "/sub/chat/{roomId}")
     public ApiResponse<SimpleMessageResponseDto> message(@DestinationVariable Long roomId,
                                                          @Valid @RequestBody final ChatMessageRequest request,
-                                                         Authentication authentication){
+                                                         SimpMessageHeaderAccessor accessor){
         log.info("메세지 전송");
         LocalDateTime now = LocalDateTime.now();
-        return ApiResponse.ok(chatService.saveMessage(roomId, request, authentication.getName(), now));
+        String mobileNumber = accessor.getSessionAttributes().get("mobileNumber").toString();
+        log.info("보내는 사람 mobileNumber = {}", mobileNumber);
+        return ApiResponse.ok(chatService.saveMessage(roomId, request, mobileNumber, now));
     }
+
+//    @MessageMapping(value = "/chat/message/{roomId}")
+//    @SendTo(value = "/sub/chat/{roomId}")
+//    public ApiResponse<SimpleMessageResponseDto> message(@DestinationVariable Long roomId,
+//                                                         @Valid @RequestBody final ChatMessageRequest request,
+//                                                         Authentication authentication){
+//        log.info("메세지 전송");
+//        LocalDateTime now = LocalDateTime.now();
+//        return ApiResponse.ok(chatService.saveMessage(roomId, request, authentication.getName(), now));
+//    }
 
 //    @MessageMapping(value = "/chat/message/{roomId}")
 //    @SendTo(value = "/sub/chat/{roomId}")
