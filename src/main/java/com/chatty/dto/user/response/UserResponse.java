@@ -1,6 +1,7 @@
 package com.chatty.dto.user.response;
 
 import com.chatty.constants.Authority;
+import com.chatty.dto.interest.response.InterestResponse;
 import com.chatty.entity.user.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,14 +25,14 @@ public class UserResponse {
     private String address;
     private Authority authority;
     private String imageUrl;
-    private List<String> interests;
+    private List<InterestResponse> interests;
     private String job;
     private String introduce;
     private String school;
     private boolean blueCheck;
 
     @Builder
-    public UserResponse(final Long id, final String mobileNumber, final String nickname, final LocalDate birth, final Gender gender, final Mbti mbti, final String address, final Authority authority, final String imageUrl, final List<String> interests, final String job, final String introduce, final String school, final boolean blueCheck) {
+    public UserResponse(final Long id, final String mobileNumber, final String nickname, final LocalDate birth, final Gender gender, final Mbti mbti, final String address, final Authority authority, final String imageUrl, final List<InterestResponse> interests, final String job, final String introduce, final String school, final boolean blueCheck) {
         this.id = id;
         this.mobileNumber = mobileNumber;
         this.nickname = nickname;
@@ -60,7 +61,7 @@ public class UserResponse {
                 .authority(user.getAuthority())
                 .imageUrl(user.getImageUrl())
                 .interests(user.getUserInterests().stream()
-                        .map(i -> i.getInterest().getName())
+                        .map(userInterest -> InterestResponse.of(userInterest.getInterest()))
                         .collect(Collectors.toList()))
                 .job(user.getJob())
                 .introduce(user.getIntroduce())

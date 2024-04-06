@@ -335,7 +335,12 @@ class UserServiceTest {
         // then
         assertThat(userResponse.getId()).isNotNull();
         assertThat(userResponse.getInterests()).hasSize(3)
-                .containsExactlyInAnyOrder("여행", "맛집", "카페");
+                .extracting("id", "name")
+                .containsExactlyInAnyOrder(
+                        tuple(interest1.getId(), "여행"),
+                        tuple(interest2.getId(), "맛집"),
+                        tuple(interest3.getId(), "카페")
+                );
     }
 
     @DisplayName("관심사를 수정할 때, 존재하지 않는 관심사 값을 넣으면 예외가 발생한다.")
