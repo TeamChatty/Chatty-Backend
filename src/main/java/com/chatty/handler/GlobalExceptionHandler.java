@@ -12,6 +12,9 @@ import java.security.NoSuchAlgorithmException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,7 +26,7 @@ import org.springframework.web.client.RestClientException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({CustomException.class})
-    protected ResponseEntity<ErrorResponse> handleNormalException(CustomException e){
+    public ResponseEntity<ErrorResponse> handleNormalException(CustomException e){
         return ResponseEntity.status(e.getCode().getHttpStatus())
                 .body(ErrorResponse.builder()
                         .errorCode(e.getCode().getErrorCode())
@@ -50,6 +53,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ErrorResponse userException(UsernameNotFoundException e){
+        return ErrorResponse.of(NOT_EXIST_USER.getErrorCode(),e.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse exception(AccessDeniedException e){
+        System.out.println("e = " + e);
+        System.out.println("e = " + e);
+        System.out.println("e = " + e);
+        System.out.println("e = " + e);
         return ErrorResponse.of(NOT_EXIST_USER.getErrorCode(),e.getMessage());
     }
 }
