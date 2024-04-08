@@ -32,7 +32,8 @@ public class StompHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         String accessToken = accessor.getFirstNativeHeader("Authorization");
         log.info("PreSendMethod");
-        log.info(accessor.getCommand().toString());
+        log.info("StompCommand = {}", accessor.getCommand().toString());
+        log.info("message = {}", message);
         // apic 이랑 websocket 테스트 툴이랑 다름.
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             log.info("CONNECT AND SEND 검증");

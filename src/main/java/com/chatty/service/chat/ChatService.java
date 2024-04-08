@@ -41,8 +41,11 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
                 .orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
 
-        chatRoomRepository.findChatRoomByRoomIdAndSenderOrReceiver(roomId, sender, sender)
-                .orElseThrow(() -> new CustomException(Code.NOT_IN_USER_ROOM));
+        if (!chatRoomRepository.existsByRoomIdAndSenderOrReceiver(roomId, sender, sender)) {
+            throw new CustomException(Code.NOT_IN_USER_ROOM);
+        }
+//        chatRoomRepository.findChatRoomByRoomIdAndSenderOrReceiver(roomId, sender, sender)
+//                .orElseThrow(() -> new CustomException(Code.NOT_IN_USER_ROOM));
 
         User receiver = chatRoom.getSender().equals(sender) ? chatRoom.getReceiver() : chatRoom.getSender();
 
