@@ -1,10 +1,12 @@
 package com.chatty.repository.user;
 
+import com.chatty.constants.Code;
 import com.chatty.entity.user.User;
 
 import java.util.List;
 import java.util.Optional;
 
+import com.chatty.exception.CustomException;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,4 +35,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Double customFindByDistance2(@Param("point") Point point,
                                     @Param("point2") Point point2,
                                     @Param("scope") Double scope);
+
+    default User getByMobileNumber(String mobileNumber) {
+        return findUserByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+    }
 }
