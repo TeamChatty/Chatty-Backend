@@ -18,6 +18,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
     Optional<ChatRoom> findChatRoomByRoomIdAndSenderOrReceiver(Long roomId, User sender, User receiver);
     boolean existsByRoomIdAndSenderOrReceiver(Long roomId, User sender, User receiver);
 
+    boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
+
 //    @Query(value = "select c.* " +
 //            "from chat_room c " +
 //            "where c.sender_id = :user or c.receiver_id = :user " +

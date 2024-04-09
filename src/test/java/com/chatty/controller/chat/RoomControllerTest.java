@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.DeleteRoomDto;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.service.chat.RoomService;
@@ -45,38 +46,18 @@ class RoomControllerTest {
     @WithMockUser(username = "123123", roles = "USER")
     void createChatRoom() throws Exception {
         //given
-        RoomDto roomDto = RoomDto.builder()
-                .senderId(1L)
-                .receiverId(2L)
+        ChatRoomCreateRequest request = ChatRoomCreateRequest.builder()
+                .receiverId(1L)
                 .build();
 
         //when, then
         mockMvc.perform(
                 post("/chat/room").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(roomDto))
+                        .content(objectMapper.writeValueAsString(request))
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("채팅방 생성시, senderId 필수 값이다.")
-    @WithMockUser(username = "123123", roles = "USER")
-    void createChatRoomWithoutSenderId() throws Exception{
-        //given
-        RoomDto roomDto = RoomDto.builder()
-                .receiverId(1L)
-                .build();
-        //when, then
-        mockMvc.perform(
-                        post("/chat/room").with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(roomDto))
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("senderId(송신자)는 필수로 입력해야 합니다."));
     }
 
     @Test
@@ -84,14 +65,14 @@ class RoomControllerTest {
     @WithMockUser(username = "123123", roles = "USER")
     void createChatRoomWithoutReceiverId() throws Exception{
         //given
-        RoomDto roomDto = RoomDto.builder()
-                .senderId(1L)
+        ChatRoomCreateRequest request = ChatRoomCreateRequest.builder()
                 .build();
+
         //when, then
         mockMvc.perform(
                         post("/chat/room").with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(roomDto))
+                                .content(objectMapper.writeValueAsString(request))
                 )
                 .andDo(print())
                 .andExpect(status().isBadRequest())
