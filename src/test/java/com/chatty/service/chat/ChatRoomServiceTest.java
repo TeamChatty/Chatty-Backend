@@ -1,20 +1,23 @@
 package com.chatty.service.chat;
 
 import com.chatty.constants.Authority;
+import com.chatty.constants.Code;
+import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
+import com.chatty.dto.chat.response.ChatRoomResponse;
 import com.chatty.entity.chat.ChatMessage;
 import com.chatty.entity.chat.ChatRoom;
 import com.chatty.entity.user.User;
+import com.chatty.exception.CustomException;
 import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.chat.MessageRepository;
 import com.chatty.repository.user.UserRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -91,6 +94,69 @@ class ChatRoomServiceTest {
                 .containsExactlyInAnyOrder(
                         tuple(user2.getId(), "김연아", "profile2.jpg", true, "다시만나요4", 4)
                 );
+    }
+
+    @DisplayName("채팅방을 생성한다.")
+    @Test
+    void createChatRoom() {
+        // given
+        User sender = createUser("박지성", "01011112222", "profile1.jpg", true);
+        User receiver = createUser("김연아", "01012345678", "profile2.jpg", true);
+        userRepository.saveAll(List.of(sender, receiver));
+
+        ChatRoomCreateRequest request = ChatRoomCreateRequest.builder()
+                .receiverId(receiver.getId())
+                .build();
+
+        // when
+        ChatRoomResponse chatRoomResponse = chatRoomService.createRoom(request, sender.getMobileNumber());
+
+        // then
+        assertThat(chatRoomResponse.getRoomId()).isNotNull();
+        assertThat(chatRoomResponse)
+                .extracting("roomId", "senderId", "receiverId")
+                .containsExactlyInAnyOrder(chatRoomResponse.getRoomId(), sender.getId(), receiver.getId());
+
+    }
+
+    @DisplayName("채팅방을 생성할 때, user1이 user2에게 신청하여 만든 채팅방이 존재하면 예외가 발생하는 시나리오")
+    @TestFactory
+    Collection<DynamicTest> createChatRoomWithExistChatRoom() {
+        // given
+        User user1 = createUser("박지성", "01011112222", "profile1.jpg", true);
+        User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
+        userRepository.saveAll(List.of(user1, user2));
+
+        ChatRoomCreateRequest request = ChatRoomCreateRequest.builder()
+                .receiverId(user2.getId())
+                .build();
+        chatRoomRepository.save(request.toEntity(user1, user2));
+
+        return List.of(
+                DynamicTest.dynamicTest("user1이 채팅방을 생성할 때, 이미 존재하기 때문에 예외가 발생한다.", () -> {
+                    // given
+                    ChatRoomCreateRequest userRequest = ChatRoomCreateRequest.builder()
+                            .receiverId(user2.getId())
+                            .build();
+
+                    // when // then
+                    assertThatThrownBy(() -> chatRoomService.createRoom(userRequest, user1.getMobileNumber()))
+                            .isInstanceOf(CustomException.class)
+                            .hasMessage("채팅방이 이미 존재합니다.");
+                }),
+
+                DynamicTest.dynamicTest("user2가 채팅방을 생성할 때, 이미 존재하기 때문에 예외가 발생한다.", () -> {
+                    // given
+                    ChatRoomCreateRequest userRequest = ChatRoomCreateRequest.builder()
+                            .receiverId(user1.getId())
+                            .build();
+
+                    // when // then
+                    assertThatThrownBy(() -> chatRoomService.createRoom(userRequest, user2.getMobileNumber()))
+                            .isInstanceOf(CustomException.class)
+                            .hasMessage("채팅방이 이미 존재합니다.");
+                })
+        );
     }
 
     private User createUser(final String nickname, final String mobileNumber, final String imageUrl, final boolean blueCheck) {
