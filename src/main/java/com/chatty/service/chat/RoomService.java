@@ -1,9 +1,11 @@
 package com.chatty.service.chat;
 
 import com.chatty.constants.Code;
+import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.DeleteRoomDto;
 import com.chatty.dto.chat.request.RoomDto;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
+import com.chatty.dto.chat.response.ChatRoomResponse;
 import com.chatty.dto.chat.response.ChatRoomsResponseDto;
 import com.chatty.dto.chat.response.RoomResponseDto;
 import com.chatty.entity.chat.ChatRoom;
@@ -30,17 +32,33 @@ public class RoomService {
     private final UserRepository userRepository;
     private final UserService userService;
 
+//    @Transactional
+//    public RoomResponseDto createRoom(RoomDto roomDto){
+//        User receiver = userService.validateExistUser(roomDto.getReceiverId());
+//        User sender = userService.validateExistUser(roomDto.getSenderId());
+//
+//        isExistedRoomByUserId(sender,receiver);
+//
+//        ChatRoom chatRoom = ChatRoom.builder().sender(sender).receiver(receiver).build();
+//        log.info("채팅방을 생성했습니다.");
+//
+//        return RoomResponseDto.of(chatRoomRepository.save(chatRoom));
+//    }
+
     @Transactional
-    public RoomResponseDto createRoom(RoomDto roomDto){
-        User receiver = userService.validateExistUser(roomDto.getReceiverId());
-        User sender = userService.validateExistUser(roomDto.getSenderId());
+    public ChatRoomResponse createRoom(final ChatRoomCreateRequest request, final String mobileNumber){
+        User sender = userRepository.findUserByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+
+        User receiver = userRepository.findById(request.getReceiverId())
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
 
         isExistedRoomByUserId(sender,receiver);
 
-        ChatRoom chatRoom = ChatRoom.builder().sender(sender).receiver(receiver).build();
+        ChatRoom chatRoom = chatRoomRepository.save(request.toEntity(sender, receiver));
         log.info("채팅방을 생성했습니다.");
 
-        return RoomResponseDto.of(chatRoomRepository.save(chatRoom));
+        return ChatRoomResponse.of(chatRoom);
     }
 
     @Transactional
@@ -69,7 +87,7 @@ public class RoomService {
 
     private void isExistedRoomByUserId(User sender, User receiver){
         Optional<ChatRoom> optionalChatRoom1 = chatRoomRepository.findChatRoomBySenderAndReceiver(sender,receiver);
-        Optional<ChatRoom> optionalChatRoom2 = chatRoomRepository.findChatRoomByReceiverAndSender(receiver,sender);
+        Optional<ChatRoom> optionalChatRoom2 = chatRoomRepository.findChatRoomBySenderAndReceiver(receiver,sender);
 
         if(optionalChatRoom1.isPresent() || optionalChatRoom2.isPresent()){
             throw new CustomException(Code.ALREADY_EXIST_CHATROOM);
