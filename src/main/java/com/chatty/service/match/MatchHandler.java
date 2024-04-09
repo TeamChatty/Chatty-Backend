@@ -1,13 +1,16 @@
 package com.chatty.service.match;
 
 import com.chatty.config.WebSocketConnectionManager;
+import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.RoomDto;
+import com.chatty.dto.chat.response.ChatRoomResponse;
 import com.chatty.dto.chat.response.RoomResponseDto;
 import com.chatty.dto.match.response.MatchResponse;
 import com.chatty.entity.match.MatchHistory;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.match.MatchHistoryRepository;
 import com.chatty.repository.user.UserRepository;
 import com.chatty.service.chat.RoomService;
@@ -37,6 +40,8 @@ public class MatchHandler extends TextWebSocketHandler {
     private final RoomService roomService;
     private final MatchHistoryRepository matchHistoryRepository;
 
+    private final ChatRoomRepository chatRoomRepository;
+
     @Override
     public void afterConnectionEstablished(final WebSocketSession session) throws Exception {
         sessions.add(session);
@@ -54,23 +59,10 @@ public class MatchHandler extends TextWebSocketHandler {
         log.info("sessionId = {}", session.getId());
         log.info("payload = {}", payload);
         log.info("message = {}", message);
-
-        System.out.println("======================");
-        System.out.println("matchResponse.getId() = " + matchResponse.getId());
-        System.out.println("matchResponse.getGender() = " + matchResponse.getGender());
-        System.out.println("matchResponse.getGender() = " + matchResponse.getGender());
-        System.out.println("matchResponse.getGender() = " + matchResponse.getGender());
-        System.out.println("matchResponse.getGender() = " + matchResponse.getGender());
-        System.out.println("matchResponse.getRequestGender() = " + matchResponse.getRequestGender());
-        System.out.println("matchResponse.getRequestCategory() = " + matchResponse.getRequestCategory());
-        System.out.println("matchResponse.isBlueCheck() = " + matchResponse.isBlueCheck());
-        System.out.println("matchResponse.isRequestBlueCheck() = " + matchResponse.isRequestBlueCheck());
-        System.out.println("======================");
+        String mobileNumber = session.getAttributes().get("mobileNumber").toString();
+        log.info("Session MobileNumber = {}", mobileNumber);
 
         matchService.createUserSession(session, matchResponse);
-
-        System.out.println("===========================");
-        System.out.println("===========================");
 
         Object myRequestGender = session.getAttributes().get("requestGender");
         Object myGender = session.getAttributes().get("gender");
@@ -83,26 +75,33 @@ public class MatchHandler extends TextWebSocketHandler {
                 continue;
             }
 
+            Long senderId = Long.parseLong(session.getAttributes().get("userId").toString());
+            Long receiverId = Long.parseLong(connected.getAttributes().get("userId").toString());
+
+            // 이미 매칭 기록이 존재하면 Skip
+            if (matchHistoryRepository.existsBySenderIdAndReceiverId(senderId, receiverId) ||
+                    matchHistoryRepository.existsBySenderIdAndReceiverId(receiverId, senderId)) {
+                log.info("이미 매칭 기록이 존재합니다.");
+                continue;
+            }
+
+            // 이미 채팅 기록이 존재하면 Skip
+            if (chatRoomRepository.existsBySenderIdAndReceiverId(senderId, receiverId) ||
+                    chatRoomRepository.existsBySenderIdAndReceiverId(receiverId, senderId)) {
+                log.info("이미 채팅 내역이 존재합니다.");
+                continue;
+            }
+
             // session requestBlueCheck 값 체크
             Object requestBlueCheck = session.getAttributes().get("requestBlueCheck");
             Object connectedBlueCheck = connected.getAttributes().get("isBlueCheck");
             if (requestBlueCheck.equals(true)) {
                 if (connectedBlueCheck.equals(false)) {
-                    System.out.println("나는 프사있는 사람이랑 매칭이 되고 싶은데,");
-                    System.out.println("웹세션에는 프사없는 사람이 존재하니까 continue를 할게.");
+                    log.info("BlueCheck 사람과 매칭하고 싶은데 상대방은 BlueCheck 없다. -> continue");
                     continue;
                 }
             }
 
-            Long senderId = Long.parseLong(session.getAttributes().get("userId").toString());
-            Long receiverId = Long.parseLong(connected.getAttributes().get("userId").toString());
-
-            // 이미 매칭 기록이 존재하면 Skip
-//            if (matchHistoryRepository.existsBySenderIdAndReceiverId(senderId, receiverId) ||
-//                    matchHistoryRepository.existsBySenderIdAndReceiverId(receiverId, senderId)) {
-//                continue;
-//            }
-            //
 
             // 1. 내가 원하는 성별이 ALL일 경우
             if (myRequestGender.equals(Gender.ALL)) {
@@ -138,12 +137,8 @@ public class MatchHandler extends TextWebSocketHandler {
                     continue;
                 }
             }
+            log.info("성별 조건이 만족합니다.");
 
-            log.info("성별 조건에 만족하는 사람과 매칭되었습니다.");
-            System.out.println("성별 조건에 만족하는 사람이랑 매칭되었습니다.");
-
-
-            log.info("============나이 조건을 비교합니다.============");
             // 1. 내가 원하는 최소 나이와 최대 나이, 그리고 상대방의 나이를 비교한다.
             int myRequestMinAge = Integer.parseInt(session.getAttributes().get("requestMinAge").toString());
             int myRequestMaxAge = Integer.parseInt(session.getAttributes().get("requestMaxAge").toString());
@@ -166,34 +161,33 @@ public class MatchHandler extends TextWebSocketHandler {
                 continue;
             }
 
-            log.info("내가 정한 최소 나이 = {}", myRequestMinAge);
-            log.info("상대방의 나이 = {}", yourAge);
-            log.info("내가 정한 최대 나이 = {}", myRequestMaxAge);
-            System.out.println("나이 조건에 만족하는 사람과 매칭되었습니다.");
+//            log.info("내가 정한 최소 나이 = {}", myRequestMinAge);
+//            log.info("상대방의 나이 = {}", yourAge);
+//            log.info("내가 정한 최대 나이 = {}", myRequestMaxAge);
+            log.info("나이 조건이 만족합니다. 최종 매칭 성공!");
 
-            log.info("카테고리 일치 여부를 확인합니다.");
-            String myCategory = session.getAttributes().get("category").toString();
-            String yourCategory = connected.getAttributes().get("category").toString();
+//            log.info("카테고리 일치 여부를 확인합니다.");
+//            String myCategory = session.getAttributes().get("category").toString();
+//            String yourCategory = connected.getAttributes().get("category").toString();
 
 //            if (!myCategory.equals(yourCategory)) {
 //                log.info("카테고리값이 서로 다릅니다.");
 //                continue;
 //            }
-
-            System.out.println("카테고리 값이 일치합니다. 매칭되었습니다.");
+//            log.info("카테고리 값이 일치합니다. 최종 매칭 성공!");
 
             Long sessionMatchId = Long.parseLong(session.getAttributes().get("matchId").toString());
             Long connectedMatchId = Long.parseLong(connected.getAttributes().get("matchId").toString());
 
             Long sessionUserId = Long.parseLong(session.getAttributes().get("userId").toString());
             Long connectedUserId = Long.parseLong(connected.getAttributes().get("userId").toString());
+            log.info("mobileNumber = {}", session.getAttributes().get("mobileNumber").toString());
 
             // 채팅방 생성
-            RoomDto request = RoomDto.builder()
-                    .senderId(sessionUserId)
+            ChatRoomCreateRequest request = ChatRoomCreateRequest.builder()
                     .receiverId(connectedUserId)
                     .build();
-            RoomResponseDto room = roomService.createRoom(request);
+            ChatRoomResponse room = roomService.createRoom(request, mobileNumber);
             String json = gson.toJson(room);
             TextMessage textMessage2 = new TextMessage(json);
             session.sendMessage(textMessage2);
