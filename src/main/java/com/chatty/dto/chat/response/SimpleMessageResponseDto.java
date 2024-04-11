@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,6 +24,8 @@ public class SimpleMessageResponseDto {
 
     private String content;
 
+    private LocalDateTime sendTime;
+
     public static SimpleMessageResponseDto of(ChatMessage chatMessage){
         return SimpleMessageResponseDto.builder()
                 .messageId(chatMessage.getMessageId())
@@ -29,6 +33,7 @@ public class SimpleMessageResponseDto {
                 .senderId(chatMessage.getSender().getId())
                 .receiverId(chatMessage.getReceiver().getId())
                 .content(chatMessage.getContent())
+                .sendTime(chatMessage.getSendTime())
                 .build();
     }
 }
