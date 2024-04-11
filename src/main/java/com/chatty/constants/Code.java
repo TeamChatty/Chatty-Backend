@@ -39,6 +39,8 @@ public enum Code {
     NOT_AUTHORITY_USER(HttpStatus.FORBIDDEN, "회원가입을 완료해주세요.", "E030"),
     NOT_EXIST_POST(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다.", "E031"),
 
+    NOT_EXIST_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.", "E032"),
+
 
 
     // ratelimit
