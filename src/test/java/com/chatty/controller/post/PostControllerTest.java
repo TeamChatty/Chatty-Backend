@@ -184,7 +184,7 @@ class PostControllerTest {
 
         // when // then
         mockMvc.perform(
-                        get("/v1/post")
+                        get("/v1/posts")
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                 )

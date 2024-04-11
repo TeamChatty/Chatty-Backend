@@ -34,7 +34,7 @@ public class PostController {
         return ApiResponse.ok(postService.getPost(authentication.getName(), postId));
     }
 
-    @GetMapping("/v1/post")
+    @GetMapping("/v1/posts")
     public ApiResponse<List<PostListResponse>> getPostList(final Authentication authentication) {
         return ApiResponse.ok(postService.getPostList(authentication.getName()));
     }
