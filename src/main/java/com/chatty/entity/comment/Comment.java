@@ -16,7 +16,7 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "update Comment SET deleted_at = current_timestamp where comment_id = ?")
-@SQLRestriction("deleted_at is null")
+//@SQLRestriction("deleted_at is null") // 왜 에러가 발생하지?
 @Getter
 @Entity
 public class Comment extends BaseTimeEntity {
