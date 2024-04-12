@@ -16,12 +16,10 @@ public class CommentCreateRequest {
     @NotBlank(message = "내용은 필수로 입력해야 됩니다.")
     private String content;
 
-    private Comment parent;
 
     @Builder
-    public CommentCreateRequest(final String content, final Comment parent) {
+    public CommentCreateRequest(final String content) {
         this.content = content;
-        this.parent = parent;
     }
 
     public Comment toEntity(final Post post, final User user) {
@@ -29,7 +27,6 @@ public class CommentCreateRequest {
                 .post(post)
                 .user(user)
                 .content(content)
-                .parent(parent)
                 .build();
     }
 }
