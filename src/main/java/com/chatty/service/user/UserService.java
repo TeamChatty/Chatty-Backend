@@ -207,7 +207,9 @@ public class UserService {
         }
 
         validateExtension(image.getOriginalFilename());
-        String fileUrl = s3Service.uploadFileToS3(image, "profile/" + user.getId() + ".jpg");
+
+        UUID uuid = UUID.randomUUID();
+        String fileUrl = s3Service.uploadFileToS3(image, "profile/" + uuid + ".jpg");
         user.updateImage(fileUrl);
 
         return UserResponse.of(user);
