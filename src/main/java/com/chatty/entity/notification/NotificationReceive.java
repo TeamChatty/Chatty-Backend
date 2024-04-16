@@ -35,4 +35,15 @@ public class NotificationReceive {
         this.user = user;
     }
 
+    public void updateMarketingNotification(final boolean marketingNotification) {
+        this.marketingNotification = marketingNotification;
+    }
+
+    public void updateChattingNotification(final boolean chattingNotification) {
+        this.chattingNotification = chattingNotification;
+    }
+    public void updateFeedNotification(final boolean feedNotification) {
+        this.feedNotification = feedNotification;
+    }
+
 }
