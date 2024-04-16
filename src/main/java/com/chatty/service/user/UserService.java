@@ -87,10 +87,6 @@ public class UserService {
         user.updateDeviceToken(null);
 
         String refreshTokenUuid = JwtTokenUtils.getRefreshTokenUuid(user.getMobileNumber(), user.getDeviceId());
-        System.out.println("refreshTokenUuid = " + refreshTokenUuid);
-        System.out.println("refreshTokenUuid = " + refreshTokenUuid);
-        System.out.println("refreshTokenUuid = " + refreshTokenUuid);
-        System.out.println("refreshTokenUuid = " + refreshTokenUuid);
         deleteToken(refreshTokenUuid);
         return "로그아웃 완료.";
     }
