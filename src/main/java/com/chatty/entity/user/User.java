@@ -4,6 +4,7 @@ import com.chatty.constants.Authority;
 import com.chatty.constants.Code;
 import com.chatty.entity.CommonEntity;
 import com.chatty.entity.check.AuthCheck;
+import com.chatty.entity.notification.NotificationReceive;
 import com.chatty.exception.CustomException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -13,10 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -83,6 +81,9 @@ public class User extends CommonEntity implements UserDetails{
 
     private int ticket;
     private int candy;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private NotificationReceive notificationReceive;
 
     public void joinComplete(final User request) {
         this.nickname = request.getNickname();

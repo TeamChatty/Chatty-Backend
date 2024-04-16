@@ -7,12 +7,14 @@ import com.chatty.dto.user.request.*;
 import com.chatty.dto.user.response.UserResponse;
 import com.chatty.dto.user.response.UserResponseDto;
 import com.chatty.constants.Authority;
+import com.chatty.entity.notification.NotificationReceive;
 import com.chatty.entity.user.Interest;
 import com.chatty.entity.user.User;
 import com.chatty.entity.user.UserInterest;
 import com.chatty.exception.CustomException;
 import com.chatty.jwt.JwtTokenProvider;
 import com.chatty.repository.interest.InterestRepository;
+import com.chatty.repository.notification.NotificationReceiveRepository;
 import com.chatty.repository.token.RefreshTokenRepository;
 import com.chatty.repository.user.UserRepository;
 import com.chatty.service.sms.SmsService;
@@ -42,6 +44,7 @@ public class UserService {
     private final SmsService smsService;
     private final S3Service s3Service;
     private final InterestRepository interestRepository;
+    private final NotificationReceiveRepository notificationReceiveRepository;
 
     private static final String ACCESS_TOKEN = "accessToken";
     private static final String REFRESH_TOKEN = "refreshToken";
@@ -110,7 +113,15 @@ public class UserService {
                 .deviceToken(userRequestDto.getDeviceToken())
                 .build();
 
-        if(!isExistedUser) userRepository.save(user);
+        if(!isExistedUser) {
+            User savedUser = userRepository.save(user);
+            notificationReceiveRepository.save(NotificationReceive.builder()
+                    .chattingNotification(true)
+                    .marketingNotification(true)
+                    .feedNotification(true)
+                    .user(savedUser)
+                    .build());
+        }
         log.info("[UserService/join] 회원 가입 완료");
 
         Map<String,String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
