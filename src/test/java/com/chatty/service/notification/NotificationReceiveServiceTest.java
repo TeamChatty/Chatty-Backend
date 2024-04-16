@@ -1,6 +1,7 @@
 package com.chatty.service.notification;
 
 import com.chatty.constants.Authority;
+import com.chatty.dto.notification.receive.request.NotificationReceiveUpdateRequest;
 import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
 import com.chatty.entity.notification.NotificationReceive;
 import com.chatty.entity.user.Coordinate;
@@ -58,6 +59,81 @@ class NotificationReceiveServiceTest {
         assertThat(notificationReceiveResponse)
                 .extracting("userId", "marketingNotification", "chattingNotification", "feedNotification")
                 .containsExactlyInAnyOrder(user.getId(), true, true, true);
+    }
+
+    @DisplayName("마케팅 알림 수신 상태(허용/비허용)를 변경한다.")
+    @Test
+    void updateMarketingNotificationReceive() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        userRepository.save(user);
+
+        NotificationReceive notificationReceive = createNotificationReceive(user);
+        notificationReceiveRepository.save(notificationReceive);
+
+        NotificationReceiveUpdateRequest request = NotificationReceiveUpdateRequest.builder()
+                .agree(false)
+                .build();
+
+        // when
+        NotificationReceiveResponse notificationReceiveResponse =
+                notificationReceiveService.updateMarketingNotification(user.getMobileNumber(), request);
+
+        // then
+        assertThat(notificationReceiveResponse.getNotificationReceiveId()).isNotNull();
+        assertThat(notificationReceiveResponse)
+                .extracting("userId", "marketingNotification", "chattingNotification", "feedNotification")
+                .containsExactlyInAnyOrder(user.getId(), false, true, true);
+    }
+
+    @DisplayName("채팅 알림 수신 상태(허용/비허용)를 변경한다.")
+    @Test
+    void updateChattingNotificationReceive() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        userRepository.save(user);
+
+        NotificationReceive notificationReceive = createNotificationReceive(user);
+        notificationReceiveRepository.save(notificationReceive);
+
+        NotificationReceiveUpdateRequest request = NotificationReceiveUpdateRequest.builder()
+                .agree(false)
+                .build();
+
+        // when
+        NotificationReceiveResponse notificationReceiveResponse =
+                notificationReceiveService.updateChattingNotification(user.getMobileNumber(), request);
+
+        // then
+        assertThat(notificationReceiveResponse.getNotificationReceiveId()).isNotNull();
+        assertThat(notificationReceiveResponse)
+                .extracting("userId", "marketingNotification", "chattingNotification", "feedNotification")
+                .containsExactlyInAnyOrder(user.getId(), true, false, true);
+    }
+
+    @DisplayName("피드 알림 수신 상태(허용/비허용)를 변경한다.")
+    @Test
+    void updateFeedNotificationReceive() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        userRepository.save(user);
+
+        NotificationReceive notificationReceive = createNotificationReceive(user);
+        notificationReceiveRepository.save(notificationReceive);
+
+        NotificationReceiveUpdateRequest request = NotificationReceiveUpdateRequest.builder()
+                .agree(false)
+                .build();
+
+        // when
+        NotificationReceiveResponse notificationReceiveResponse =
+                notificationReceiveService.updateMarketingNotification(user.getMobileNumber(), request);
+
+        // then
+        assertThat(notificationReceiveResponse.getNotificationReceiveId()).isNotNull();
+        assertThat(notificationReceiveResponse)
+                .extracting("userId", "marketingNotification", "chattingNotification", "feedNotification")
+                .containsExactlyInAnyOrder(user.getId(), true, true, false);
     }
 
     private NotificationReceive createNotificationReceive(final User user) {
