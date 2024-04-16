@@ -13,7 +13,9 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +56,12 @@ public class UserController {
     public ApiResponse<UserResponseDto> login(@Valid @RequestBody UserRequestDto userRequestDto) {
         log.info("[UserController/login] 로그인 시작");
         return ApiResponse.ok(userService.login(userRequestDto));
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<String> logout(Authentication authentication) {
+        log.info("UserController - logout");
+        return ApiResponse.ok(userService.logout(authentication.getName()));
     }
 
 

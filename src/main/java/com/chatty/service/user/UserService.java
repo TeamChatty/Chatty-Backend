@@ -74,9 +74,25 @@ public class UserService {
             throw new CustomException(Code.INVALID_DEVICE_NUMER);
         }
 
+        user.updateDeviceToken(userRequestDto.getDeviceToken());
         deleteToken(JwtTokenUtils.getRefreshTokenUuid(userRequestDto.getMobileNumber(),userRequestDto.getDeviceId()));
         Map<String,String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
         return UserResponseDto.of(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
+    }
+
+    @Transactional
+    public String logout(final String mobileNumber) {
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        user.updateDeviceToken(null);
+
+        String refreshTokenUuid = JwtTokenUtils.getRefreshTokenUuid(user.getMobileNumber(), user.getDeviceId());
+        System.out.println("refreshTokenUuid = " + refreshTokenUuid);
+        System.out.println("refreshTokenUuid = " + refreshTokenUuid);
+        System.out.println("refreshTokenUuid = " + refreshTokenUuid);
+        System.out.println("refreshTokenUuid = " + refreshTokenUuid);
+        deleteToken(refreshTokenUuid);
+        return "로그아웃 완료.";
     }
 
     @Transactional
@@ -339,4 +355,5 @@ public class UserService {
         log.info("유저가 유효한지 검사");
         return userRepository.findUserById(userId).orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
     }
+
 }
