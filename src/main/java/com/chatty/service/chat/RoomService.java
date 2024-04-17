@@ -2,6 +2,7 @@ package com.chatty.service.chat;
 
 import com.chatty.constants.Code;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
+import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
 import com.chatty.dto.chat.request.DeleteRoomDto;
 import com.chatty.dto.chat.request.RoomDto;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
@@ -56,7 +57,7 @@ public class RoomService {
         isExistedRoomByUserId(sender,receiver);
 
         ChatRoom chatRoom = chatRoomRepository.save(request.toEntity(sender, receiver));
-        log.info("채팅방을 생성했습니다.");
+        log.info("매칭을 통한 채팅방을 생성했습니다.");
 
         return ChatRoomResponse.of(chatRoom);
     }
@@ -118,5 +119,33 @@ public class RoomService {
                 .toList();
 
         return result;
+    }
+
+    @Transactional
+    public ChatRoomResponse updateRoomExtend(final Long roomId, final ChatRoomUpdateExtendRequest request,
+                                             final String mobileNumber) {
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
+
+        String unlockMethod = request.getUnlockMethod();
+        if (unlockMethod.equals("candy")) {
+            if (user.isCandyQuantityLessThan(7)) {
+                throw new CustomException(Code.INSUFFICIENT_CANDY);
+            }
+
+            user.deductCandyQuantity(7);
+            chatRoom.updateExtend(true);
+        } else if (unlockMethod.equals("ticket")) {
+            if (user.isTicketQuantityLessThan(1)) {
+                throw new CustomException(Code.INSUFFICIENT_TICKET);
+            }
+
+            user.deductTicketQuantity(1);
+            chatRoom.updateExtend(true);
+        }
+
+        return ChatRoomResponse.of(chatRoom);
     }
 }
