@@ -2,6 +2,7 @@ package com.chatty.entity.user;
 
 import com.chatty.constants.Authority;
 import com.chatty.constants.Code;
+import com.chatty.entity.BaseTimeEntity;
 import com.chatty.entity.CommonEntity;
 import com.chatty.entity.check.AuthCheck;
 import com.chatty.entity.notification.NotificationReceive;
@@ -28,7 +29,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends CommonEntity implements UserDetails{
+public class User extends BaseTimeEntity implements UserDetails{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
