@@ -46,7 +46,7 @@ class ChatMessageServiceTest {
         userRepository.deleteAllInBatch();
     }
 
-    @DisplayName("채팅방에서 메세지를 전송한다. 1번 유저가 2번 유저에게 메세지를 보낸다.")
+    @DisplayName("채팅방에서 메세지를 전송한다. 1번 유저가 2번 유저에게 메세지를 보낸다. (채팅방 생성 후 10분 초과X)")
     @Test
     void saveMessage() {
         // given
@@ -55,7 +55,7 @@ class ChatMessageServiceTest {
         User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
         userRepository.saveAll(List.of(user1, user2));
 
-        ChatRoom chatRoom = createChatRoom(user1, user2);
+        ChatRoom chatRoom = createChatRoom(user1, user2, false);
         chatRoomRepository.save(chatRoom);
 
         ChatMessageRequest request = ChatMessageRequest.builder()
@@ -64,6 +64,54 @@ class ChatMessageServiceTest {
 
         // when
         SimpleMessageResponseDto chatMessageResponse = chatMessageService.saveMessage(chatRoom.getRoomId(), request, user1.getMobileNumber(), now);
+
+        // then
+        assertThat(chatMessageResponse.getMessageId()).isNotNull();
+        assertThat(chatMessageResponse).
+                extracting("roomId", "senderId", "receiverId", "content")
+                .containsExactlyInAnyOrder(chatRoom.getRoomId(), user1.getId(), user2.getId(), "안녕하세요.");
+    }
+
+    @DisplayName("채팅방에서 메세지를 전송할 때, 채팅방 생성 시간이 10분을 초과하고 연장이 안 되어있으면 예외가 발생한다.")
+    @Test
+    void saveMessageWithoutExtendAndExpiredTime() {
+        // given
+        User user1 = createUser("박지성", "01011112222", "profile1.jpg", true);
+        User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
+        userRepository.saveAll(List.of(user1, user2));
+
+        ChatRoom chatRoom = createChatRoom(user2, user1, false);
+        chatRoomRepository.save(chatRoom);
+        LocalDateTime nowPlusElevenMinute = chatRoom.getCreatedAt().plusMinutes(11);
+
+        ChatMessageRequest request = ChatMessageRequest.builder()
+                .content("안녕하세요.")
+                .build();
+
+        // when // then
+        assertThatThrownBy(() -> chatMessageService.saveMessage(chatRoom.getRoomId(), request, user2.getMobileNumber(), nowPlusElevenMinute))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("제한 시간을 초과했습니다.");
+    }
+
+    @DisplayName("채팅방에서 메세지를 전송할 때, 10분을 초과하였지만 연장이 되어있으면 메세지가 보내진다.")
+    @Test
+    void saveMessageExpiredTimeAndExtend() {
+        // given
+        User user1 = createUser("박지성", "01011112222", "profile1.jpg", true);
+        User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
+        userRepository.saveAll(List.of(user1, user2));
+
+        ChatRoom chatRoom = createChatRoom(user2, user1, true);
+        chatRoomRepository.save(chatRoom);
+        LocalDateTime nowPlusElevenMinute = chatRoom.getCreatedAt().plusMinutes(11);
+
+        ChatMessageRequest request = ChatMessageRequest.builder()
+                .content("안녕하세요.")
+                .build();
+
+        // when
+        SimpleMessageResponseDto chatMessageResponse = chatMessageService.saveMessage(chatRoom.getRoomId(), request, user1.getMobileNumber(), nowPlusElevenMinute);
 
         // then
         assertThat(chatMessageResponse.getMessageId()).isNotNull();
@@ -81,7 +129,7 @@ class ChatMessageServiceTest {
         User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
         userRepository.saveAll(List.of(user1, user2));
 
-        ChatRoom chatRoom = createChatRoom(user2, user1);
+        ChatRoom chatRoom = createChatRoom(user2, user1, false);
         chatRoomRepository.save(chatRoom);
 
         ChatMessageRequest request = ChatMessageRequest.builder()
@@ -109,7 +157,7 @@ class ChatMessageServiceTest {
         User user3 = createUser("강혜원", "01022222222", "profile3.jpg", true);
         userRepository.saveAll(List.of(user1, user2, user3));
 
-        ChatRoom chatRoom = createChatRoom(user1, user2);
+        ChatRoom chatRoom = createChatRoom(user1, user2, false);
         chatRoomRepository.save(chatRoom);
 
         ChatMessageRequest request = ChatMessageRequest.builder()
@@ -131,7 +179,7 @@ class ChatMessageServiceTest {
         User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
         userRepository.saveAll(List.of(user1, user2));
 
-        ChatRoom chatRoom = createChatRoom(user1, user2);
+        ChatRoom chatRoom = createChatRoom(user1, user2, false);
         chatRoomRepository.save(chatRoom);
 
         ChatMessage chatMessage1 = createChatMessage(chatRoom, "1번입니다.", user1, user2, now);
@@ -160,7 +208,7 @@ class ChatMessageServiceTest {
         User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
         userRepository.saveAll(List.of(user1, user2));
 
-        ChatRoom chatRoom = createChatRoom(user1, user2);
+        ChatRoom chatRoom = createChatRoom(user1, user2, false);
         chatRoomRepository.save(chatRoom);
 
         ChatMessage chatMessage1 = createChatMessage(chatRoom, "1번입니다.", user1, user2, now);
@@ -191,7 +239,7 @@ class ChatMessageServiceTest {
         User user3 = createUser("강혜원", "01022222222", "profile3.jpg", true);
         userRepository.saveAll(List.of(user1, user2, user3));
 
-        ChatRoom chatRoom = createChatRoom(user1, user2);
+        ChatRoom chatRoom = createChatRoom(user1, user2, false);
         chatRoomRepository.save(chatRoom);
 
         ChatMessage chatMessage1 = createChatMessage(chatRoom, "1번입니다.", user1, user2, now);
@@ -213,7 +261,7 @@ class ChatMessageServiceTest {
         User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
         userRepository.saveAll(List.of(user1, user2));
 
-        ChatRoom chatRoom = createChatRoom(user1, user2);
+        ChatRoom chatRoom = createChatRoom(user1, user2, false);
         chatRoomRepository.save(chatRoom);
 
         ChatMessage chatMessage1 = createChatMessage(chatRoom, "1번입니다.", user1, user2, now);
@@ -243,10 +291,11 @@ class ChatMessageServiceTest {
                 .build();
     }
 
-    private ChatRoom createChatRoom(final User sender, final User receiver) {
+    private ChatRoom createChatRoom(final User sender, final User receiver, final boolean extend) {
         return ChatRoom.builder()
                 .sender(sender)
                 .receiver(receiver)
+                .extend(extend)
                 .build();
     }
 
