@@ -41,6 +41,8 @@ public enum Code {
 
     NOT_EXIST_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.", "E032"),
 
+    EXPIRED_CHAT_TIME(HttpStatus.BAD_REQUEST, "제한 시간을 초과했습니다.", "E033"),
+
 
 
     // ratelimit
