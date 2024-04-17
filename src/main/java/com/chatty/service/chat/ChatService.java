@@ -41,6 +41,13 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
                 .orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
 
+        /**
+         * 현재 시각보다 10분이 넘었는데 연장을 안 해놨으면 예외가 발생한다.
+         */
+        if (now.isAfter(chatRoom.getCreatedAt().plusMinutes(10)) && !chatRoom.isExtend()) {
+            throw new CustomException(Code.EXPIRED_CHAT_TIME);
+        }
+
         if (!chatRoomRepository.existsByRoomIdAndSenderOrReceiver(roomId, sender, sender)) {
             throw new CustomException(Code.NOT_IN_USER_ROOM);
         }

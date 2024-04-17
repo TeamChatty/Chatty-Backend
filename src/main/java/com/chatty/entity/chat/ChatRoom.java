@@ -1,5 +1,6 @@
 package com.chatty.entity.chat;
 
+import com.chatty.entity.BaseTimeEntity;
 import com.chatty.entity.CommonEntity;
 import com.chatty.entity.user.User;
 import jakarta.persistence.*;
@@ -15,8 +16,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class ChatRoom extends CommonEntity {
+public class ChatRoom extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
@@ -31,4 +31,18 @@ public class ChatRoom extends CommonEntity {
 
     @OneToMany(mappedBy = "chatRoom")
     private List<ChatMessage> chatMessages = new ArrayList<>();
+
+    private boolean extend;
+
+    @Builder
+    public ChatRoom(final User sender, final User receiver, final List<ChatMessage> chatMessages, final boolean extend) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.chatMessages = chatMessages;
+        this.extend = extend;
+    }
+
+    public void updateExtend(final boolean extend) {
+        this.extend = extend;
+    }
 }

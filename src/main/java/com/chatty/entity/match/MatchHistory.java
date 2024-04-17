@@ -1,5 +1,6 @@
 package com.chatty.entity.match;
 
+import com.chatty.entity.BaseTimeEntity;
 import com.chatty.entity.CommonEntity;
 import com.chatty.entity.user.User;
 import jakarta.persistence.*;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-public class MatchHistory extends CommonEntity {
+public class MatchHistory extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

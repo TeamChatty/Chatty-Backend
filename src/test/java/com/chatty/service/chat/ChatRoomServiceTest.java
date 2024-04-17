@@ -1,7 +1,6 @@
 package com.chatty.service.chat;
 
 import com.chatty.constants.Authority;
-import com.chatty.constants.Code;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.dto.chat.response.ChatRoomResponse;
@@ -52,7 +51,7 @@ class ChatRoomServiceTest {
         User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
         userRepository.saveAll(List.of(user1, user2));
 
-        ChatRoom chatRoom = createChatRoom(user1, user2);
+        ChatRoom chatRoom = createChatRoomWithMatching(user1, user2);
         chatRoomRepository.save(chatRoom);
 
         // when
@@ -75,7 +74,7 @@ class ChatRoomServiceTest {
         User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
         userRepository.saveAll(List.of(user1, user2));
 
-        ChatRoom chatRoom = createChatRoom(user1, user2);
+        ChatRoom chatRoom = createChatRoomWithMatching(user1, user2);
         chatRoomRepository.save(chatRoom);
 
         final LocalDateTime now = LocalDateTime.now();
@@ -98,7 +97,7 @@ class ChatRoomServiceTest {
 
     @DisplayName("채팅방을 생성한다.")
     @Test
-    void createChatRoom() {
+    void createChatRoomWithMatching() {
         // given
         User sender = createUser("박지성", "01011112222", "profile1.jpg", true);
         User receiver = createUser("김연아", "01012345678", "profile2.jpg", true);
@@ -114,14 +113,14 @@ class ChatRoomServiceTest {
         // then
         assertThat(chatRoomResponse.getRoomId()).isNotNull();
         assertThat(chatRoomResponse)
-                .extracting("roomId", "senderId", "receiverId")
-                .containsExactlyInAnyOrder(chatRoomResponse.getRoomId(), sender.getId(), receiver.getId());
+                .extracting("roomId", "senderId", "receiverId", "extend")
+                .containsExactlyInAnyOrder(chatRoomResponse.getRoomId(), sender.getId(), receiver.getId(), false);
 
     }
 
     @DisplayName("채팅방을 생성할 때, user1이 user2에게 신청하여 만든 채팅방이 존재하면 예외가 발생하는 시나리오")
     @TestFactory
-    Collection<DynamicTest> createChatRoomWithExistChatRoom() {
+    Collection<DynamicTest> createChatRoomWithExistChatRoomWithMatching() {
         // given
         User user1 = createUser("박지성", "01011112222", "profile1.jpg", true);
         User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
@@ -170,10 +169,11 @@ class ChatRoomServiceTest {
                 .build();
     }
 
-    private ChatRoom createChatRoom(final User sender, final User receiver) {
+    private ChatRoom createChatRoomWithMatching(final User sender, final User receiver) {
         return ChatRoom.builder()
                 .sender(sender)
                 .receiver(receiver)
+                .extend(false)
                 .build();
     }
 

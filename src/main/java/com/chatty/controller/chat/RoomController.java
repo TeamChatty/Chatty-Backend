@@ -2,6 +2,7 @@ package com.chatty.controller.chat;
 
 import com.chatty.dto.ApiResponse;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
+import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
 import com.chatty.dto.chat.request.DeleteRoomDto;
 import com.chatty.dto.chat.request.RoomDto;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
@@ -15,13 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -139,5 +134,13 @@ public class RoomController {
     public ApiResponse<List<ChatRoomListResponse>> getRooms(Authentication authentication) {
         log.info("채팅방 목록 가져오기");
         return ApiResponse.ok(roomService.getChatRoomList(authentication.getName()));
+    }
+
+    @PutMapping("/room/{roomId}")
+    public ApiResponse<ChatRoomResponse> updateRoomExtend(@PathVariable Long roomId,
+                                                          @RequestBody ChatRoomUpdateExtendRequest request,
+                                                          Authentication authentication) {
+        log.info("매칭으로 생성된 채팅방 연장 Controller");
+        return ApiResponse.ok(roomService.updateRoomExtend(roomId, request, authentication.getName()));
     }
 }
