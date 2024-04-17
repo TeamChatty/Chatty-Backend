@@ -138,7 +138,7 @@ public class RoomController {
 
     @PutMapping("/room/{roomId}")
     public ApiResponse<ChatRoomResponse> updateRoomExtend(@PathVariable Long roomId,
-                                                          @RequestBody ChatRoomUpdateExtendRequest request,
+                                                          @Valid @RequestBody ChatRoomUpdateExtendRequest request,
                                                           Authentication authentication) {
         log.info("매칭으로 생성된 채팅방 연장 Controller");
         return ApiResponse.ok(roomService.updateRoomExtend(roomId, request, authentication.getName()));
