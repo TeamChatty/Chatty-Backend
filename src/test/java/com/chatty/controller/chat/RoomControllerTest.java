@@ -2,14 +2,13 @@ package com.chatty.controller.chat;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
+import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
 import com.chatty.dto.chat.request.DeleteRoomDto;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.service.chat.RoomService;
@@ -52,9 +51,9 @@ class RoomControllerTest {
 
         //when, then
         mockMvc.perform(
-                post("/chat/room").with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
+                        post("/chat/room").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -63,7 +62,7 @@ class RoomControllerTest {
     @Test
     @DisplayName("채팅방 생성시, receiverId는 필수 값이다.")
     @WithMockUser(username = "123123", roles = "USER")
-    void createChatRoomWithoutReceiverId() throws Exception{
+    void createChatRoomWithoutReceiverId() throws Exception {
         //given
         ChatRoomCreateRequest request = ChatRoomCreateRequest.builder()
                 .build();
@@ -82,19 +81,19 @@ class RoomControllerTest {
     @Test
     @DisplayName("채팅방을 삭제한다.")
     @WithMockUser(username = "123123", roles = "USER")
-    void removeChatRoom() throws Exception{
+    void removeChatRoom() throws Exception {
         //given
         DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
-                        .roomId(1L)
-                                .userId(1L)
-                                        .build();
+                .roomId(1L)
+                .userId(1L)
+                .build();
 
         //then
         mockMvc.perform(
-                delete("/chat/room").with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(deleteRoomDto))
-        )
+                        delete("/chat/room").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(deleteRoomDto))
+                )
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -102,7 +101,7 @@ class RoomControllerTest {
     @Test
     @DisplayName("채팅방을 삭제시, 방 id는 필수 값이다.")
     @WithMockUser(username = "123123", roles = "USER")
-    void removeChatRoomWithoutRoomId() throws Exception{
+    void removeChatRoomWithoutRoomId() throws Exception {
         //given
         DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
                 .userId(1L)
@@ -122,7 +121,7 @@ class RoomControllerTest {
     @Test
     @DisplayName("채팅방을 삭제시, user id는 필수 값이다.")
     @WithMockUser(username = "123123", roles = "USER")
-    void removeChatRoomWithoutUserId() throws Exception{
+    void removeChatRoomWithoutUserId() throws Exception {
         //given
         DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
                 .roomId(1L)
@@ -142,14 +141,14 @@ class RoomControllerTest {
     @Test
     @DisplayName("채팅방을 찾는다.")
     @WithMockUser(username = "123123", roles = "USER")
-    void getRoom() throws Exception{
+    void getRoom() throws Exception {
         //given
         Long roomId = 1L;
 
         //then
         mockMvc.perform(
-                get("/chat/room/{roomId}",roomId).with(csrf())
-        )
+                        get("/chat/room/{roomId}", roomId).with(csrf())
+                )
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -170,5 +169,44 @@ class RoomControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray());
+    }
+
+    @DisplayName("채팅방을 연장한다.")
+    @Test
+    @WithMockUser(username = "01012345678", roles = "USER")
+    void updateChatRoomExtend() throws Exception {
+        // given
+        ChatRoomUpdateExtendRequest request = ChatRoomUpdateExtendRequest.builder()
+                .unlockMethod("ticket")
+                .build();
+
+        //then
+        mockMvc.perform(
+                        put("/chat/room/{roomId}", 1L).with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("채팅방을 연장할 때, ticket 또는 candy 값을 넘겨야 한다.")
+    @Test
+    @WithMockUser(username = "01012345678", roles = "USER")
+    void updateChatRoomExtendWithoutTicketAndCandy() throws Exception {
+        // given
+        ChatRoomUpdateExtendRequest request = ChatRoomUpdateExtendRequest.builder()
+//                .unlockMethod("ticket")
+                .build();
+
+        //then
+        mockMvc.perform(
+                        put("/chat/room/{roomId}", 1L).with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("candy또는 ticket을 입력해주세요."));
     }
 }

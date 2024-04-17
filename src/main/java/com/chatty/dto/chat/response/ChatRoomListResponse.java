@@ -74,7 +74,7 @@ public class ChatRoomListResponse {
 
     private static LocalDateTime getLastMessageCreatedAt(final ChatRoom chatRoom) {
         if (chatRoom.getChatMessages().isEmpty()) {
-            return null;
+            return chatRoom.getCreatedAt();
         }
 
         return chatRoom.getChatMessages().get(chatRoom.getChatMessages().size() - 1).getSendTime();
