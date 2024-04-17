@@ -129,6 +129,10 @@ public class RoomService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
 
+        if (!chatRoomRepository.existsByRoomIdAndSenderOrReceiver(roomId, user, user)) {
+            throw new CustomException(Code.NOT_IN_USER_ROOM);
+        }
+
         String unlockMethod = request.getUnlockMethod();
         if (unlockMethod.equals("candy")) {
             if (user.isCandyQuantityLessThan(7)) {
