@@ -58,7 +58,7 @@ class CommentServiceTest {
         User user = createUser("닉네임", "01012345678");
         userRepository.save(user);
 
-        Post post = createPost("제목", "내용", user);
+        Post post = createPost("내용", user);
         postRepository.save(post);
 
         CommentCreateRequest request = CommentCreateRequest.builder()
@@ -82,7 +82,7 @@ class CommentServiceTest {
         User user = createUser("닉네임", "01012345678");
         userRepository.save(user);
 
-        Post post = createPost("제목", "내용", user);
+        Post post = createPost("내용", user);
         postRepository.save(post);
 
         Comment comment = createComment(post, user, "내용", null);
@@ -109,7 +109,7 @@ class CommentServiceTest {
         User user = createUser("닉네임", "01012345678");
         userRepository.save(user);
 
-        Post post = createPost("제목", "내용", user);
+        Post post = createPost("내용", user);
         postRepository.save(post);
 
         Comment comment1 = createComment(post, user, "내용1", null);
@@ -142,7 +142,7 @@ class CommentServiceTest {
         User user = createUser("닉네임", "01012345678");
         userRepository.save(user);
 
-        Post post = createPost("제목", "내용", user);
+        Post post = createPost("내용", user);
         postRepository.save(post);
 
         Comment comment1 = createComment(post, user, "내용1", null);
@@ -176,7 +176,7 @@ class CommentServiceTest {
         User user = createUser("닉네임", "01012345678");
         userRepository.save(user);
 
-        Post post = createPost("제목", "내용", user);
+        Post post = createPost("내용", user);
         postRepository.save(post);
 
         Comment comment = createComment(post, user, "내용1", null);
@@ -220,9 +220,8 @@ class CommentServiceTest {
                 .build();
     }
 
-    private Post createPost(final String title, final String content, final User user) {
+    private Post createPost(final String content, final User user) {
         return Post.builder()
-                .title(title)
                 .content(content)
                 .user(user)
                 .build();

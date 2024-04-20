@@ -17,8 +17,6 @@ import java.util.List;
 @Getter
 public class PostRequest {
 
-    @NotBlank(message = "제목은 필수로 입력해야 됩니다.")
-    private String title;
 
     @NotBlank(message = "내용은 필수로 입력해야 됩니다.")
     private String content;
@@ -27,8 +25,7 @@ public class PostRequest {
     private List<MultipartFile> images;
 
     @Builder
-    public PostRequest(final String title, final String content, final List<MultipartFile> images) {
-        this.title = title;
+    public PostRequest(final String content, final List<MultipartFile> images) {
         this.content = content;
         this.images = images;
     }
@@ -36,7 +33,6 @@ public class PostRequest {
     public Post toEntity(final User user) {
         return Post.builder()
                 .user(user)
-                .title(title)
                 .content(content)
                 .build();
     }

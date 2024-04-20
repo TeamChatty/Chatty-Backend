@@ -1,6 +1,8 @@
 package com.chatty.entity.post;
 
 import com.chatty.entity.BaseTimeEntity;
+import com.chatty.entity.comment.Comment;
+import com.chatty.entity.like.PostLike;
 import com.chatty.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -29,8 +31,6 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String title;
-
     private String content;
 
     private int viewCount;
@@ -38,10 +38,15 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post")
     private List<PostImage> postImages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post")
+    private List<PostLike> postLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments = new ArrayList<>();
+
     @Builder
-    public Post(final User user, final String title, final String content, final int viewCount) {
+    public Post(final User user, final String content, final int viewCount) {
         this.user = user;
-        this.title = title;
         this.content = content;
         this.viewCount = viewCount;
     }

@@ -2,6 +2,7 @@ package com.chatty.controller.post;
 
 import com.chatty.dto.ApiResponse;
 import com.chatty.dto.post.request.PostRequest;
+import com.chatty.dto.post.response.PostCreateResponse;
 import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.dto.post.response.PostResponse;
 import com.chatty.service.post.PostService;
@@ -23,8 +24,8 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping(value = "/v1/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<PostResponse> createPost(final Authentication authentication,
-                                                @Valid PostRequest request) throws IOException {
+    public ApiResponse<PostCreateResponse> createPost(final Authentication authentication,
+                                                      @Valid PostRequest request) throws IOException {
         return ApiResponse.ok(postService.createPost(authentication.getName(), request));
     }
 

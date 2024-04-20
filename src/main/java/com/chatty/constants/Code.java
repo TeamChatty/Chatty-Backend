@@ -43,6 +43,10 @@ public enum Code {
 
     EXPIRED_CHAT_TIME(HttpStatus.BAD_REQUEST, "제한 시간을 초과했습니다.", "E033"),
 
+    ALREADY_LIKE_POST(HttpStatus.BAD_REQUEST, "이미 좋아요를 눌렀습니다.", "E034"),
+
+    NOT_EXIST_LIKE_POST(HttpStatus.NOT_FOUND, "좋아요가 존재하지 않습니다.", "E035"),
+
 
 
     // ratelimit

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class PostResponse {
+public class PostCreateResponse {
 
     private Long postId;
 
@@ -29,16 +29,8 @@ public class PostResponse {
 
     private int viewCount;
 
-    private long likeCount;
-
-    private long commentCount;
-
-    private boolean isLike;
-
-    private boolean isOwner;
-
     @Builder
-    public PostResponse(final Long postId, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount, final long likeCount, final long commentCount, final boolean isLike, final boolean isOwner) {
+    public PostCreateResponse(final Long postId, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount) {
         this.postId = postId;
         this.content = content;
         this.userId = userId;
@@ -46,14 +38,10 @@ public class PostResponse {
         this.profileImage = profileImage;
         this.postImages = postImages;
         this.viewCount = viewCount;
-        this.likeCount = likeCount;
-        this.commentCount = commentCount;
-        this.isLike = isLike;
-        this.isOwner = isOwner;
     }
 
-    public static PostResponse of(final Post post, final User user, final boolean isLike, final boolean isOwner) {
-        return PostResponse.builder()
+    public static PostCreateResponse of(final Post post, final User user) {
+        return PostCreateResponse.builder()
                 .postId(post.getId())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream()
@@ -63,10 +51,6 @@ public class PostResponse {
                 .userId(user.getId())
                 .profileImage(user.getImageUrl())
                 .viewCount(post.getViewCount())
-                .likeCount(post.getPostLikes().size())
-                .commentCount(post.getComments().size())
-                .isLike(isLike)
-                .isOwner(isOwner)
                 .build();
     }
 }
