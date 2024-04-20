@@ -1,6 +1,5 @@
 package com.chatty.dto.chat.response;
 
-import com.chatty.entity.chat.ChatMessage;
 import com.chatty.entity.chat.ChatRoom;
 import com.chatty.entity.user.User;
 import lombok.AccessLevel;
@@ -9,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -21,20 +18,22 @@ public class ChatRoomListResponse {
     private String senderNickname;
     private String senderImageUrl;
     private boolean blueCheck;
-    private LocalDateTime createdAt;
+    private LocalDateTime lastMessageCreatedTime;
     private String lastMessage;
     private Integer unreadMessageCount;
+    private LocalDateTime chatRoomCreatedTime;
 
     @Builder
-    public ChatRoomListResponse(final Long roomId, final Long senderId, final String senderNickname, final String senderImageUrl, final boolean blueCheck, final LocalDateTime createdAt, final String lastMessage, final Integer unreadMessageCount) {
+    public ChatRoomListResponse(final Long roomId, final Long senderId, final String senderNickname, final String senderImageUrl, final boolean blueCheck, final LocalDateTime lastMessageCreatedTime, final String lastMessage, final Integer unreadMessageCount, final LocalDateTime chatRoomCreatedTime) {
         this.roomId = roomId;
         this.senderId = senderId;
         this.senderNickname = senderNickname;
         this.senderImageUrl = senderImageUrl;
         this.blueCheck = blueCheck;
-        this.createdAt = createdAt;
+        this.lastMessageCreatedTime = lastMessageCreatedTime;
         this.lastMessage = lastMessage;
         this.unreadMessageCount = unreadMessageCount;
+        this.chatRoomCreatedTime = chatRoomCreatedTime;
     }
 
     public static ChatRoomListResponse of(final ChatRoom chatRoom, final Long me) {
@@ -49,8 +48,9 @@ public class ChatRoomListResponse {
 //                .messages(chatRoom.getChatMessages().stream()
 //                        .map(ChatMessage::getContent)
 //                        .toList())
-                .createdAt(getLastMessageCreatedAt(chatRoom))
+                .lastMessageCreatedTime(getLastMessageCreatedAt(chatRoom))
                 .unreadMessageCount(getUnreadMessageCount(chatRoom, me))
+                .chatRoomCreatedTime(chatRoom.getCreatedAt())
                 .build();
     }
 

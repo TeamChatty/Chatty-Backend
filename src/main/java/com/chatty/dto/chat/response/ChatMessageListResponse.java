@@ -33,12 +33,12 @@ public class ChatMessageListResponse {
 
     private boolean yourIsRead;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime chatRoomCreatedTime;
 
     private boolean isExtend;
 
     @Builder
-    public ChatMessageListResponse(final Long chatMessageId, final Long roomId, final Long yourId, final String yourNickname, final String yourImageUrl, final boolean yourBlueCheck, final Long senderId, final String content, final LocalDateTime sendTime, final boolean yourIsRead, final LocalDateTime createdAt, final boolean isExtend) {
+    public ChatMessageListResponse(final Long chatMessageId, final Long roomId, final Long yourId, final String yourNickname, final String yourImageUrl, final boolean yourBlueCheck, final Long senderId, final String content, final LocalDateTime sendTime, final boolean yourIsRead, final LocalDateTime chatRoomCreatedTime, final boolean isExtend) {
         this.chatMessageId = chatMessageId;
         this.roomId = roomId;
         this.yourId = yourId;
@@ -49,7 +49,7 @@ public class ChatMessageListResponse {
         this.content = content;
         this.sendTime = sendTime;
         this.yourIsRead = yourIsRead;
-        this.createdAt = createdAt;
+        this.chatRoomCreatedTime = chatRoomCreatedTime;
         this.isExtend = isExtend;
     }
 
@@ -65,7 +65,7 @@ public class ChatMessageListResponse {
                 .content(chatMessage.getContent())
                 .sendTime(chatMessage.getSendTime())
                 .yourIsRead(chatMessage.getIsRead())
-                .createdAt(chatMessage.getChatRoom().getCreatedAt())
+                .chatRoomCreatedTime(chatMessage.getChatRoom().getCreatedAt())
                 .isExtend(chatMessage.getChatRoom().isExtend())
                 .build();
     }
