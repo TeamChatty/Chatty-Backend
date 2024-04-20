@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Getter
 public class PostCreateResponse {
 
-    private Long id;
+    private Long postId;
 
     private String title;
 
@@ -32,8 +32,8 @@ public class PostCreateResponse {
     private int viewCount;
 
     @Builder
-    public PostCreateResponse(final Long id, final String title, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount) {
-        this.id = id;
+    public PostCreateResponse(final Long postId, final String title, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount) {
+        this.postId = postId;
         this.title = title;
         this.content = content;
         this.userId = userId;
@@ -45,7 +45,7 @@ public class PostCreateResponse {
 
     public static PostCreateResponse of(final Post post, final User user) {
         return PostCreateResponse.builder()
-                .id(post.getId())
+                .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream()

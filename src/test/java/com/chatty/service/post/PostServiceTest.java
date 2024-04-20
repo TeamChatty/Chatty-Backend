@@ -86,7 +86,7 @@ class PostServiceTest {
         PostCreateResponse postCreateResponse = postService.createPost(user.getMobileNumber(), request);
 
         // then
-        assertThat(postCreateResponse.getId()).isNotNull();
+        assertThat(postCreateResponse.getPostId()).isNotNull();
         assertThat(postCreateResponse.getViewCount()).isZero();
         assertThat(postCreateResponse.getPostImages()).hasSize(3)
                 .containsExactlyInAnyOrder(
@@ -110,7 +110,7 @@ class PostServiceTest {
         PostCreateResponse postCreateResponse = postService.createPost(user.getMobileNumber(), request);
 
         // then
-        assertThat(postCreateResponse.getId()).isNotNull();
+        assertThat(postCreateResponse.getPostId()).isNotNull();
     }
 
     @DisplayName("게시글을 단건 조회한다. 조회수도 1 증가한다.")
