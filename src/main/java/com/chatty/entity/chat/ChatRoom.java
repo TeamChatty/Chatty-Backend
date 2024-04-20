@@ -1,7 +1,6 @@
 package com.chatty.entity.chat;
 
 import com.chatty.entity.BaseTimeEntity;
-import com.chatty.entity.CommonEntity;
 import com.chatty.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,17 +31,17 @@ public class ChatRoom extends BaseTimeEntity {
     @OneToMany(mappedBy = "chatRoom")
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
-    private boolean extend;
+    private boolean isExtend;
 
     @Builder
-    public ChatRoom(final User sender, final User receiver, final List<ChatMessage> chatMessages, final boolean extend) {
+    public ChatRoom(final User sender, final User receiver, final List<ChatMessage> chatMessages, final boolean isExtend) {
         this.sender = sender;
         this.receiver = receiver;
         this.chatMessages = chatMessages;
-        this.extend = extend;
+        this.isExtend = isExtend;
     }
 
     public void updateExtend(final boolean extend) {
-        this.extend = extend;
+        this.isExtend = extend;
     }
 }

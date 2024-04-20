@@ -25,7 +25,7 @@ public class ChatRoomCreateRequest {
         return ChatRoom.builder()
                 .sender(sender)
                 .receiver(receiver)
-                .extend(false)
+                .isExtend(false)
                 .build();
     }
 }

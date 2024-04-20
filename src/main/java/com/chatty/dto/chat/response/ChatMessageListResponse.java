@@ -1,7 +1,6 @@
 package com.chatty.dto.chat.response;
 
 import com.chatty.entity.chat.ChatMessage;
-import com.chatty.entity.chat.ChatRoom;
 import com.chatty.entity.user.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -36,10 +35,10 @@ public class ChatMessageListResponse {
 
     private LocalDateTime createdAt;
 
-    private boolean extend;
+    private boolean isExtend;
 
     @Builder
-    public ChatMessageListResponse(final Long chatMessageId, final Long roomId, final Long yourId, final String yourNickname, final String yourImageUrl, final boolean yourBlueCheck, final Long senderId, final String content, final LocalDateTime sendTime, final boolean yourIsRead, final LocalDateTime createdAt, final boolean extend) {
+    public ChatMessageListResponse(final Long chatMessageId, final Long roomId, final Long yourId, final String yourNickname, final String yourImageUrl, final boolean yourBlueCheck, final Long senderId, final String content, final LocalDateTime sendTime, final boolean yourIsRead, final LocalDateTime createdAt, final boolean isExtend) {
         this.chatMessageId = chatMessageId;
         this.roomId = roomId;
         this.yourId = yourId;
@@ -51,7 +50,7 @@ public class ChatMessageListResponse {
         this.sendTime = sendTime;
         this.yourIsRead = yourIsRead;
         this.createdAt = createdAt;
-        this.extend = extend;
+        this.isExtend = isExtend;
     }
 
     public static ChatMessageListResponse of(final ChatMessage chatMessage, final User you) {
@@ -67,7 +66,7 @@ public class ChatMessageListResponse {
                 .sendTime(chatMessage.getSendTime())
                 .yourIsRead(chatMessage.getIsRead())
                 .createdAt(chatMessage.getChatRoom().getCreatedAt())
-                .extend(chatMessage.getChatRoom().isExtend())
+                .isExtend(chatMessage.getChatRoom().isExtend())
                 .build();
     }
 }
