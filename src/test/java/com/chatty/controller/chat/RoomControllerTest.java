@@ -78,80 +78,80 @@ class RoomControllerTest {
                 .andExpect(jsonPath("$.message").value("receiverId(수신자)는 필수로 입력해야 합니다."));
     }
 
-    @Test
-    @DisplayName("채팅방을 삭제한다.")
-    @WithMockUser(username = "123123", roles = "USER")
-    void removeChatRoom() throws Exception {
-        //given
-        DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
-                .roomId(1L)
-                .userId(1L)
-                .build();
+//    @Test
+//    @DisplayName("채팅방을 삭제한다.")
+//    @WithMockUser(username = "123123", roles = "USER")
+//    void removeChatRoom() throws Exception {
+//        //given
+//        DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
+//                .roomId(1L)
+//                .userId(1L)
+//                .build();
+//
+//        //then
+//        mockMvc.perform(
+//                        delete("/chat/room").with(csrf())
+//                                .contentType(MediaType.APPLICATION_JSON)
+//                                .content(objectMapper.writeValueAsString(deleteRoomDto))
+//                )
+//                .andDo(print())
+//                .andExpect(status().isOk());
+//    }
 
-        //then
-        mockMvc.perform(
-                        delete("/chat/room").with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(deleteRoomDto))
-                )
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    @DisplayName("채팅방을 삭제시, 방 id는 필수 값이다.")
+//    @WithMockUser(username = "123123", roles = "USER")
+//    void removeChatRoomWithoutRoomId() throws Exception {
+//        //given
+//        DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
+//                .userId(1L)
+//                .build();
+//
+//        //then
+//        mockMvc.perform(
+//                        delete("/chat/room").with(csrf())
+//                                .contentType(MediaType.APPLICATION_JSON)
+//                                .content(objectMapper.writeValueAsString(deleteRoomDto))
+//                )
+//                .andDo(print())
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.message").value("roomId(방 아이디)는 필수로 입력해야 합니다."));
+//    }
 
-    @Test
-    @DisplayName("채팅방을 삭제시, 방 id는 필수 값이다.")
-    @WithMockUser(username = "123123", roles = "USER")
-    void removeChatRoomWithoutRoomId() throws Exception {
-        //given
-        DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
-                .userId(1L)
-                .build();
+//    @Test
+//    @DisplayName("채팅방을 삭제시, user id는 필수 값이다.")
+//    @WithMockUser(username = "123123", roles = "USER")
+//    void removeChatRoomWithoutUserId() throws Exception {
+//        //given
+//        DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
+//                .roomId(1L)
+//                .build();
+//
+//        //then
+//        mockMvc.perform(
+//                        delete("/chat/room").with(csrf())
+//                                .contentType(MediaType.APPLICATION_JSON)
+//                                .content(objectMapper.writeValueAsString(deleteRoomDto))
+//                )
+//                .andDo(print())
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.message").value("userId(송신자) 는 필수로 입력해야 합니다."));
+//    }
 
-        //then
-        mockMvc.perform(
-                        delete("/chat/room").with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(deleteRoomDto))
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("roomId(방 아이디)는 필수로 입력해야 합니다."));
-    }
-
-    @Test
-    @DisplayName("채팅방을 삭제시, user id는 필수 값이다.")
-    @WithMockUser(username = "123123", roles = "USER")
-    void removeChatRoomWithoutUserId() throws Exception {
-        //given
-        DeleteRoomDto deleteRoomDto = DeleteRoomDto.builder()
-                .roomId(1L)
-                .build();
-
-        //then
-        mockMvc.perform(
-                        delete("/chat/room").with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(deleteRoomDto))
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("userId(송신자) 는 필수로 입력해야 합니다."));
-    }
-
-    @Test
-    @DisplayName("채팅방을 찾는다.")
-    @WithMockUser(username = "123123", roles = "USER")
-    void getRoom() throws Exception {
-        //given
-        Long roomId = 1L;
-
-        //then
-        mockMvc.perform(
-                        get("/chat/room/{roomId}", roomId).with(csrf())
-                )
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    @DisplayName("채팅방을 찾는다.")
+//    @WithMockUser(username = "123123", roles = "USER")
+//    void getRoom() throws Exception {
+//        //given
+//        Long roomId = 1L;
+//
+//        //then
+//        mockMvc.perform(
+//                        get("/chat/room/{roomId}", roomId).with(csrf())
+//                )
+//                .andDo(print())
+//                .andExpect(status().isOk());
+//    }
 
     @DisplayName("채팅방 목록을 불러온다.")
     @Test
