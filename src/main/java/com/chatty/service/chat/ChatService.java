@@ -2,7 +2,6 @@ package com.chatty.service.chat;
 
 import com.chatty.constants.Code;
 import com.chatty.dto.chat.request.ChatMessageRequest;
-import com.chatty.dto.chat.request.UnreadMessageDto;
 import com.chatty.dto.chat.response.*;
 import com.chatty.entity.chat.ChatMessage;
 import com.chatty.entity.chat.ChatRoom;
@@ -15,7 +14,7 @@ import com.chatty.service.user.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

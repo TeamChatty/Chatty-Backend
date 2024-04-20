@@ -2,9 +2,7 @@ package com.chatty.service.match;
 
 import com.chatty.config.WebSocketConnectionManager;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
-import com.chatty.dto.chat.request.RoomDto;
 import com.chatty.dto.chat.response.ChatRoomResponse;
-import com.chatty.dto.chat.response.RoomResponseDto;
 import com.chatty.dto.match.response.MatchResponse;
 import com.chatty.entity.match.MatchHistory;
 import com.chatty.entity.user.Gender;

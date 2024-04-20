@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ChatRoomResponse {
@@ -16,14 +18,17 @@ public class ChatRoomResponse {
 
     private Long receiverId;
 
-    private boolean extend;
+    private boolean isExtend;
+
+    private LocalDateTime chatRoomCreatedTime;
 
     @Builder
-    public ChatRoomResponse(final Long roomId, final Long senderId, final Long receiverId, final boolean extend) {
+    public ChatRoomResponse(final Long roomId, final Long senderId, final Long receiverId, final boolean isExtend, final LocalDateTime chatRoomCreatedTime) {
         this.roomId = roomId;
         this.senderId = senderId;
         this.receiverId = receiverId;
-        this.extend = extend;
+        this.isExtend = isExtend;
+        this.chatRoomCreatedTime = chatRoomCreatedTime;
     }
 
     public static ChatRoomResponse of(final ChatRoom chatRoom) {
@@ -31,7 +36,8 @@ public class ChatRoomResponse {
                 .roomId(chatRoom.getRoomId())
                 .senderId(chatRoom.getSender().getId())
                 .receiverId(chatRoom.getReceiver().getId())
-                .extend(chatRoom.isExtend())
+                .isExtend(chatRoom.isExtend())
+                .chatRoomCreatedTime(chatRoom.getCreatedAt())
                 .build();
     }
 }

@@ -291,11 +291,11 @@ class ChatMessageServiceTest {
                 .build();
     }
 
-    private ChatRoom createChatRoom(final User sender, final User receiver, final boolean extend) {
+    private ChatRoom createChatRoom(final User sender, final User receiver, final boolean isExtend) {
         return ChatRoom.builder()
                 .sender(sender)
                 .receiver(receiver)
-                .extend(extend)
+                .isExtend(isExtend)
                 .build();
     }
 

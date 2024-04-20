@@ -1,15 +1,9 @@
 package com.chatty.controller.chat;
 import com.chatty.dto.ApiResponse;
 import com.chatty.dto.chat.request.ChatMessageRequest;
-import com.chatty.dto.chat.request.UnreadMessageDto;
 import com.chatty.dto.chat.response.ChatMessageListResponse;
-import com.chatty.dto.chat.response.MessageMarkResponseDto;
-import com.chatty.dto.chat.response.MultipleMessageResponseDto;
 import com.chatty.dto.chat.response.SimpleMessageResponseDto;
 import com.chatty.service.chat.ChatService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -4,11 +4,8 @@ import com.chatty.constants.Code;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
 import com.chatty.dto.chat.request.DeleteRoomDto;
-import com.chatty.dto.chat.request.RoomDto;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.dto.chat.response.ChatRoomResponse;
-import com.chatty.dto.chat.response.ChatRoomsResponseDto;
-import com.chatty.dto.chat.response.RoomResponseDto;
 import com.chatty.entity.chat.ChatRoom;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
@@ -62,23 +59,23 @@ public class RoomService {
         return ChatRoomResponse.of(chatRoom);
     }
 
-    @Transactional
-    public RoomResponseDto deleteRoom(DeleteRoomDto deleteRoomDto) {
+//    @Transactional
+//    public RoomResponseDto deleteRoom(DeleteRoomDto deleteRoomDto) {
+//
+//        ChatRoom chatRoom = isExistedRoomByRoomId(deleteRoomDto.getRoomId());
+//
+//        isValidUserInRoom(deleteRoomDto.getUserId(), chatRoom);
+//
+//        chatRoomRepository.delete(chatRoom);
+//        log.info("채팅방을 삭제했습니다.");
+//
+//        return RoomResponseDto.of(chatRoom);
+//    }
 
-        ChatRoom chatRoom = isExistedRoomByRoomId(deleteRoomDto.getRoomId());
-
-        isValidUserInRoom(deleteRoomDto.getUserId(), chatRoom);
-
-        chatRoomRepository.delete(chatRoom);
-        log.info("채팅방을 삭제했습니다.");
-
-        return RoomResponseDto.of(chatRoom);
-    }
-
-    @Transactional
-    public RoomResponseDto findChatRoom(long roomId){
-        return RoomResponseDto.of(chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM)));
-    }
+//    @Transactional
+//    public RoomResponseDto findChatRoom(long roomId){
+//        return RoomResponseDto.of(chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM)));
+//    }
 
     private void isValidUserInRoom(Long userId, ChatRoom chatRoom){
         if(!(chatRoom.getReceiver().getId() == userId || chatRoom.getSender().getId() == userId)){
@@ -99,13 +96,13 @@ public class RoomService {
         return chatRoomRepository.findChatRoomByRoomId(roomId).orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
     }
 
-    public ChatRoomsResponseDto getRooms(Authentication authentication) {
-        User user = userRepository.findUserByMobileNumber(authentication.getName()).orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
-        List<ChatRoom> rooms = chatRoomRepository.findAllBySender(user);
-        List<RoomResponseDto> list = rooms.stream().map(room -> RoomResponseDto.of(room)).collect(Collectors.toList());
-
-        return ChatRoomsResponseDto.of(list);
-    }
+//    public ChatRoomsResponseDto getRooms(Authentication authentication) {
+//        User user = userRepository.findUserByMobileNumber(authentication.getName()).orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+//        List<ChatRoom> rooms = chatRoomRepository.findAllBySender(user);
+//        List<RoomResponseDto> list = rooms.stream().map(room -> RoomResponseDto.of(room)).collect(Collectors.toList());
+//
+//        return ChatRoomsResponseDto.of(list);
+//    }
 
     public List<ChatRoomListResponse> getChatRoomList(final String mobilNumber) {
         User user = userRepository.findUserByMobileNumber(mobilNumber)
