@@ -1,9 +1,11 @@
 package com.chatty.service.notification;
 
+import com.chatty.constants.Code;
 import com.chatty.dto.notification.receive.request.NotificationReceiveUpdateRequest;
 import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
 import com.chatty.entity.notification.NotificationReceive;
 import com.chatty.entity.user.User;
+import com.chatty.exception.CustomException;
 import com.chatty.repository.notification.NotificationReceiveRepository;
 import com.chatty.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,9 @@ public class NotificationReceiveService {
     @Transactional
     public NotificationReceiveResponse getNotificationReceive(final String mobileNumber) {
         User user = userRepository.getByMobileNumber(mobileNumber);
-        NotificationReceive notificationReceive = notificationReceiveRepository.findById(user.getNotificationReceive().getId()).get();
+
+        NotificationReceive notificationReceive = notificationReceiveRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
 
         return NotificationReceiveResponse.of(notificationReceive);
     }
@@ -35,8 +39,8 @@ public class NotificationReceiveService {
                                                                    NotificationReceiveUpdateRequest request) {
         User user = userRepository.getByMobileNumber(mobileNumber);
 
-        NotificationReceive notificationReceive =
-                notificationReceiveRepository.getById(user.getNotificationReceive().getId());
+        NotificationReceive notificationReceive = notificationReceiveRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
 
         notificationReceive.updateMarketingNotification(request.isAgree());
 
@@ -45,11 +49,11 @@ public class NotificationReceiveService {
 
     @Transactional
     public NotificationReceiveResponse updateChattingNotification(final String mobileNumber,
-                                                                   NotificationReceiveUpdateRequest request) {
+                                                                  NotificationReceiveUpdateRequest request) {
         User user = userRepository.getByMobileNumber(mobileNumber);
 
-        NotificationReceive notificationReceive =
-                notificationReceiveRepository.getById(user.getNotificationReceive().getId());
+        NotificationReceive notificationReceive = notificationReceiveRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
 
         notificationReceive.updateChattingNotification(request.isAgree());
 
@@ -58,11 +62,11 @@ public class NotificationReceiveService {
 
     @Transactional
     public NotificationReceiveResponse updateFeedNotification(final String mobileNumber,
-                                                                   NotificationReceiveUpdateRequest request) {
+                                                              NotificationReceiveUpdateRequest request) {
         User user = userRepository.getByMobileNumber(mobileNumber);
 
-        NotificationReceive notificationReceive =
-                notificationReceiveRepository.getById(user.getNotificationReceive().getId());
+        NotificationReceive notificationReceive = notificationReceiveRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
 
         notificationReceive.updateFeedNotification(request.isAgree());
 

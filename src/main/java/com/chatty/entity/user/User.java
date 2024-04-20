@@ -83,8 +83,8 @@ public class User extends BaseTimeEntity implements UserDetails{
     private int ticket;
     private int candy;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private NotificationReceive notificationReceive;
+//    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private NotificationReceive notificationReceive;
 
     public void joinComplete(final User request) {
         this.nickname = request.getNickname();
