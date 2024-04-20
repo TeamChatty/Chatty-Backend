@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class PostListResponse {
 
     private Long postId;
-    private String title;
     private String content;
     private int viewCount;
     private LocalDateTime createdAt;
@@ -37,9 +36,8 @@ public class PostListResponse {
     private boolean isOwner;
 
     @Builder
-    public PostListResponse(final Long postId, final String title, final String content, final int viewCount, final LocalDateTime createdAt, final Long userId, final String nickname, final String imageUrl, final List<String> postImages, final long likeCount, final long commentCount, final boolean isLike, final boolean isOwner) {
+    public PostListResponse(final Long postId, final String content, final int viewCount, final LocalDateTime createdAt, final Long userId, final String nickname, final String imageUrl, final List<String> postImages, final long likeCount, final long commentCount, final boolean isLike, final boolean isOwner) {
         this.postId = postId;
-        this.title = title;
         this.content = content;
         this.viewCount = viewCount;
         this.createdAt = createdAt;
@@ -56,7 +54,6 @@ public class PostListResponse {
     public static PostListResponse of(final Post post, final User user) {
         return PostListResponse.builder()
                 .postId(post.getId())
-                .title(post.getTitle())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream()
                         .map(PostImage::getImage)

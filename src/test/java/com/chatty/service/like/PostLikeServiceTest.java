@@ -55,7 +55,7 @@ class PostLikeServiceTest {
         User user = createUser("김연아", "01098765432");
         userRepository.saveAll(List.of(writer, user));
 
-        Post post = createPost("제목", "내용", writer);
+        Post post = createPost("내용", writer);
         postRepository.save(post);
 
         // when
@@ -78,7 +78,7 @@ class PostLikeServiceTest {
         User user = createUser("김연아", "01098765432");
         userRepository.saveAll(List.of(writer, user));
 
-        Post post = createPost("제목", "내용", writer);
+        Post post = createPost("내용", writer);
         postRepository.save(post);
 
         PostLike postLike = createPostLike(user, post);
@@ -98,7 +98,7 @@ class PostLikeServiceTest {
         User user = createUser("김연아", "01098765432");
         userRepository.saveAll(List.of(writer, user));
 
-        Post post = createPost("제목", "내용", writer);
+        Post post = createPost("내용", writer);
         postRepository.save(post);
 
         PostLike postLike = createPostLike(user, post);
@@ -120,7 +120,7 @@ class PostLikeServiceTest {
         User user = createUser("김연아", "01098765432");
         userRepository.saveAll(List.of(writer, user));
 
-        Post post = createPost("제목", "내용", writer);
+        Post post = createPost("내용", writer);
         postRepository.save(post);
 
         // when // then
@@ -150,9 +150,8 @@ class PostLikeServiceTest {
                 .build();
     }
 
-    private Post createPost(final String title, final String content, final User user) {
+    private Post createPost(final String content, final User user) {
         return Post.builder()
-                .title(title)
                 .content(content)
                 .user(user)
                 .build();

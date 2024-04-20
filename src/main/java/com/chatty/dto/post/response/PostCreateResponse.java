@@ -17,8 +17,6 @@ public class PostCreateResponse {
 
     private Long postId;
 
-    private String title;
-
     private String content;
 
     private Long userId;
@@ -32,9 +30,8 @@ public class PostCreateResponse {
     private int viewCount;
 
     @Builder
-    public PostCreateResponse(final Long postId, final String title, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount) {
+    public PostCreateResponse(final Long postId, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount) {
         this.postId = postId;
-        this.title = title;
         this.content = content;
         this.userId = userId;
         this.nickname = nickname;
@@ -46,7 +43,6 @@ public class PostCreateResponse {
     public static PostCreateResponse of(final Post post, final User user) {
         return PostCreateResponse.builder()
                 .postId(post.getId())
-                .title(post.getTitle())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream()
                         .map(PostImage::getImage)

@@ -17,8 +17,6 @@ public class PostResponse {
 
     private Long postId;
 
-    private String title;
-
     private String content;
 
     private Long userId;
@@ -40,9 +38,8 @@ public class PostResponse {
     private boolean isOwner;
 
     @Builder
-    public PostResponse(final Long postId, final String title, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount, final long likeCount, final long commentCount, final boolean isLike, final boolean isOwner) {
+    public PostResponse(final Long postId, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount, final long likeCount, final long commentCount, final boolean isLike, final boolean isOwner) {
         this.postId = postId;
-        this.title = title;
         this.content = content;
         this.userId = userId;
         this.nickname = nickname;
@@ -58,7 +55,6 @@ public class PostResponse {
     public static PostResponse of(final Post post, final User user, final boolean isLike, final boolean isOwner) {
         return PostResponse.builder()
                 .postId(post.getId())
-                .title(post.getTitle())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream()
                         .map(PostImage::getImage)

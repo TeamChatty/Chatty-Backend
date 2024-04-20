@@ -77,7 +77,6 @@ class PostServiceTest {
                 .thenReturn(image1.getName(), image2.getName(), image3.getName());
 
         PostRequest request = PostRequest.builder()
-                .title("제목")
                 .content("내용")
                 .images(List.of(image1, image2, image3))
                 .build();
@@ -102,7 +101,6 @@ class PostServiceTest {
         userRepository.save(user);
 
         PostRequest request = PostRequest.builder()
-                .title("제목")
                 .content("내용")
                 .build();
 
@@ -120,7 +118,7 @@ class PostServiceTest {
         User user = createUser("닉네임", "01012345678");
         userRepository.save(user);
 
-        Post post = createPost("제목", "내용", user);
+        Post post = createPost("내용", user);
         postRepository.save(post);
 
         PostImage postImage = PostImage.builder()
@@ -135,7 +133,6 @@ class PostServiceTest {
 
         // then
         assertThat(postResponse.getPostId()).isNotNull();
-        assertThat(postResponse.getTitle()).isEqualTo(post.getTitle());
         assertThat(postResponse)
                 .extracting("postId", "content", "isOwner")
                 .containsExactlyInAnyOrder(
@@ -155,9 +152,9 @@ class PostServiceTest {
         User user = createUser("닉네임", "01012345678");
         userRepository.save(user);
 
-        Post post1 = createPost("제목1", "내용1", user);
-        Post post2 = createPost("제목2", "내용2", user);
-        Post post3 = createPost("제목3", "내용3", user);
+        Post post1 = createPost("내용1", user);
+        Post post2 = createPost("내용2", user);
+        Post post3 = createPost("내용3", user);
         postRepository.saveAll(List.of(post1, post2, post3));
 
         // when
@@ -165,11 +162,11 @@ class PostServiceTest {
 
         // then
         assertThat(postList).hasSize(3)
-                .extracting("title", "content", "isOwner", "isLike")
+                .extracting("content", "isOwner", "isLike")
                 .containsExactlyInAnyOrder(
-                        tuple("제목1", "내용1", true, false),
-                        tuple("제목2", "내용2", true, false),
-                        tuple("제목3", "내용3", true, false)
+                        tuple("내용1", true, false),
+                        tuple("내용2", true, false),
+                        tuple("내용3", true, false)
                 );
     }
 
@@ -182,12 +179,12 @@ class PostServiceTest {
         User user2 = createUser("닉네임2", "01011112222");
         userRepository.saveAll(List.of(user, user2));
 
-        Post post1 = createPost("제목1", "내용1", user);
-        Post post2 = createPost("제목2", "내용2", user);
-        Post post3 = createPost("제목3", "내용3", user);
-        Post post4 = createPost("제목4", "내용4", user2);
-        Post post5 = createPost("제목5", "내용5", user2);
-        Post post6 = createPost("제목6", "내용6", user2);
+        Post post1 = createPost("내용1", user);
+        Post post2 = createPost("내용2", user);
+        Post post3 = createPost("내용3", user);
+        Post post4 = createPost("내용4", user2);
+        Post post5 = createPost("내용5", user2);
+        Post post6 = createPost("내용6", user2);
         postRepository.saveAll(List.of(post1, post2, post3, post4, post5, post6));
 
         PostLike postLike1 = createPostLike(post4, user);
@@ -199,14 +196,14 @@ class PostServiceTest {
 
         // then
         assertThat(postList).hasSize(6)
-                .extracting("title", "content", "isOwner", "isLike")
+                .extracting("content", "isOwner", "isLike")
                 .containsExactlyInAnyOrder(
-                        tuple("제목1", "내용1", true, false),
-                        tuple("제목2", "내용2", true, false),
-                        tuple("제목3", "내용3", true, false),
-                        tuple("제목4", "내용4", false, true),
-                        tuple("제목5", "내용5", false, true),
-                        tuple("제목6", "내용6", false, false)
+                        tuple("내용1", true, false),
+                        tuple("내용2", true, false),
+                        tuple("내용3", true, false),
+                        tuple("내용4", false, true),
+                        tuple("내용5", false, true),
+                        tuple("내용6", false, false)
                 );
     }
 
@@ -230,9 +227,8 @@ class PostServiceTest {
                 .build();
     }
 
-    private Post createPost(final String title, final String content, final User user) {
+    private Post createPost(final String content, final User user) {
         return Post.builder()
-                .title(title)
                 .content(content)
                 .user(user)
                 .build();

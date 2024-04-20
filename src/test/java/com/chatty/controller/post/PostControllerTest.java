@@ -55,7 +55,6 @@ class PostControllerTest {
         List<MultipartFile> images = List.of(image);
 
         PostRequest request = PostRequest.builder()
-                .title("제목")
                 .content("내용")
 //                .images(images)
                 .build();
@@ -66,38 +65,10 @@ class PostControllerTest {
                                 .file(image)
                                 .with(csrf())
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                                .param("title", "제목")
                                 .param("content", "내용")
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
-    }
-
-    @DisplayName("게시글을 등록할 때, 제목은 필수값이다.")
-    @Test
-    void createPostWithoutTitle() throws Exception {
-        // given
-        MockMultipartFile image = new MockMultipartFile("images", "image.jpg", "image/jpeg", new byte[]{123, 123});
-        List<MultipartFile> images = List.of(image);
-
-        PostRequest request = PostRequest.builder()
-//                .title("제목")
-                .content("내용")
-                .images(images)
-                .build();
-
-        // when // then
-        mockMvc.perform(
-                        multipart("/v1/post")
-                                .file(image)
-                                .with(csrf())
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
-//                                .param("title", "제목")
-                                .param("content", "내용")
-                )
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("제목은 필수로 입력해야 됩니다."));
     }
 
     @DisplayName("게시글을 등록할 때, 내용은 필수값이다.")
@@ -108,7 +79,6 @@ class PostControllerTest {
         List<MultipartFile> images = List.of(image);
 
         PostRequest request = PostRequest.builder()
-                .title("제목")
 //                .content("내용")
                 .images(images)
                 .build();
@@ -119,7 +89,6 @@ class PostControllerTest {
                                 .file(image)
                                 .with(csrf())
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                                .param("title", "제목")
 //                                .param("content", "내용")
                 )
                 .andDo(print())
@@ -135,7 +104,6 @@ class PostControllerTest {
         List<MultipartFile> images = List.of(image);
 
         PostRequest request = PostRequest.builder()
-                .title("제목")
                 .content("내용")
                 .images(images)
                 .build();
@@ -151,7 +119,6 @@ class PostControllerTest {
                                 .file(image)
                                 .with(csrf())
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                                .param("title", "제목")
                                 .param("content", "내용")
                 )
                 .andDo(print())
