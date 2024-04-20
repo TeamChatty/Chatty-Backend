@@ -22,9 +22,10 @@ public class ChatRoomListResponse {
     private String lastMessage;
     private Integer unreadMessageCount;
     private LocalDateTime chatRoomCreatedTime;
+    private boolean isExtend;
 
     @Builder
-    public ChatRoomListResponse(final Long roomId, final Long senderId, final String senderNickname, final String senderImageUrl, final boolean blueCheck, final LocalDateTime lastMessageCreatedTime, final String lastMessage, final Integer unreadMessageCount, final LocalDateTime chatRoomCreatedTime) {
+    public ChatRoomListResponse(final Long roomId, final Long senderId, final String senderNickname, final String senderImageUrl, final boolean blueCheck, final LocalDateTime lastMessageCreatedTime, final String lastMessage, final Integer unreadMessageCount, final LocalDateTime chatRoomCreatedTime, final boolean isExtend) {
         this.roomId = roomId;
         this.senderId = senderId;
         this.senderNickname = senderNickname;
@@ -34,6 +35,7 @@ public class ChatRoomListResponse {
         this.lastMessage = lastMessage;
         this.unreadMessageCount = unreadMessageCount;
         this.chatRoomCreatedTime = chatRoomCreatedTime;
+        this.isExtend = isExtend;
     }
 
     public static ChatRoomListResponse of(final ChatRoom chatRoom, final Long me) {
@@ -51,6 +53,7 @@ public class ChatRoomListResponse {
                 .lastMessageCreatedTime(getLastMessageCreatedAt(chatRoom))
                 .unreadMessageCount(getUnreadMessageCount(chatRoom, me))
                 .chatRoomCreatedTime(chatRoom.getCreatedAt())
+                .isExtend(chatRoom.isExtend())
                 .build();
     }
 
