@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Getter
 public class PostResponse {
 
-    private Long id;
+    private Long postId;
 
     private String title;
 
@@ -31,9 +31,17 @@ public class PostResponse {
 
     private int viewCount;
 
+    private long likeCount;
+
+    private long commentCount;
+
+    private boolean isLike;
+
+    private boolean isOwner;
+
     @Builder
-    public PostResponse(final Long id, final String title, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount) {
-        this.id = id;
+    public PostResponse(final Long postId, final String title, final String content, final Long userId, final String nickname, final String profileImage, final List<String> postImages, final int viewCount, final long likeCount, final long commentCount, final boolean isLike, final boolean isOwner) {
+        this.postId = postId;
         this.title = title;
         this.content = content;
         this.userId = userId;
@@ -41,11 +49,15 @@ public class PostResponse {
         this.profileImage = profileImage;
         this.postImages = postImages;
         this.viewCount = viewCount;
+        this.likeCount = likeCount;
+        this.commentCount = commentCount;
+        this.isLike = isLike;
+        this.isOwner = isOwner;
     }
 
-    public static PostResponse of(final Post post, final User user) {
+    public static PostResponse of(final Post post, final User user, final boolean isLike, final boolean isOwner) {
         return PostResponse.builder()
-                .id(post.getId())
+                .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream()
@@ -55,6 +67,10 @@ public class PostResponse {
                 .userId(user.getId())
                 .profileImage(user.getImageUrl())
                 .viewCount(post.getViewCount())
+                .likeCount(post.getPostLikes().size())
+                .commentCount(post.getComments().size())
+                .isLike(isLike)
+                .isOwner(isOwner)
                 .build();
     }
 }

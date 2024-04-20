@@ -2,12 +2,14 @@ package com.chatty.service.post;
 
 import com.chatty.constants.Code;
 import com.chatty.dto.post.request.PostRequest;
+import com.chatty.dto.post.response.PostCreateResponse;
 import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.dto.post.response.PostResponse;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.post.PostImage;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostImageRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
@@ -33,9 +35,10 @@ public class PostService {
     private final UserRepository userRepository;
     private final PostImageRepository postImageRepository;
     private final S3Service s3service;
+    private final PostLikeRepository postLikeRepository;
 
     @Transactional
-    public PostResponse createPost(final String mobileNumber, final PostRequest request) throws IOException {
+    public PostCreateResponse createPost(final String mobileNumber, final PostRequest request) throws IOException {
         log.info("createPost Method Start");
         User user = userRepository.findUserByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
@@ -43,7 +46,7 @@ public class PostService {
         Post post = postRepository.save(request.toEntity(user));
 
         if (request.getImages() == null || request.getImages().isEmpty()) {
-            return PostResponse.of(post, user);
+            return PostCreateResponse.of(post, user);
         }
 
 
@@ -59,24 +62,28 @@ public class PostService {
             post.getPostImages().add(savedPostImage);
         }
 
-        return PostResponse.of(post, user);
+        return PostCreateResponse.of(post, user);
     }
 
     @Transactional
     public PostResponse getPost(final String mobileNumber, final Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_POST));
+        Post post = postRepository.getById(postId);
 
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        boolean isLike = postLikeRepository.existsByPostAndUser(post, user);
+        boolean isOwner = post.getUser().getId().equals(user.getId());
         post.addViewCount();
 
-        return PostResponse.of(post, post.getUser());
+        return PostResponse.of(post, user, isLike, isOwner);
     }
 
     public List<PostListResponse> getPostList(final String mobileNumber) {
         List<Post> postList = postRepository.findAll(Sort.by("id").descending());
+        User user = userRepository.getByMobileNumber(mobileNumber);
 
         return postList.stream()
-                .map(PostListResponse::of)
+                .map(post -> PostListResponse.of(post, user))
                 .collect(Collectors.toList());
     }
 

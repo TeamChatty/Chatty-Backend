@@ -2,18 +2,20 @@ package com.chatty.service.post;
 
 import com.chatty.constants.Authority;
 import com.chatty.dto.post.request.PostRequest;
+import com.chatty.dto.post.response.PostCreateResponse;
 import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.dto.post.response.PostResponse;
+import com.chatty.entity.like.PostLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.post.PostImage;
 import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
+import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostImageRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
 import com.chatty.utils.S3Service;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +30,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -51,8 +52,12 @@ class PostServiceTest {
     @Autowired
     private PostImageRepository postImageRepository;
 
+    @Autowired
+    private PostLikeRepository postLikeRepository;
+
     @AfterEach
     void tearDown() {
+        postLikeRepository.deleteAllInBatch();
         postImageRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
@@ -78,17 +83,17 @@ class PostServiceTest {
                 .build();
 
         // when
-        PostResponse postResponse = postService.createPost(user.getMobileNumber(), request);
+        PostCreateResponse postCreateResponse = postService.createPost(user.getMobileNumber(), request);
 
         // then
-        assertThat(postResponse.getId()).isNotNull();
-        assertThat(postResponse.getViewCount()).isZero();
-        assertThat(postResponse.getPostImages()).hasSize(3)
+        assertThat(postCreateResponse.getId()).isNotNull();
+        assertThat(postCreateResponse.getViewCount()).isZero();
+        assertThat(postCreateResponse.getPostImages()).hasSize(3)
                 .containsExactlyInAnyOrder(
                         "image1", "image2", "image3"
                 );
     }
-    
+
     @DisplayName("게시글을 등록한다. 이미지X")
     @Test
     void createPostWithoutImage() throws IOException {
@@ -102,10 +107,10 @@ class PostServiceTest {
                 .build();
 
         // when
-        PostResponse postResponse = postService.createPost(user.getMobileNumber(), request);
+        PostCreateResponse postCreateResponse = postService.createPost(user.getMobileNumber(), request);
 
         // then
-        assertThat(postResponse.getId()).isNotNull();
+        assertThat(postCreateResponse.getId()).isNotNull();
     }
 
     @DisplayName("게시글을 단건 조회한다. 조회수도 1 증가한다.")
@@ -129,8 +134,13 @@ class PostServiceTest {
         PostResponse postResponse = postService.getPost(user.getMobileNumber(), post.getId());
 
         // then
-        assertThat(postResponse.getId()).isNotNull();
+        assertThat(postResponse.getPostId()).isNotNull();
         assertThat(postResponse.getTitle()).isEqualTo(post.getTitle());
+        assertThat(postResponse)
+                .extracting("postId", "content", "isOwner")
+                .containsExactlyInAnyOrder(
+                        post.getId(), post.getContent(), true
+                );
         assertThat(postResponse.getPostImages()).hasSize(1)
                 .containsExactlyInAnyOrder(
                         "image1"
@@ -155,11 +165,48 @@ class PostServiceTest {
 
         // then
         assertThat(postList).hasSize(3)
-                .extracting("title", "content")
+                .extracting("title", "content", "isOwner", "isLike")
                 .containsExactlyInAnyOrder(
-                        tuple("제목1", "내용1"),
-                        tuple("제목2", "내용2"),
-                        tuple("제목3", "내용3")
+                        tuple("제목1", "내용1", true, false),
+                        tuple("제목2", "내용2", true, false),
+                        tuple("제목3", "내용3", true, false)
+                );
+    }
+
+    @DisplayName("게시글 목록을 조회한다. 좋아요 여부, 글을 쓴 사람인지 여부도 확인할 수 있다.")
+    @Test
+    void getPostListWithIsLikeAndIsOwner() throws IOException {
+        // given
+        // user와 user2가 쓴 글이 3개씩 존재하고 user2가 작성한 글 2개(4, 5)에만 좋아요를 누른 상황이다. user를 기준으로 조회한다.
+        User user = createUser("닉네임", "01012345678");
+        User user2 = createUser("닉네임2", "01011112222");
+        userRepository.saveAll(List.of(user, user2));
+
+        Post post1 = createPost("제목1", "내용1", user);
+        Post post2 = createPost("제목2", "내용2", user);
+        Post post3 = createPost("제목3", "내용3", user);
+        Post post4 = createPost("제목4", "내용4", user2);
+        Post post5 = createPost("제목5", "내용5", user2);
+        Post post6 = createPost("제목6", "내용6", user2);
+        postRepository.saveAll(List.of(post1, post2, post3, post4, post5, post6));
+
+        PostLike postLike1 = createPostLike(post4, user);
+        PostLike postLike2 = createPostLike(post5, user);
+        postLikeRepository.saveAll(List.of(postLike1, postLike2));
+
+        // when
+        List<PostListResponse> postList = postService.getPostList(user.getMobileNumber());
+
+        // then
+        assertThat(postList).hasSize(6)
+                .extracting("title", "content", "isOwner", "isLike")
+                .containsExactlyInAnyOrder(
+                        tuple("제목1", "내용1", true, false),
+                        tuple("제목2", "내용2", true, false),
+                        tuple("제목3", "내용3", true, false),
+                        tuple("제목4", "내용4", false, true),
+                        tuple("제목5", "내용5", false, true),
+                        tuple("제목6", "내용6", false, false)
                 );
     }
 
@@ -187,6 +234,13 @@ class PostServiceTest {
         return Post.builder()
                 .title(title)
                 .content(content)
+                .user(user)
+                .build();
+    }
+
+    private PostLike createPostLike(final Post post, final User user) {
+        return PostLike.builder()
+                .post(post)
                 .user(user)
                 .build();
     }
