@@ -1,6 +1,7 @@
 package com.chatty.dto.chat.response;
 
 import com.chatty.entity.chat.ChatRoom;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class ChatRoomResponse {
 
     private boolean isExtend;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime chatRoomCreatedTime;
 
     @Builder

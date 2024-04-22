@@ -1,5 +1,6 @@
 package com.chatty.service.match;
 
+import com.chatty.config.LocalDateTimeSerializer;
 import com.chatty.config.WebSocketConnectionManager;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.response.ChatRoomResponse;
@@ -13,6 +14,7 @@ import com.chatty.repository.match.MatchHistoryRepository;
 import com.chatty.repository.user.UserRepository;
 import com.chatty.service.chat.RoomService;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +35,7 @@ import static com.chatty.constants.Code.NOT_EXIST_USER;
 public class MatchHandler extends TextWebSocketHandler {
 
     private final List<WebSocketSession> sessions = new ArrayList<>();
-    private final Gson gson;
+//    private final Gson gson;
     private final UserRepository userRepository;
     private final MatchService matchService;
     private final RoomService roomService;
@@ -52,6 +55,9 @@ public class MatchHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(final WebSocketSession session, final TextMessage message) throws Exception {
         String payload = message.getPayload();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer());
+        Gson gson = gsonBuilder.setPrettyPrinting().create();
         MatchResponse matchResponse = gson.fromJson(payload, MatchResponse.class);
 
         log.info("sessionId = {}", session.getId());
