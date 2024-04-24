@@ -4,6 +4,7 @@ import com.chatty.constants.Code;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
 import com.chatty.dto.chat.request.DeleteRoomDto;
+import com.chatty.dto.chat.response.ChatRoomDataResponse;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.dto.chat.response.ChatRoomResponse;
 import com.chatty.entity.chat.ChatRoom;
@@ -148,5 +149,14 @@ public class RoomService {
         }
 
         return ChatRoomResponse.of(chatRoom);
+    }
+
+    public ChatRoomDataResponse getChatRoom(final Long roomId, final String mobileNumber) {
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
+
+        return ChatRoomDataResponse.of(chatRoom, user);
     }
 }
