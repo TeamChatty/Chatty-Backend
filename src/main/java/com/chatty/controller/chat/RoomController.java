@@ -3,6 +3,7 @@ package com.chatty.controller.chat;
 import com.chatty.dto.ApiResponse;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
+import com.chatty.dto.chat.response.ChatRoomDataResponse;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.dto.chat.response.ChatRoomResponse;
 import com.chatty.service.chat.RoomService;
@@ -136,5 +137,12 @@ public class RoomController {
                                                           Authentication authentication) {
         log.info("매칭으로 생성된 채팅방 연장 Controller");
         return ApiResponse.ok(roomService.updateRoomExtend(roomId, request, authentication.getName()));
+    }
+
+    @GetMapping("/room/{roomId}")
+    public ApiResponse<ChatRoomDataResponse> getChatRoom(@PathVariable Long roomId,
+                                                         Authentication authentication) {
+        log.info("getChatRoom - Controller");
+        return ApiResponse.ok(roomService.getChatRoom(roomId, authentication.getName()));
     }
 }
