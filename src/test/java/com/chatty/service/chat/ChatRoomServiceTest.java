@@ -3,6 +3,7 @@ package com.chatty.service.chat;
 import com.chatty.constants.Authority;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
+import com.chatty.dto.chat.response.ChatRoomDataResponse;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.dto.chat.response.ChatRoomResponse;
 import com.chatty.entity.chat.ChatMessage;
@@ -249,6 +250,48 @@ class ChatRoomServiceTest {
 
         // when // then
         assertThatThrownBy(() -> chatRoomService.updateRoomExtend(chatRoom.getRoomId(), request, user3.getMobileNumber()))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("유저가 채팅방에 존재하지 않습니다.");
+    }
+
+    @DisplayName("채팅방을 상세조회 합니다.")
+    @Test
+    void getChatRoom() {
+        // given
+        User me = createUser("박지성", "01011112222", "profile1.jpg", true, 5, 7);
+        User partner = createUser("김연아", "01012345678", "profile2.jpg", true, 5, 7);
+        userRepository.saveAll(List.of(me, partner));
+
+        ChatRoom chatRoom = createChatRoomWithMatching(me, partner);
+        chatRoomRepository.save(chatRoom);
+
+        // when
+        ChatRoomDataResponse chatRoomDateResponse = chatRoomService.getChatRoom(chatRoom.getRoomId(), me.getMobileNumber());
+
+        // then
+        assertThat(chatRoomDateResponse.getRoomId()).isNotNull();
+        assertThat(chatRoomDateResponse)
+                .extracting("partnerId", "partnerNickname", "partnerImageUrl")
+                .containsExactlyInAnyOrder(
+                        partner.getId(), partner.getNickname(), partner.getImageUrl()
+                );
+    }
+
+    @DisplayName("채팅방을 상세조회할 때, 그 채팅방에 존재하지 않는 유저면 예외가 발생한다.")
+    @Test
+    void getChatRoomNotExistUser() {
+        // given
+        User me = createUser("박지성", "01011112222", "profile1.jpg", true, 5, 7);
+        User partner = createUser("김연아", "01012345678", "profile2.jpg", true, 5, 7);
+
+        User user3 = createUser("강혜원", "01022222222", "profile3.jpg", true, 5, 7);
+        userRepository.saveAll(List.of(me, partner, user3));
+
+        ChatRoom chatRoom = createChatRoomWithMatching(me, partner);
+        chatRoomRepository.save(chatRoom);
+
+        // when // then
+        assertThatThrownBy(() -> chatRoomService.getChatRoom(chatRoom.getRoomId(), user3.getMobileNumber()))
                 .isInstanceOf(CustomException.class)
                 .hasMessage("유저가 채팅방에 존재하지 않습니다.");
     }
