@@ -16,24 +16,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class FcmService {
 
-//    private final FirebaseMessaging firebaseMessaging;
-//    private final UserRepository userRepository;
-//
-//    public String sendNotification(final FcmRequest request) throws FirebaseMessagingException {
-//        Long userId = request.getUserId();
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
-//
-//        Notification notification = Notification.builder()
-//                .setTitle(request.getTitle())
-//                .setBody(request.getBody())
-//                .build();
-//
-//        Message message = Message.builder()
-//                .setToken(user.getDeviceToken())
-//                .setNotification(notification)
-//                .build();
-//
-//        return firebaseMessaging.send(message);
-//    }
+    private final FirebaseMessaging firebaseMessaging;
+    private final UserRepository userRepository;
+
+    public String sendNotification(final FcmRequest request) throws FirebaseMessagingException {
+        Long userId = request.getUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+
+        Notification notification = Notification.builder()
+                .setTitle(request.getTitle())
+                .setBody(request.getBody())
+                .build();
+
+        Message message = Message.builder()
+                .setToken(user.getDeviceToken())
+                .setNotification(notification)
+                .build();
+
+        return firebaseMessaging.send(message);
+    }
 }

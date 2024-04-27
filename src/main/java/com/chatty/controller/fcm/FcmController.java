@@ -14,8 +14,8 @@ public class FcmController {
 
     private final FcmService fcmService;
 
-//    @PostMapping("/v1/notification")
-//    public String sendNotification(@RequestBody FcmRequest request) throws FirebaseMessagingException {
-//        return fcmService.sendNotification(request);
-//    }
+    @PostMapping("/v1/notification")
+    public String sendNotification(@RequestBody FcmRequest request) throws FirebaseMessagingException {
+        return fcmService.sendNotification(request);
+    }
 }
