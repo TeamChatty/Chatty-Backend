@@ -54,7 +54,7 @@ public class UserService {
 
         log.info("[UserService/login] 로그인 시작");
 
-        String key = SmsUtils.makeKey(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
+        String key = userRequestDto.getMobileNumber();
         String authNumber = userRequestDto.getAuthenticationNumber();
 
         if(!smsService.checkAuthNumber(key,authNumber)){
