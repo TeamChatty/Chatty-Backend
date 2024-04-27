@@ -16,6 +16,8 @@ import com.chatty.repository.user.UserRepository;
 import com.chatty.utils.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,6 +87,17 @@ public class PostService {
         return postList.stream()
                 .map(post -> PostListResponse.of(post, user))
                 .collect(Collectors.toList());
+    }
+
+    public List<PostListResponse> getPostListPages(final Long lastPostId, final int size, final String mobileNumber) {
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        User user = userRepository.getByMobileNumber(mobileNumber);
+        Page<Post> posts = postRepository.findByIdLessThanOrderByIdDesc(lastPostId, pageRequest);
+
+        return posts.getContent().stream()
+                .map(post -> PostListResponse.of(post, user))
+                .toList();
     }
 
     private void validateExtension(final String filename) {
