@@ -50,6 +50,7 @@ public class SmsService {
     private String phone;
 
     private static final int AUTH_NUMBER_LIMIT = 5;
+    private static final String LIMIT_FIRST_NUMBER = "1";
 
     private final AuthNumberRepository authNumberRepository;
 
@@ -95,20 +96,20 @@ public class SmsService {
         String key = userSmsRequestDto.getMobileNumber();
         authNumberRepository.save(key, authNumber);
 
-        checkAuthLimitNumber(key);
+        String limitValue = checkAuthLimitNumber(key);
 
         log.info("번호 인증 요청 정보 저장 완료 : {}", authNumber);
         //sendSms(MessageRequestDto.builder().to(userSmsRequestDto.getMobileNumber()).content(authNumber).build());
-        return SmsUserResponseDto.of(authNumber);
+        return SmsUserResponseDto.of(authNumber, Integer.parseInt(limitValue));
     }
 
-    private void checkAuthLimitNumber(final String authNumber){
+    private String checkAuthLimitNumber(final String authNumber){
 
         String limitValue = authNumberRepository.findAuthLimitNumber(authNumber);
 
         if(limitValue == null) {
             authNumberRepository.saveLimitNumber(authNumber);
-            return;
+            return LIMIT_FIRST_NUMBER;
         }
 
         if(Integer.parseInt(limitValue) == AUTH_NUMBER_LIMIT) {
@@ -116,6 +117,8 @@ public class SmsService {
         }
 
         authNumberRepository.updateAuthLimitNumber(authNumber, limitValue);
+
+        return limitValue;
     }
 
     public boolean checkAuthNumber(String key, String authNumber) {

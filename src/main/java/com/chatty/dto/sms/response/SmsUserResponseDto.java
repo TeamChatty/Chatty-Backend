@@ -11,10 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SmsUserResponseDto {
     private String authNumber;
+    private int limitNumber;
 
-    public static SmsUserResponseDto of(String authNumber){
+    public static SmsUserResponseDto of(final String authNumber, final int limitNumber){
         return SmsUserResponseDto.builder()
                 .authNumber(authNumber)
+                .limitNumber(limitNumber)
                 .build();
     }
 }
