@@ -21,16 +21,24 @@ public class ChatRoomResponse {
 
     private boolean isExtend;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime chatRoomCreatedTime;
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss", timezone = "Asia/Seoul")
+//    private LocalDateTime chatRoomCreatedTime;
+
+//    @Builder
+//    public ChatRoomResponse(final Long roomId, final Long senderId, final Long receiverId, final boolean isExtend, final LocalDateTime chatRoomCreatedTime) {
+//        this.roomId = roomId;
+//        this.senderId = senderId;
+//        this.receiverId = receiverId;
+//        this.isExtend = isExtend;
+//        this.chatRoomCreatedTime = chatRoomCreatedTime;
+//    }
 
     @Builder
-    public ChatRoomResponse(final Long roomId, final Long senderId, final Long receiverId, final boolean isExtend, final LocalDateTime chatRoomCreatedTime) {
+    public ChatRoomResponse(final Long roomId, final Long senderId, final Long receiverId, final boolean isExtend) {
         this.roomId = roomId;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.isExtend = isExtend;
-        this.chatRoomCreatedTime = chatRoomCreatedTime;
     }
 
     public static ChatRoomResponse of(final ChatRoom chatRoom) {
@@ -39,7 +47,6 @@ public class ChatRoomResponse {
                 .senderId(chatRoom.getSender().getId())
                 .receiverId(chatRoom.getReceiver().getId())
                 .isExtend(chatRoom.isExtend())
-                .chatRoomCreatedTime(chatRoom.getCreatedAt())
                 .build();
     }
 }

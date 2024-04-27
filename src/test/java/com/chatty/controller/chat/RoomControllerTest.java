@@ -209,4 +209,19 @@ class RoomControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("candy또는 ticket을 입력해주세요."));
     }
+
+    @DisplayName("선택한 채팅방을 상세조회 합니다.")
+    @Test
+    @WithMockUser(username = "01012345678", roles = "USER")
+    void getChatRoom() throws Exception {
+        // given
+
+        //then
+        mockMvc.perform(
+                        get("/chat/room/{roomId}", 1L).with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

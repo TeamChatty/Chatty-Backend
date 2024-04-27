@@ -42,7 +42,7 @@ public class AuthCheckControllerTest {
 
         //when,then
         mockMvc.perform(
-                get("/check/problem/nickname")
+                post("/check/problem/nickname")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(problemRequestDto))
@@ -59,7 +59,7 @@ public class AuthCheckControllerTest {
 
         //when, then
         mockMvc.perform(
-                        get("/check/problem/nickname").with(csrf())
+                        post("/check/problem/nickname").with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(problemRequestDto))
                 )
@@ -129,7 +129,7 @@ public class AuthCheckControllerTest {
 
         //when,then
         mockMvc.perform(
-                        get("/check/problem/birth")
+                        post("/check/problem/birth")
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(problemRequestDto))
@@ -146,7 +146,7 @@ public class AuthCheckControllerTest {
 
         //when,then
         mockMvc.perform(
-                        get("/check/problem/birth")
+                        post("/check/problem/birth")
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(problemRequestDto))

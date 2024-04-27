@@ -35,7 +35,7 @@ import static com.chatty.constants.Code.NOT_EXIST_USER;
 public class MatchHandler extends TextWebSocketHandler {
 
     private final List<WebSocketSession> sessions = new ArrayList<>();
-//    private final Gson gson;
+    private final Gson gson;
     private final UserRepository userRepository;
     private final MatchService matchService;
     private final RoomService roomService;
@@ -55,9 +55,9 @@ public class MatchHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(final WebSocketSession session, final TextMessage message) throws Exception {
         String payload = message.getPayload();
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer());
-        Gson gson = gsonBuilder.setPrettyPrinting().create();
+//        GsonBuilder gsonBuilder = new GsonBuilder();
+//        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer());
+//        Gson gson = gsonBuilder.setPrettyPrinting().create();
         MatchResponse matchResponse = gson.fromJson(payload, MatchResponse.class);
 
         log.info("sessionId = {}", session.getId());

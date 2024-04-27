@@ -3,7 +3,6 @@ package com.chatty.service.chat;
 import com.chatty.constants.Code;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
-import com.chatty.dto.chat.request.DeleteRoomDto;
 import com.chatty.dto.chat.response.ChatRoomDataResponse;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.dto.chat.response.ChatRoomResponse;
@@ -15,10 +14,9 @@ import com.chatty.repository.user.UserRepository;
 import com.chatty.service.user.UserService;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,9 +125,7 @@ public class RoomService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
 
-        if (!chatRoomRepository.existsByRoomIdAndSenderOrReceiver(roomId, user, user)) {
-            throw new CustomException(Code.NOT_IN_USER_ROOM);
-        }
+        existsByRoomIdAndSenderOrReceiver(roomId, user);
 
         String unlockMethod = request.getUnlockMethod();
         if (unlockMethod.equals("candy")) {
@@ -157,6 +153,14 @@ public class RoomService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
 
+        existsByRoomIdAndSenderOrReceiver(roomId, user);
+
         return ChatRoomDataResponse.of(chatRoom, user);
+    }
+
+    private void existsByRoomIdAndSenderOrReceiver(final Long roomId, final User user) {
+        if (!chatRoomRepository.existsByRoomIdAndSenderOrReceiver(roomId, user, user)) {
+            throw new CustomException(Code.NOT_IN_USER_ROOM);
+        }
     }
 }
