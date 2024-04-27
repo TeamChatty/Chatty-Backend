@@ -373,3 +373,5 @@ Caused by: java.io.FileNotFoundException: class path resource [chatty-lab-fireba
 	at java.base/java.lang.reflect.Method.invoke(Method.java:577)
 	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:140)
 	... 48 common frames omitted
+2024-04-27 23:31:50.062 [http-nio-8080-exec-3] ERROR com.chatty.service.user.UserService - 인증 번호가 일치하지 않는다.
+2024-04-27 23:34:58.212 [http-nio-8080-exec-3] ERROR com.chatty.service.user.UserService - 이미 존재 하는 유저 입니다.

@@ -98,7 +98,7 @@ public class UserService {
 
         boolean isExistedUser = isAlreadyExistedUser(userRequestDto.getMobileNumber());
 
-        String key = SmsUtils.makeKey(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
+        String key = userRequestDto.getMobileNumber();
         String authNumber = userRequestDto.getAuthenticationNumber();
 
         if(!smsService.checkAuthNumber(key,authNumber)){
