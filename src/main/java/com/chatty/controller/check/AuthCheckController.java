@@ -41,7 +41,7 @@ public class AuthCheckController {
                     }
             )
     )
-    @GetMapping("/problem/nickname")
+    @PostMapping("/problem/nickname")
     public ApiResponse<ProblemResponseDto> getNicknameProblem(@Valid @RequestBody ProblemRequestDto problemRequestDto) {
         log.info("[AuthCheckController/checkBirth] 닉네임 문제 획득");
         return ApiResponse.ok(authCheckService.createNicknameProblem(problemRequestDto));
@@ -96,7 +96,7 @@ public class AuthCheckController {
                     }
             )
     )
-    @GetMapping("/problem/birth")
+    @PostMapping("/problem/birth")
     public ApiResponse<ProblemResponseDto> getBirthProblem(@Valid @RequestBody ProblemRequestDto problemRequestDto) {
         log.info("[AuthCheckController/checkBirth] 출생 년도 문제 획득");
         return ApiResponse.ok(authCheckService.createBirthProblem(problemRequestDto));
