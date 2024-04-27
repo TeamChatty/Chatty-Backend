@@ -9,6 +9,7 @@ import com.chatty.service.post.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,13 @@ public class PostController {
     @GetMapping("/v1/posts")
     public ApiResponse<List<PostListResponse>> getPostList(final Authentication authentication) {
         return ApiResponse.ok(postService.getPostList(authentication.getName()));
+    }
+
+    @GetMapping("/v2/posts")
+    public ApiResponse<List<PostListResponse>> getPostListPages(@RequestParam Long lastPostId,
+                                                                @RequestParam int size,
+                                                                final Authentication authentication) {
+        return ApiResponse.ok(postService.getPostListPages(lastPostId, size, authentication.getName()));
     }
 
 }
