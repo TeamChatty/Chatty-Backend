@@ -2,11 +2,13 @@ package com.chatty.service.sms;
 
 import static com.chatty.utils.sms.SmsUtils.makeSignature;
 
+import com.chatty.constants.Code;
 import com.chatty.dto.sms.request.MessageRequestDto;
 import com.chatty.dto.sms.request.NaverSmsRequestDto;
 import com.chatty.dto.sms.request.UserSmsRequestDto;
 import com.chatty.dto.sms.response.SmsResponseDto;
 import com.chatty.dto.sms.response.SmsUserResponseDto;
+import com.chatty.exception.CustomException;
 import com.chatty.repository.auth.AuthNumberRepository;
 import com.chatty.utils.sms.SmsUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -46,6 +48,8 @@ public class SmsService {
 
     @Value("${naver-cloud-sms-sender-phone-number}")
     private String phone;
+
+    private static final int AUTH_NUMBER_LIMIT = 5;
 
     private final AuthNumberRepository authNumberRepository;
 
@@ -90,9 +94,28 @@ public class SmsService {
         String authNumber = SmsUtils.generateNumber();
         String key = userSmsRequestDto.getMobileNumber();
         authNumberRepository.save(key, authNumber);
+
+        checkAuthLimitNumber(key);
+
         log.info("번호 인증 요청 정보 저장 완료 : {}", authNumber);
         //sendSms(MessageRequestDto.builder().to(userSmsRequestDto.getMobileNumber()).content(authNumber).build());
         return SmsUserResponseDto.of(authNumber);
+    }
+
+    private void checkAuthLimitNumber(final String authNumber){
+
+        String limitValue = authNumberRepository.findAuthLimitNumber(authNumber);
+
+        if(limitValue == null) {
+            authNumberRepository.saveLimitNumber(authNumber);
+            return;
+        }
+
+        if(Integer.parseInt(limitValue) == AUTH_NUMBER_LIMIT) {
+            throw new CustomException(Code.AUTH_NUMBER_LIMIT);
+        }
+
+        authNumberRepository.updateAuthLimitNumber(authNumber, limitValue);
     }
 
     public boolean checkAuthNumber(String key, String authNumber) {

@@ -15,30 +15,30 @@ import java.util.List;
 @Configuration
 public class FcmConfig {
 
-    private final ClassPathResource firebaseResource = new ClassPathResource("chatty-lab-firebase-adminsdk-wxe5z-fa16ef3d12.json");
-
-    @Bean
-    FirebaseMessaging firebaseMessaging() throws IOException {
-        InputStream refreshToken = firebaseResource.getInputStream();
-
-        FirebaseApp firebaseApp = null;
-        List<FirebaseApp> firebaseAppList = FirebaseApp.getApps();
-
-        if (firebaseAppList != null && !firebaseAppList.isEmpty()) {
-            for (FirebaseApp app : firebaseAppList) {
-                if (app.getName().equals(FirebaseApp.DEFAULT_APP_NAME)) {
-                    firebaseApp = app;
-                }
-            }
-        } else {
-
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(refreshToken))
-                    .build();
-
-            firebaseApp = FirebaseApp.initializeApp(options);
-        }
-
-        return FirebaseMessaging.getInstance(firebaseApp);
-    }
+//    private final ClassPathResource firebaseResource = new ClassPathResource("chatty-lab-firebase-adminsdk-wxe5z-fa16ef3d12.json");
+//
+//    @Bean
+//    FirebaseMessaging firebaseMessaging() throws IOException {
+//        InputStream refreshToken = firebaseResource.getInputStream();
+//
+//        FirebaseApp firebaseApp = null;
+//        List<FirebaseApp> firebaseAppList = FirebaseApp.getApps();
+//
+//        if (firebaseAppList != null && !firebaseAppList.isEmpty()) {
+//            for (FirebaseApp app : firebaseAppList) {
+//                if (app.getName().equals(FirebaseApp.DEFAULT_APP_NAME)) {
+//                    firebaseApp = app;
+//                }
+//            }
+//        } else {
+//
+//            FirebaseOptions options = FirebaseOptions.builder()
+//                    .setCredentials(GoogleCredentials.fromStream(refreshToken))
+//                    .build();
+//
+//            firebaseApp = FirebaseApp.initializeApp(options);
+//        }
+//
+//        return FirebaseMessaging.getInstance(firebaseApp);
+//    }
 }
