@@ -21,7 +21,7 @@ public class RefreshTokenRepository {
 
     public void save(String deviceId, String refreshToken){
         ValueOperations<String, String> value = redisTemplate.opsForValue();
-        value.set(deviceId,refreshToken, Long.parseLong(validTime)/1000, SECONDS);
+        value.set(deviceId,refreshToken, Long.parseLong(validTime), SECONDS);
     }
 
     public String findRefreshTokenByDeviceId(String deviceId){
