@@ -100,6 +100,17 @@ public class PostService {
                 .toList();
     }
 
+    public List<PostListResponse> getPostListPagesOrderByTopLiked(final Long lastLikeCount, final int size, final String mobileNumber) {
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        User user = userRepository.getByMobileNumber(mobileNumber);
+        Page<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(lastLikeCount, pageRequest);
+
+        return posts.getContent().stream()
+                .map(post -> PostListResponse.of(post, user))
+                .toList();
+    }
+
     private void validateExtension(final String filename) {
         String[] file = filename.split("\\.");
         String extension = file[file.length - 1];

@@ -21,7 +21,7 @@ public class RefreshTokenRepository {
     public void save(String deviceId, String refreshToken){
         try {
             ValueOperations<String, String> value = redisTemplate.opsForValue();
-            value.set(deviceId,refreshToken, Duration.ofSeconds(Long.parseLong(validTime)/1000));
+            value.set(deviceId,refreshToken, Duration.ofSeconds(Long.parseLong(validTime)));
         }catch(Exception e) {
             log.error("[RedistTokenService/getRefreshTokenByUuid] 데이터 저장 실패");
         }
