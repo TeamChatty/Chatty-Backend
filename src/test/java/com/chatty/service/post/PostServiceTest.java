@@ -281,6 +281,33 @@ class PostServiceTest {
                 );
     }
 
+    @DisplayName("내가 작성한 게시글 목록을 페이징하여 조회한다.")
+    @Test
+    void getMyPostListPages() throws IOException {
+        // given
+        User user = createUser("닉네임", "01012345678");
+        User user2 = createUser("닉네임2", "01011112222");
+        userRepository.saveAll(List.of(user, user2));
+
+        Post post1 = createPost("내용1", user);
+        Post post2 = createPost("내용2", user);
+        Post post3 = createPost("내용3", user2);
+        Post post4 = createPost("내용4", user);
+        postRepository.saveAll(List.of(post1, post2, post3, post4));
+
+        // when
+        List<PostListResponse> postList = postService.getMyPostListPages(post4.getId() + 1, 3, user.getMobileNumber());
+
+        // then
+        assertThat(postList).hasSize(3)
+                .extracting("postId", "content")
+                .containsExactlyInAnyOrder(
+                        tuple(post1.getId(), "내용1"),
+                        tuple(post2.getId(), "내용2"),
+                        tuple(post4.getId(), "내용4")
+                );
+    }
+
     private User createUser(final String nickname, final String mobileNumber) {
         return User.builder()
                 .mobileNumber(mobileNumber)
