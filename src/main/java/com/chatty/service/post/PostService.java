@@ -9,6 +9,7 @@ import com.chatty.entity.post.Post;
 import com.chatty.entity.post.PostImage;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.bookmark.BookmarkRepository;
 import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostImageRepository;
 import com.chatty.repository.post.PostRepository;
@@ -38,6 +39,7 @@ public class PostService {
     private final PostImageRepository postImageRepository;
     private final S3Service s3service;
     private final PostLikeRepository postLikeRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public PostCreateResponse createPost(final String mobileNumber, final PostRequest request) throws IOException {
@@ -75,9 +77,10 @@ public class PostService {
 
         boolean isLike = postLikeRepository.existsByPostAndUser(post, user);
         boolean isOwner = post.getUser().getId().equals(user.getId());
+        boolean isBookmark = bookmarkRepository.existsByPostAndUser(post, user);
         post.addViewCount();
 
-        return PostResponse.of(post, user, isLike, isOwner);
+        return PostResponse.of(post, user, isLike, isOwner, isBookmark);
     }
 
     public List<PostListResponse> getPostList(final String mobileNumber) {

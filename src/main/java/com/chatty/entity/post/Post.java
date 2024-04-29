@@ -1,6 +1,7 @@
 package com.chatty.entity.post;
 
 import com.chatty.entity.BaseTimeEntity;
+import com.chatty.entity.bookmark.Bookmark;
 import com.chatty.entity.comment.Comment;
 import com.chatty.entity.like.PostLike;
 import com.chatty.entity.user.User;
@@ -43,6 +44,9 @@ public class Post extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post")
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
     @Builder
     public Post(final User user, final String content, final int viewCount) {
