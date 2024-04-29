@@ -2,6 +2,7 @@ package com.chatty.repository.post;
 
 import com.chatty.constants.Code;
 import com.chatty.entity.post.Post;
+import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,4 +25,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "having LikeCount < :lastLikeCount " +
             "order by LikeCount Desc, p.post_id Desc", nativeQuery = true)
     Page<Post> customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(Long lastLikeCount, Pageable pageable);
+
+    Page<Post> findByUserAndIdLessThanOrderByIdDesc(User user, Long postId, Pageable pageable);
 }

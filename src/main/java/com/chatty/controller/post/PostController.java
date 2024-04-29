@@ -55,4 +55,11 @@ public class PostController {
         return ApiResponse.ok(postService.getPostListPagesOrderByTopLiked(lastLikeCount, size, authentication.getName()));
     }
 
+    @GetMapping("/v1/my-posts")
+    public ApiResponse<List<PostListResponse>> getMyPostListPages(@RequestParam Long lastPostId,
+                                                                  @RequestParam int size,
+                                                                  final Authentication authentication) {
+        return ApiResponse.ok(postService.getMyPostListPages(lastPostId, size, authentication.getName()));
+    }
+
 }
