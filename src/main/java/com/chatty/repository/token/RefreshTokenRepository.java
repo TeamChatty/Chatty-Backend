@@ -1,8 +1,6 @@
 package com.chatty.repository.token;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-
-import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

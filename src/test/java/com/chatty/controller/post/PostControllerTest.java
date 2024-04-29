@@ -180,4 +180,25 @@ class PostControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray());
     }
+
+    @DisplayName("게시글 목록을 좋아요 순으로 정렬, 페이징하여 조회한다.")
+    @Test
+    void getPostListPagesOrderByTopLiked() throws Exception {
+        // given
+        List<PostListResponse> result = List.of();
+
+        when(postService.getPostListPagesOrderByTopLiked(11L, 10, "01012341234")).thenReturn(result);
+
+        // when // then
+        mockMvc.perform(
+                        get("/v1/posts/top-liked")
+                                .param("lastLikeCount", "11")
+                                .param("size", "10")
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray());
+    }
 }
