@@ -1,7 +1,6 @@
 package com.chatty.repository.token;
 
-import static java.util.concurrent.TimeUnit.*;
-
+import static java.util.concurrent.TimeUnit.SECONDS;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +20,8 @@ public class RefreshTokenRepository {
 
     public void save(String deviceId, String refreshToken){
         ValueOperations<String, String> value = redisTemplate.opsForValue();
-        value.set(deviceId,refreshToken, Long.parseLong(validTime), SECONDS);
+        log.info("refresh 유효 시간 : {}", Long.parseLong(validTime) / 1000);
+        value.set(deviceId,refreshToken, Long.parseLong(validTime)/1000, SECONDS);
     }
 
     public String findRefreshTokenByDeviceId(String deviceId){
