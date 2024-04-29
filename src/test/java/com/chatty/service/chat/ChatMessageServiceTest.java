@@ -252,6 +252,38 @@ class ChatMessageServiceTest {
                 .hasMessage("유저가 채팅방에 존재하지 않습니다.");
     }
 
+    @DisplayName("채팅방에 존재하는 메세지를 페이징하여 불러온다. (2번 유저가 채팅방에 접속했을 때 기준)")
+    @Test
+    void getMessageListPagesWithUser2() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        User user1 = createUser("박지성", "01011112222", "profile1.jpg", true);
+        User user2 = createUser("김연아", "01012345678", "profile2.jpg", true);
+        userRepository.saveAll(List.of(user1, user2));
+
+        ChatRoom chatRoom = createChatRoom(user1, user2, false);
+        chatRoomRepository.save(chatRoom);
+
+        ChatMessage chatMessage1 = createChatMessage(chatRoom, "1번입니다.", user1, user2, now);
+        ChatMessage chatMessage2 = createChatMessage(chatRoom, "1번입니다.", user1, user2, now);
+        ChatMessage chatMessage3 = createChatMessage(chatRoom, "2번입니다.", user2, user1, now);
+        ChatMessage chatMessage4 = createChatMessage(chatRoom, "2번입니다.", user2, user1, now);
+        chatMessageRepository.saveAll(List.of(chatMessage1, chatMessage2, chatMessage3, chatMessage4));
+
+        // when
+        List<ChatMessageListResponse> messageListResponse =
+                chatMessageService.getMessageListPages(chatRoom.getRoomId(), chatMessage4.getMessageId(), 3, user2.getMobileNumber());
+
+        // then
+        assertThat(messageListResponse).hasSize(3)
+                .extracting("yourId", "yourNickname", "senderId", "content", "yourIsRead")
+                .containsExactlyInAnyOrder(
+                        tuple(user1.getId(), user1.getNickname(), user1.getId(), "1번입니다.", false),
+                        tuple(user1.getId(), user1.getNickname(), user1.getId(), "1번입니다.", false),
+                        tuple(user1.getId(), user1.getNickname(), user2.getId(), "2번입니다.", false)
+                );
+    }
+
     @DisplayName("상대방이 보낸 메세지를 전부 읽는다. (1번 유저 기준으로 2번이 보낸 메세지를 읽는다.)")
     @Test
     void acknowledge() {
