@@ -1,5 +1,7 @@
 package com.chatty.repository.token;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,22 +21,14 @@ public class RefreshTokenRepository {
     private final RedisTemplate<String, String> redisTemplate;
 
     public void save(String deviceId, String refreshToken){
-        try {
-            ValueOperations<String, String> value = redisTemplate.opsForValue();
-            value.set(deviceId,refreshToken, Duration.ofSeconds(Long.parseLong(validTime)/1000));
-        }catch(Exception e) {
-            log.error("[RedistTokenService/getRefreshTokenByUuid] 데이터 저장 실패");
-        }
+        ValueOperations<String, String> value = redisTemplate.opsForValue();
+        log.info("refresh 유효 시간 : {}", Long.parseLong(validTime) / 1000);
+        value.set(deviceId,refreshToken, Long.parseLong(validTime)/1000, SECONDS);
     }
 
     public String findRefreshTokenByDeviceId(String deviceId){
-        try {
-            ValueOperations<String, String> value = redisTemplate.opsForValue();
-            return value.get(deviceId);
-        }catch(Exception e) {
-            log.error("[RedistTokenService/getRefreshTokenByUuid] 일치하는 refresh 토큰이 존재하지 않습니다.");
-            return null;
-        }
+        ValueOperations<String, String> value = redisTemplate.opsForValue();
+        return value.get(deviceId);
     }
 
     public void delete(String uuid){
