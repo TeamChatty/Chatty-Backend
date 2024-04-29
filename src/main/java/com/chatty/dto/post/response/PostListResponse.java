@@ -35,8 +35,10 @@ public class PostListResponse {
 
     private boolean isOwner;
 
+    private boolean isBookmark;
+
     @Builder
-    public PostListResponse(final Long postId, final String content, final int viewCount, final LocalDateTime createdAt, final Long userId, final String nickname, final String imageUrl, final List<String> postImages, final long likeCount, final long commentCount, final boolean isLike, final boolean isOwner) {
+    public PostListResponse(final Long postId, final String content, final int viewCount, final LocalDateTime createdAt, final Long userId, final String nickname, final String imageUrl, final List<String> postImages, final long likeCount, final long commentCount, final boolean isLike, final boolean isOwner, final boolean isBookmark) {
         this.postId = postId;
         this.content = content;
         this.viewCount = viewCount;
@@ -49,6 +51,7 @@ public class PostListResponse {
         this.commentCount = commentCount;
         this.isLike = isLike;
         this.isOwner = isOwner;
+        this.isBookmark = isBookmark;
     }
 
     public static PostListResponse of(final Post post, final User user) {
@@ -68,6 +71,8 @@ public class PostListResponse {
                 .isLike(post.getPostLikes().stream()
                         .anyMatch(postLike -> postLike.getUser().getId().equals(user.getId())))
                 .isOwner(post.getUser().getId().equals(user.getId()))
+                .isBookmark(post.getBookmarks().stream()
+                        .anyMatch(bookmark -> bookmark.getUser().getId().equals(user.getId())))
                 .build();
     }
 }

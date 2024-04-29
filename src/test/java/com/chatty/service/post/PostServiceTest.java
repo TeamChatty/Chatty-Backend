@@ -5,12 +5,14 @@ import com.chatty.dto.post.request.PostRequest;
 import com.chatty.dto.post.response.PostCreateResponse;
 import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.dto.post.response.PostResponse;
+import com.chatty.entity.bookmark.Bookmark;
 import com.chatty.entity.like.PostLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.post.PostImage;
 import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
+import com.chatty.repository.bookmark.BookmarkRepository;
 import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostImageRepository;
 import com.chatty.repository.post.PostRepository;
@@ -55,8 +57,12 @@ class PostServiceTest {
     @Autowired
     private PostLikeRepository postLikeRepository;
 
+    @Autowired
+    private BookmarkRepository bookmarkRepository;
+
     @AfterEach
     void tearDown() {
+        bookmarkRepository.deleteAllInBatch();
         postLikeRepository.deleteAllInBatch();
         postImageRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
@@ -111,7 +117,7 @@ class PostServiceTest {
         assertThat(postCreateResponse.getPostId()).isNotNull();
     }
 
-    @DisplayName("게시글을 단건 조회한다. 조회수도 1 증가한다.")
+    @DisplayName("게시글을 단건 조회한다. 조회수도 1 증가하며, 좋아요 여부 북마크 여부 글쓴 사람인지 확인 가능하다.")
     @Test
     void getPost() throws IOException {
         // given
@@ -128,15 +134,17 @@ class PostServiceTest {
         postImageRepository.save(postImage);
         post.getPostImages().add(postImage);
 
+        Bookmark bookmark = createBookmark(post, user);
+        bookmarkRepository.save(bookmark);
         // when
         PostResponse postResponse = postService.getPost(user.getMobileNumber(), post.getId());
 
         // then
         assertThat(postResponse.getPostId()).isNotNull();
         assertThat(postResponse)
-                .extracting("postId", "content", "isOwner")
+                .extracting("postId", "content", "isOwner", "isLike", "isBookmark")
                 .containsExactlyInAnyOrder(
-                        post.getId(), post.getContent(), true
+                        post.getId(), post.getContent(), true, false, true
                 );
         assertThat(postResponse.getPostImages()).hasSize(1)
                 .containsExactlyInAnyOrder(
@@ -170,7 +178,7 @@ class PostServiceTest {
                 );
     }
 
-    @DisplayName("게시글 목록을 조회한다. 좋아요 여부, 글을 쓴 사람인지 여부도 확인할 수 있다.")
+    @DisplayName("게시글 목록을 조회한다. 좋아요 여부, 북마크 여부, 글을 쓴 사람인지 여부도 확인할 수 있다.")
     @Test
     void getPostListWithIsLikeAndIsOwner() throws IOException {
         // given
@@ -191,19 +199,24 @@ class PostServiceTest {
         PostLike postLike2 = createPostLike(post5, user);
         postLikeRepository.saveAll(List.of(postLike1, postLike2));
 
+        Bookmark bookmark1 = createBookmark(post4, user);
+        Bookmark bookmark2 = createBookmark(post5, user);
+        Bookmark bookmark3 = createBookmark(post6, user);
+        bookmarkRepository.saveAll(List.of(bookmark1, bookmark2, bookmark3));
+
         // when
         List<PostListResponse> postList = postService.getPostList(user.getMobileNumber());
 
         // then
         assertThat(postList).hasSize(6)
-                .extracting("content", "isOwner", "isLike")
+                .extracting("content", "isOwner", "isLike", "isBookmark")
                 .containsExactlyInAnyOrder(
-                        tuple("내용1", true, false),
-                        tuple("내용2", true, false),
-                        tuple("내용3", true, false),
-                        tuple("내용4", false, true),
-                        tuple("내용5", false, true),
-                        tuple("내용6", false, false)
+                        tuple("내용1", true, false, false),
+                        tuple("내용2", true, false, false),
+                        tuple("내용3", true, false, false),
+                        tuple("내용4", false, true, true),
+                        tuple("내용5", false, true, true),
+                        tuple("내용6", false, false, true)
                 );
     }
 
@@ -297,6 +310,13 @@ class PostServiceTest {
 
     private PostLike createPostLike(final Post post, final User user) {
         return PostLike.builder()
+                .post(post)
+                .user(user)
+                .build();
+    }
+
+    private Bookmark createBookmark(final Post post, final User user) {
+        return Bookmark.builder()
                 .post(post)
                 .user(user)
                 .build();
