@@ -106,4 +106,13 @@ public class MessageController {
         log.info("채팅방 접속하여 특정 채팅방의 모든 메세지 불러오기");
         return ApiResponse.ok(chatService.getMessages(roomId, authentication.getName()));
     }
+
+    @GetMapping("/v2/chat/messages/{roomId}")
+    public ApiResponse<List<ChatMessageListResponse>> getMessageListPages(@RequestParam Long lastChatMessageId,
+                                                                          @RequestParam int size,
+                                                                          @PathVariable Long roomId,
+                                                                          Authentication authentication) {
+        log.info("채팅방 접속하여 특정 채팅방의 페이징 후 메세지 불러오기");
+        return ApiResponse.ok(chatService.getMessageListPages(roomId, lastChatMessageId, size, authentication.getName()));
+    }
 }

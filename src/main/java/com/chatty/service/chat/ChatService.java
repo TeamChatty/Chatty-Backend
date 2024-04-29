@@ -17,6 +17,8 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,6 +110,36 @@ public class ChatService {
 //        }
 
         List<ChatMessageListResponse> result = chatMessageList.stream()
+                .map(m -> ChatMessageListResponse.of(m, you))
+                .toList();
+
+        return result;
+    }
+
+    @Transactional
+    public List<ChatMessageListResponse> getMessageListPages(final Long roomId,
+                                                             final Long lastChatMessageId,
+                                                             final int size,
+                                                             final String mobileNumber) {
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
+                .orElseThrow(() -> new CustomException(Code.NOT_FOUND_CHAT_ROOM));
+
+        User me = userRepository.findUserByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+        if (!chatRoom.getSender().equals(me) && !chatRoom.getReceiver().equals(me)) {
+            throw new CustomException(Code.NOT_IN_USER_ROOM);
+        }
+
+        // chatRoom 에는 2명이 존재하는데, sender, receiver
+        // me 와 sender 같으면 receiver 가 상대방이고, 다르면 sender 가 상대방이다.
+        User you = chatRoom.getSender().equals(me) ? chatRoom.getReceiver() : chatRoom.getSender();
+
+        Page<ChatMessage> chatMessageList =
+                messageRepository.findByChatRoomAndMessageIdLessThanOrderByMessageIdDesc(chatRoom, lastChatMessageId, pageRequest);
+
+        List<ChatMessageListResponse> result = chatMessageList.getContent().stream()
                 .map(m -> ChatMessageListResponse.of(m, you))
                 .toList();
 
