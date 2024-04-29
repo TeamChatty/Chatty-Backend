@@ -43,6 +43,8 @@ public enum Code {
     ALREADY_LIKE_POST(HttpStatus.BAD_REQUEST, "이미 좋아요를 눌렀습니다.", "E034"),
     NOT_EXIST_LIKE_POST(HttpStatus.NOT_FOUND, "좋아요가 존재하지 않습니다.", "E035"),
     AUTH_NUMBER_LIMIT(HttpStatus.BAD_REQUEST, "요청 일일횟수 제한은 5번입니다.", "E036"),
+    ALREADY_EXIST_BOOKMARK(HttpStatus.BAD_REQUEST, "북마크가 이미 존재합니다.","E037"),
+    NOT_FOUND_BOOKMARK(HttpStatus.NOT_FOUND, "북마크가 존재하지 않습니다.", "E038"),
 
     // ratelimit
     TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "너무 많은 요청을 보냈습니다.","E098");
