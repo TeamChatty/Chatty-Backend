@@ -1,7 +1,9 @@
 package com.chatty.service.bookmark;
 
 import com.chatty.constants.Authority;
+import com.chatty.dto.bookmark.response.BookmarkListResponse;
 import com.chatty.dto.bookmark.response.BookmarkResponse;
+import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.entity.bookmark.Bookmark;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.Coordinate;
@@ -127,6 +129,46 @@ class BookmarkServiceTest {
         assertThatThrownBy(() -> bookmarkService.deleteBookmark(post.getId(), user.getMobileNumber()))
                 .isInstanceOf(CustomException.class)
                 .hasMessage("북마크가 존재하지 않습니다.");
+    }
+
+    @DisplayName("북마크한 게시글들을 페이징 처리하여 목록을 불러온다.")
+    @Test
+    void getMyBookmarkListPages() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        User writer = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(user, writer));
+
+        Post post1 = createPost("안녕하세요1", writer);
+        Post post2 = createPost("안녕하세요2", writer);
+        Post post3 = createPost("안녕하세요3", writer);
+        Post post4 = createPost("안녕하세요4", writer);
+        Post post5 = createPost("안녕하세요5", writer);
+        postRepository.saveAll(List.of(post1, post2, post3, post4, post5));
+
+        Bookmark bookmark1 = createBookmark(post5, user);
+        Bookmark bookmark2 = createBookmark(post3, user);
+        Bookmark bookmark3 = createBookmark(post1, user);
+        bookmarkRepository.saveAll(List.of(bookmark1, bookmark2, bookmark3));
+
+        // when
+        List<BookmarkListResponse> bookmarkListResponse =
+                bookmarkService.getMyBookmarkListPages(post5.getId() + 1, 3, user.getMobileNumber());
+        PostListResponse postListResponse1 = bookmarkListResponse.get(0).getPostListResponse();
+        PostListResponse postListResponse2 = bookmarkListResponse.get(1).getPostListResponse();
+        PostListResponse postListResponse3 = bookmarkListResponse.get(2).getPostListResponse();
+
+        // then 북마크를 가장 마지막에 누른 게시글은 post1, 따라서 post1이 제일 처음으로 조회된다.
+        assertThat(bookmarkListResponse).hasSize(3);
+        assertThat(bookmarkListResponse)
+                .extracting("postListResponse")
+                .containsExactly(
+                        postListResponse1, postListResponse2, postListResponse3
+                );
+
+        assertThat(postListResponse1.getPostId()).isEqualTo(post1.getId());
+        assertThat(postListResponse2.getPostId()).isEqualTo(post3.getId());
+        assertThat(postListResponse3.getPostId()).isEqualTo(post5.getId());
     }
 
     private User createUser(final String nickname, final String mobileNumber) {
