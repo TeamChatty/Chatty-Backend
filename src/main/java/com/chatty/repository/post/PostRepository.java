@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     default Post getById(Long id) {
@@ -19,12 +21,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByIdLessThanOrderByIdDesc(Long postId, Pageable pageable);
 
     @Query(value = "select p.*, COUNT(pl.post_like_id) as LikeCount " +
-            "from Post p " +
-            "inner join Post_Like pl on p.post_id = pl.post_id " +
+            "from post p " +
+            "inner join post_like pl on p.post_id = pl.post_id " +
             "group by p.post_id " +
             "having LikeCount < :lastLikeCount " +
             "order by LikeCount Desc, p.post_id Desc", nativeQuery = true)
     Page<Post> customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(Long lastLikeCount, Pageable pageable);
 
     Page<Post> findByUserAndIdLessThanOrderByIdDesc(User user, Long postId, Pageable pageable);
+
+    List<Post> findAllByUserIdNotInOrderByIdDesc(List<Long> users);
 }

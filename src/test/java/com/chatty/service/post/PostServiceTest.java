@@ -5,6 +5,7 @@ import com.chatty.dto.post.request.PostRequest;
 import com.chatty.dto.post.response.PostCreateResponse;
 import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.dto.post.response.PostResponse;
+import com.chatty.entity.block.Block;
 import com.chatty.entity.bookmark.Bookmark;
 import com.chatty.entity.like.PostLike;
 import com.chatty.entity.post.Post;
@@ -12,6 +13,7 @@ import com.chatty.entity.post.PostImage;
 import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
+import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.bookmark.BookmarkRepository;
 import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostImageRepository;
@@ -60,8 +62,12 @@ class PostServiceTest {
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
+    @Autowired
+    private BlockRepository blockRepository;
+
     @AfterEach
     void tearDown() {
+        blockRepository.deleteAllInBatch();
         bookmarkRepository.deleteAllInBatch();
         postLikeRepository.deleteAllInBatch();
         postImageRepository.deleteAllInBatch();
@@ -175,6 +181,70 @@ class PostServiceTest {
                         tuple("내용1", true, false),
                         tuple("내용2", true, false),
                         tuple("내용3", true, false)
+                );
+    }
+
+    @DisplayName("게시글 목록을 조회할 때, 차단한 유저의 게시글은 조회하지 않는다.")
+    @Test
+    void getPostListWithBlockedUser() throws IOException {
+        // given
+        User user = createUser("닉네임", "01012345678");
+        User blocked = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(user, blocked));
+
+        Post post1 = createPost("내용1", user);
+        Post post2 = createPost("내용2", user);
+        Post post3 = createPost("내용3", user);
+        Post post4 = createPost("내용4", blocked);
+        Post post5 = createPost("내용5", blocked);
+        postRepository.saveAll(List.of(post1, post2, post3, post4, post5));
+
+        Block block = createBlock(user, blocked);
+        blockRepository.save(block);
+
+        // when
+        List<PostListResponse> postList = postService.getPostList(user.getMobileNumber());
+
+        // then
+        assertThat(postList).hasSize(3)
+                .extracting("content", "isOwner", "isLike")
+                .containsExactlyInAnyOrder(
+                        tuple("내용1", true, false),
+                        tuple("내용2", true, false),
+                        tuple("내용3", true, false)
+                );
+
+        List<Post> posts = postRepository.findAll();
+        assertThat(posts).hasSize(5);
+    }
+
+    @DisplayName("게시글 목록을 조회할 때, 차단한 유저가 없을 때, 모든 게시글을 다 불러온다.")
+    @Test
+    void getPostListWithoutBlockedUser() throws IOException {
+        // given
+        User user = createUser("닉네임", "01012345678");
+        User blocked = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(user, blocked));
+
+        Post post1 = createPost("내용1", user);
+        Post post2 = createPost("내용2", user);
+        Post post3 = createPost("내용3", user);
+        Post post4 = createPost("내용4", blocked);
+        Post post5 = createPost("내용5", blocked);
+        postRepository.saveAll(List.of(post1, post2, post3, post4, post5));
+
+        // when
+        List<PostListResponse> postList = postService.getPostList(user.getMobileNumber());
+
+        // then
+        assertThat(postList).hasSize(5)
+                .extracting("content", "isOwner", "isLike")
+                .containsExactlyInAnyOrder(
+                        tuple("내용1", true, false),
+                        tuple("내용2", true, false),
+                        tuple("내용3", true, false),
+                        tuple("내용4", false, false),
+                        tuple("내용5", false, false)
                 );
     }
 
@@ -346,6 +416,13 @@ class PostServiceTest {
         return Bookmark.builder()
                 .post(post)
                 .user(user)
+                .build();
+    }
+
+    private Block createBlock(final User blocker, final User blocked) {
+        return Block.builder()
+                .blocker(blocker)
+                .blocked(blocked)
                 .build();
     }
 }

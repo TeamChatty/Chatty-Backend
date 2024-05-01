@@ -149,7 +149,10 @@ class BookmarkServiceTest {
         Bookmark bookmark1 = createBookmark(post5, user);
         Bookmark bookmark2 = createBookmark(post3, user);
         Bookmark bookmark3 = createBookmark(post1, user);
-        bookmarkRepository.saveAll(List.of(bookmark1, bookmark2, bookmark3));
+        bookmarkRepository.save(bookmark1);
+        bookmarkRepository.save(bookmark2);
+        bookmarkRepository.save(bookmark3);
+//        bookmarkRepository.saveAll(List.of(bookmark1, bookmark2, bookmark3));
 
         // when
         List<BookmarkListResponse> bookmarkListResponse =
