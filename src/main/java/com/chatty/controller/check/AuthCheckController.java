@@ -4,7 +4,9 @@ import com.chatty.dto.ApiResponse;
 import com.chatty.dto.check.request.CheckRequestDto;
 import com.chatty.dto.check.request.CompleteRequestDto;
 import com.chatty.dto.check.request.ProblemRequestDto;
-import com.chatty.dto.check.response.CheckCompleteResponseDto;
+import com.chatty.dto.check.request.ProfileRequestDto;
+import com.chatty.dto.check.response.CompleteResponseDto;
+import com.chatty.dto.check.response.ProfileResponseDto;
 import com.chatty.dto.check.response.ProblemResponseDto;
 import com.chatty.service.check.AuthCheckService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -174,8 +175,14 @@ public class AuthCheckController {
             )
     )
     @PostMapping("/complete")
-    public ApiResponse<CheckCompleteResponseDto> complete(@Valid @RequestBody CompleteRequestDto completeRequestDto) {
+    public ApiResponse<CompleteResponseDto> complete(@Valid @RequestBody CompleteRequestDto completeRequestDto) {
         log.info("[AuthCheckController/complete] 계정 확인 완료");
         return ApiResponse.ok(authCheckService.complete(completeRequestDto));
+    }
+
+    @PostMapping("/profile")
+    public ApiResponse<ProfileResponseDto> getProfile(@Valid @RequestBody ProfileRequestDto profileRequestDto) {
+        log.info("[getProfile] 전화번호로 프로필 url 가져오기");
+        return ApiResponse.ok(authCheckService.getProfile(profileRequestDto));
     }
 }

@@ -4,8 +4,10 @@ import com.chatty.constants.Code;
 import com.chatty.dto.check.request.CheckRequestDto;
 import com.chatty.dto.check.request.CompleteRequestDto;
 import com.chatty.dto.check.request.ProblemRequestDto;
-import com.chatty.dto.check.response.CheckCompleteResponseDto;
+import com.chatty.dto.check.request.ProfileRequestDto;
+import com.chatty.dto.check.response.CompleteResponseDto;
 import com.chatty.dto.check.response.ProblemResponseDto;
+import com.chatty.dto.check.response.ProfileResponseDto;
 import com.chatty.entity.check.AuthCheck;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
@@ -96,7 +98,7 @@ public class AuthCheckService {
     }
 
     @Transactional
-    public CheckCompleteResponseDto complete(CompleteRequestDto completeRequestDto) {
+    public CompleteResponseDto complete(CompleteRequestDto completeRequestDto) {
         String mobileNumber = completeRequestDto.getMobileNumber();
         String deviceId = completeRequestDto.getDeviceId();
         User user = userRepository.findUserByMobileNumber(mobileNumber)
@@ -123,6 +125,16 @@ public class AuthCheckService {
         log.info("AuthCheck 데이터 삭제");
         authCheckRepository.deleteAuthCheckByUserId(user.getId());
 
-        return CheckCompleteResponseDto.of(accessToken, refreshToken);
+        return CompleteResponseDto.of(accessToken, refreshToken);
+    }
+
+    public ProfileResponseDto getProfile(final ProfileRequestDto profileRequestDto) {
+
+        log.info("profile 가져오기");
+        String mobileNumber = profileRequestDto.getMobileNumber();
+        User user = userRepository.findUserByMobileNumber(mobileNumber).orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+
+        log.info("imageUrl : {}", user.getImageUrl());
+        return ProfileResponseDto.builder().imageUrl(user.getImageUrl()).build();
     }
 }
