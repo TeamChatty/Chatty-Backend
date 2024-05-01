@@ -5,7 +5,6 @@ import com.chatty.dto.post.request.PostRequest;
 import com.chatty.dto.post.response.PostCreateResponse;
 import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.dto.post.response.PostResponse;
-import com.chatty.entity.block.Block;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.post.PostImage;
 import com.chatty.entity.user.User;
@@ -27,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,7 +89,7 @@ public class PostService {
         User user = userRepository.getByMobileNumber(mobileNumber);
 
         // 로그인 중인 사람 기준으로 차단한 사람을 List<Long> 으로 불러온다.
-        List<Long> blockedIds = blockRepository.findAllByBlocker(user);
+        List<Long> blockedIds = blockRepository.customFindAllByBlocker(user);
 
         List<Post> postList;
         // blockedIds 가 null 인 경우에는 쿼리가 제대로 작동하지 않기 때문에 if 조건이 필요하다.
