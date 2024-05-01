@@ -1,6 +1,7 @@
 package com.chatty.service.block;
 
 import com.chatty.constants.Code;
+import com.chatty.dto.block.response.BlockListResponse;
 import com.chatty.dto.block.response.BlockResponse;
 import com.chatty.entity.block.Block;
 import com.chatty.entity.user.User;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,5 +39,15 @@ public class BlockService {
         Block savedBlock = blockRepository.save(block);
 
         return BlockResponse.of(savedBlock);
+    }
+
+    public List<BlockListResponse> getBlockList(final String mobileNumber) {
+        User blocker = userRepository.getByMobileNumber(mobileNumber);
+
+        List<Block> blockedList = blockRepository.findAllByBlockerOrderById(blocker);
+
+        return blockedList.stream()
+                .map(BlockListResponse::of)
+                .toList();
     }
 }

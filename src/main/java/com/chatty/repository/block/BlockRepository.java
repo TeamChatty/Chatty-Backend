@@ -14,5 +14,7 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
     @Query("select b.blocked.id " +
             "from Block b " +
             "where b.blocker = :blocker")
-    List<Long> findAllByBlocker(User blocker);
+    List<Long> customFindAllByBlocker(User blocker);
+
+    List<Block> findAllByBlockerOrderById(User blocker);
 }
