@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     default Post getById(Long id) {
@@ -27,4 +29,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(Long lastLikeCount, Pageable pageable);
 
     Page<Post> findByUserAndIdLessThanOrderByIdDesc(User user, Long postId, Pageable pageable);
+
+    List<Post> findAllByUserIdNotInOrderByIdDesc(List<Long> users);
 }
