@@ -8,7 +8,7 @@ import com.chatty.constants.Code;
 import com.chatty.dto.check.request.CheckRequestDto;
 import com.chatty.dto.check.request.CompleteRequestDto;
 import com.chatty.dto.check.request.ProblemRequestDto;
-import com.chatty.dto.check.response.CheckCompleteResponseDto;
+import com.chatty.dto.check.response.CompleteResponseDto;
 import com.chatty.dto.check.response.ProblemResponseDto;
 import com.chatty.entity.check.AuthCheck;
 import com.chatty.entity.user.User;
@@ -245,11 +245,11 @@ public class AuthCheckServiceTest {
         when(authCheckRepository.findAuthCheckByUserId(user.getId())).thenReturn(Optional.of(authCheck));
         when(jwtTokenProvider.createAccessToken(any(),any())).thenReturn("abc");
         when(jwtTokenProvider.createRefreshToken(any(),any())).thenReturn("abc");
-        CheckCompleteResponseDto checkCompleteResponseDto = authCheckService.complete(completeRequestDto);
+        CompleteResponseDto completeResponseDto = authCheckService.complete(completeRequestDto);
 
         //then
-        assertThat(checkCompleteResponseDto.getAccessToken()).isNotEmpty();
-        assertThat(checkCompleteResponseDto.getRefreshToken()).isNotEmpty();
+        assertThat(completeResponseDto.getAccessToken()).isNotEmpty();
+        assertThat(completeResponseDto.getRefreshToken()).isNotEmpty();
 
     }
 

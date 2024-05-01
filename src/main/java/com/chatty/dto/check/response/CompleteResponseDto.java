@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class CheckCompleteResponseDto {
+public class CompleteResponseDto {
     private String accessToken;
     private String refreshToken;
 
-    public static CheckCompleteResponseDto of(String accessToken, String refreshToken){
-        return CheckCompleteResponseDto.builder()
+    public static CompleteResponseDto of(String accessToken, String refreshToken){
+        return CompleteResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

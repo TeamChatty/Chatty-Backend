@@ -25,6 +25,7 @@ public class RefreshTokenRepository {
     }
 
     public String findRefreshTokenByDeviceId(String deviceId){
+        log.info("RefreshTokenRepository - findRefreshTokenDeviceId : {}", deviceId);
         ValueOperations<String, String> value = redisTemplate.opsForValue();
         return value.get(deviceId);
     }

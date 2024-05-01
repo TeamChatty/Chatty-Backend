@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 public class AuthNumberRepository {
 
     private final RedisTemplate<String, String> redisTemplateAuthNumber;
-    private static final int EXPIRED_TIME = 5;
+           private static final int EXPIRED_TIME = 5;
     private static final String LIMIT= "limit";
     private static final String LIMIT_FIRST_TIME = "1";
 
