@@ -5,6 +5,7 @@ import com.chatty.dto.check.request.CheckRequestDto;
 import com.chatty.dto.check.request.CompleteRequestDto;
 import com.chatty.dto.check.request.ProblemRequestDto;
 import com.chatty.dto.check.request.ProfileRequestDto;
+import com.chatty.dto.check.response.CheckResponseDto;
 import com.chatty.dto.check.response.CompleteResponseDto;
 import com.chatty.dto.check.response.ProblemResponseDto;
 import com.chatty.dto.check.response.ProfileResponseDto;
@@ -29,6 +30,8 @@ public class AuthCheckService {
 
     private final String NICKNAME = "nickname";
     private final String BIRTH = "birth";
+    private static final String ANSWER = "정답입니다.";
+    private static final String NOT_ANSWER = "틀렸습니다.";
 
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
@@ -58,29 +61,47 @@ public class AuthCheckService {
     }
 
     @Transactional
-    public void checkNickName(CheckRequestDto checkRequestDto) {
+    public CheckResponseDto checkNickName(CheckRequestDto checkRequestDto) {
         String mobileNumber = checkRequestDto.getMobileNumber();
         String nickname = userRepository.findUserByMobileNumber(mobileNumber).orElseThrow(() -> new CustomException(
                 Code.NOT_EXIST_USER)).getNickname();
 
-        if (!nickname.equals(checkRequestDto.getAnswer())) {
-            throw new CustomException(Code.FAIL_AUTH_CHECK);
+        boolean isAnswer = false;
+        String message = NOT_ANSWER;
+
+        if (nickname.equals(checkRequestDto.getAnswer())) {
+            isAnswer = true;
+            message = ANSWER;
         }
 
         updateCheck(mobileNumber, NICKNAME, true);
+
+        return CheckResponseDto.builder()
+                .message(message)
+                .isAnswer(isAnswer)
+                .build();
     }
 
     @Transactional
-    public void checkBirth(CheckRequestDto checkRequestDto) {
+    public CheckResponseDto checkBirth(final CheckRequestDto checkRequestDto) {
         String mobileNumber = checkRequestDto.getMobileNumber();
         String year = String.valueOf(userRepository.findUserByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER)).getBirth().getYear());
 
-        if (!year.equals(checkRequestDto.getAnswer())) {
-            throw new CustomException(Code.FAIL_AUTH_CHECK);
+        boolean isAnswer = false;
+        String message = NOT_ANSWER;
+
+        if(year.equals(checkRequestDto.getAnswer())) {
+            isAnswer = true;
+            message = ANSWER;
         }
 
         updateCheck(mobileNumber, BIRTH, true);
+
+        return CheckResponseDto.builder()
+                .message(message)
+                .isAnswer(isAnswer)
+                .build();
     }
 
     private void updateCheck(String mobileNumber, String kind, Boolean value) {
