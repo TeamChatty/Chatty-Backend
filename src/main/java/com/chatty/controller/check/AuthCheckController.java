@@ -5,6 +5,7 @@ import com.chatty.dto.check.request.CheckRequestDto;
 import com.chatty.dto.check.request.CompleteRequestDto;
 import com.chatty.dto.check.request.ProblemRequestDto;
 import com.chatty.dto.check.request.ProfileRequestDto;
+import com.chatty.dto.check.response.CheckResponseDto;
 import com.chatty.dto.check.response.CompleteResponseDto;
 import com.chatty.dto.check.response.ProfileResponseDto;
 import com.chatty.dto.check.response.ProblemResponseDto;
@@ -77,10 +78,9 @@ public class AuthCheckController {
             )
     )
     @PostMapping("/nickname")
-    public ApiResponse<String> checkNickname(@Valid @RequestBody CheckRequestDto checkRequestDto) {
+    public ApiResponse<CheckResponseDto> checkNickname(@Valid @RequestBody CheckRequestDto checkRequestDto) {
         log.info("[AuthCheckController/checkBirth] 닉네임 확인");
-        authCheckService.checkNickName(checkRequestDto);
-        return ApiResponse.ok("닉네임 확인을 성공했습니다.");
+        return ApiResponse.ok(authCheckService.checkNickName(checkRequestDto));
     }
 
     @Operation(summary = "문제 제공 - 출생 년도", description = "계정확인시, 출생년도에 관련한 문제를 가져옵니다.")
@@ -132,10 +132,9 @@ public class AuthCheckController {
             )
     )
     @PostMapping("/birth")
-    public ApiResponse<String> checkBirth(@Valid @RequestBody CheckRequestDto checkRequestDto) {
+    public ApiResponse<CheckResponseDto> checkBirth(@Valid @RequestBody CheckRequestDto checkRequestDto) {
         log.info("[AuthCheckController/checkBirth] 출생 연도 월일 확인");
-        authCheckService.checkBirth(checkRequestDto);
-        return ApiResponse.ok("출생 연도 확인을 성공했습니다.");
+        return ApiResponse.ok(authCheckService.checkBirth(checkRequestDto));
     }
 
 
