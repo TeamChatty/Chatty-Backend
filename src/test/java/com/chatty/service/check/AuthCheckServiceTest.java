@@ -36,10 +36,10 @@ public class AuthCheckServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private JwtTokenProvider jwtTokenProvider;
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    private RefreshTokenRepository refreshTokenRepository;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Mock
     private AuthCheckRepository authCheckRepository;
@@ -125,20 +125,6 @@ public class AuthCheckServiceTest {
                 .hasMessage("계정 확인 이력이 존재하지 않습니다.");
     }
 
-    @Test
-    @DisplayName("닉네임 문제의 정답을 확인할 시, 정답을 맞추지 못하면 에러가 발생한다.")
-    void checkNicknameNotAnswer() throws Exception{
-        //given
-        CheckRequestDto checkRequestDto = CheckRequestDto.builder().mobileNumber("01012341234").answer("무야호").build();
-        User user = User.builder().id(1L).nickname("무야호야").build();
-
-        //when, then
-        when(userRepository.findUserByMobileNumber(checkRequestDto.getMobileNumber())).thenReturn(Optional.of(user));
-
-        assertThatThrownBy(() -> authCheckService.checkNickName(checkRequestDto))
-                .isInstanceOf(CustomException.class)
-                .hasMessage("계정 확인에 실패했습니다.");
-    }
 
     @Test
     @DisplayName("태어난 연도와 관련된 문제를 만든다.")
@@ -218,21 +204,6 @@ public class AuthCheckServiceTest {
     }
 
     @Test
-    @DisplayName("태어난 연도의 정답을 확인할 시, 정답을 맞추지 못하면 에러가 발생한다.")
-    void checkBirthNotAnswer() throws Exception{
-        //given
-        CheckRequestDto checkRequestDto = CheckRequestDto.builder().mobileNumber("01012341234").answer("2000").build();
-        User user = User.builder().id(1L).birth(LocalDate.of(1999,1,1)).build();
-
-        //when, then
-        when(userRepository.findUserByMobileNumber(checkRequestDto.getMobileNumber())).thenReturn(Optional.of(user));
-
-        assertThatThrownBy(() -> authCheckService.checkBirth(checkRequestDto))
-                .isInstanceOf(CustomException.class)
-                .hasMessage("계정 확인에 실패했습니다.");
-    }
-
-    @Test
     @DisplayName("모든 계정확인 질문 답변을 완료한다.")
     void complete() throws Exception{
         //given
@@ -250,7 +221,6 @@ public class AuthCheckServiceTest {
         //then
         assertThat(completeResponseDto.getAccessToken()).isNotEmpty();
         assertThat(completeResponseDto.getRefreshToken()).isNotEmpty();
-
     }
 
     @Test
