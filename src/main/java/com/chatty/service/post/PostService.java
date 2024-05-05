@@ -109,7 +109,14 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(0, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
-        Page<Post> posts = postRepository.findByIdLessThanOrderByIdDesc(lastPostId, pageRequest);
+        List<Long> blockedIds = blockRepository.customFindAllByBlocker(user);
+
+        Page<Post> posts;
+        if (blockedIds == null || blockedIds.isEmpty()) {
+            posts = postRepository.findByIdLessThanOrderByIdDesc(lastPostId, pageRequest);
+        } else {
+            posts = postRepository.findByIdLessThanAndUserIdNotInOrderByIdDesc(lastPostId, blockedIds, pageRequest);
+        }
 
         return posts.getContent().stream()
                 .map(post -> PostListResponse.of(post, user))
