@@ -95,4 +95,30 @@ public class AlarmService {
                 .map(AlarmListResponse::of)
                 .toList();
     }
+
+    @Transactional
+    public AlarmResponse readAlarm(final Long alarmId, final String mobileNumber) {
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        Alarm alarm = alarmRepository.getById(alarmId);
+
+        if (!alarm.getUser().getId().equals(user.getId())) {
+            throw new CustomException(Code.NOT_EXIST_ALARM);
+        }
+
+        alarm.readAlarm(true);
+
+        return AlarmResponse.of(alarm);
+    }
+
+    @Transactional
+    public void readAllAlarm(final String mobileNumber) {
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        List<Alarm> result = alarmRepository.findAllByUserAndIsReadIsFalse(user);
+
+        for (Alarm alarm : result) {
+            alarm.readAlarm(true);
+        }
+    }
 }

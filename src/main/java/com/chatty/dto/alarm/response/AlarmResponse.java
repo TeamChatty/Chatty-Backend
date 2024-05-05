@@ -21,13 +21,16 @@ public class AlarmResponse {
 
     private Long toUserId;
 
+    private boolean isRead;
+
     @Builder
-    public AlarmResponse(final Long alarmId, final AlarmType alarmType, final String content, final Long fromUserId, final Long toUserId) {
+    public AlarmResponse(final Long alarmId, final AlarmType alarmType, final String content, final Long fromUserId, final Long toUserId, final boolean isRead) {
         this.alarmId = alarmId;
         this.alarmType = alarmType;
         this.content = content;
         this.fromUserId = fromUserId;
         this.toUserId = toUserId;
+        this.isRead = isRead;
     }
 
     public static AlarmResponse of(final Alarm alarm) {
@@ -37,6 +40,7 @@ public class AlarmResponse {
                 .content(alarm.getContent())
                 .fromUserId(alarm.getFromUser())
                 .toUserId(alarm.getUser().getId())
+                .isRead(alarm.isRead())
                 .build();
     }
 }

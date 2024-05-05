@@ -30,4 +30,14 @@ public class AlarmController {
                                                              Authentication authentication) {
         return ApiResponse.ok(alarmService.getAlarmListPages(lastAlarmId, size, authentication.getName()));
     }
+
+    @PutMapping("/v1/alarm/{alarmId}")
+    public ApiResponse<AlarmResponse> readAlarm(@PathVariable Long alarmId, Authentication authentication) {
+        return ApiResponse.ok(alarmService.readAlarm(alarmId, authentication.getName()));
+    }
+
+    @PutMapping("/v1/alarms")
+    public void readAllAlarm(Authentication authentication) {
+        alarmService.readAllAlarm(authentication.getName());
+    }
 }
