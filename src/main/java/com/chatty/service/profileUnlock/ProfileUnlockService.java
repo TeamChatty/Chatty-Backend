@@ -9,6 +9,7 @@ import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
 import com.chatty.repository.profileUnlock.ProfileUnlockRepository;
 import com.chatty.repository.user.UserRepository;
+import com.chatty.service.alarm.AlarmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class ProfileUnlockService {
 
     private final ProfileUnlockRepository profileUnlockRepository;
     private final UserRepository userRepository;
+    private final AlarmService alarmService;
 
     @Transactional
     public ProfileUnlockResponse unlockProfile(final Long unlockedUserId, final String mobileNumber, final ProfileUnlockRequest request, final LocalDateTime now) {
@@ -53,6 +55,8 @@ public class ProfileUnlockService {
 
         ProfileUnlock profileUnlock = request.toEntity(unlocker, unlockedUser, now);
         profileUnlockRepository.save(profileUnlock);
+
+        alarmService.createProfileAlarm(unlocker.getId(), unlocker.getNickname(), unlockedUser);
 
         return ProfileUnlockResponse.of(profileUnlock);
     }
