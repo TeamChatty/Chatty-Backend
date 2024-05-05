@@ -1,6 +1,7 @@
 package com.chatty.repository.auth;
 
 import com.chatty.utils.redis.RedisUtils;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public class AuthNumberRepository {
 
     private final RedisTemplate<String, String> redisTemplateAuthNumber;
-           private static final int EXPIRED_TIME = 5;
+    private static final int EXPIRED_TIME = 5;
     private static final String LIMIT= "limit";
     private static final String LIMIT_FIRST_TIME = "1";
 
@@ -33,6 +34,10 @@ public class AuthNumberRepository {
 
     public void updateAuthLimitNumber(String key, String limitValue) {
         redisTemplateAuthNumber.opsForValue().set(makeKey(key), String.valueOf(Integer.valueOf(limitValue) + 1));
+    }
+
+    public void resetData() {
+        redisTemplateAuthNumber.delete(redisTemplateAuthNumber.keys("*")); // 모든 데이터 삭제
     }
 
     public String findAuthLimitNumber(String key) {

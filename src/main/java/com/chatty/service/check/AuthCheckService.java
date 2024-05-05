@@ -63,8 +63,8 @@ public class AuthCheckService {
     @Transactional
     public CheckResponseDto checkNickName(CheckRequestDto checkRequestDto) {
         String mobileNumber = checkRequestDto.getMobileNumber();
-        String nickname = userRepository.findUserByMobileNumber(mobileNumber).orElseThrow(() -> new CustomException(
-                Code.NOT_EXIST_USER)).getNickname();
+        String nickname = userRepository.findNicknameByMobileNumber(mobileNumber).orElseThrow(() -> new CustomException(
+                Code.NOT_EXIST_USER));
 
         boolean isAnswer = false;
         String message = NOT_ANSWER;

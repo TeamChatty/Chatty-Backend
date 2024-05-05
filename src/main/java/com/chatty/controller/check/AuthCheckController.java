@@ -79,7 +79,7 @@ public class AuthCheckController {
     )
     @PostMapping("/nickname")
     public ApiResponse<CheckResponseDto> checkNickname(@Valid @RequestBody CheckRequestDto checkRequestDto) {
-        log.info("[AuthCheckController/checkBirth] 닉네임 확인");
+        log.info("[AuthCheckController/checkNickname] 닉네임 확인");
         return ApiResponse.ok(authCheckService.checkNickName(checkRequestDto));
     }
 
