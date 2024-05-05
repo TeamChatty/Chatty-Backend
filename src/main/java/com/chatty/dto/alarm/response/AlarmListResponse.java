@@ -27,8 +27,10 @@ public class AlarmListResponse {
 
     private String content;
 
+    private boolean isRead;
+
     @Builder
-    public AlarmListResponse(final Long alarmId, final Long postId, final Long commentId, final Long fromUserId, final LocalDateTime registeredDateTime, final AlarmType alarmType, final String content) {
+    public AlarmListResponse(final Long alarmId, final Long postId, final Long commentId, final Long fromUserId, final LocalDateTime registeredDateTime, final AlarmType alarmType, final String content, final boolean isRead) {
         this.alarmId = alarmId;
         this.postId = postId;
         this.commentId = commentId;
@@ -36,6 +38,7 @@ public class AlarmListResponse {
         this.registeredDateTime = registeredDateTime;
         this.alarmType = alarmType;
         this.content = content;
+        this.isRead = isRead;
     }
 
     public static AlarmListResponse of(final Alarm alarm) {
@@ -47,6 +50,7 @@ public class AlarmListResponse {
                 .fromUserId(alarm.getFromUser())
                 .registeredDateTime(alarm.getCreatedAt())
                 .content(alarm.getContent())
+                .isRead(alarm.isRead())
                 .build();
     }
 }

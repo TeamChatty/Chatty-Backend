@@ -45,4 +45,8 @@ public class Alarm extends BaseTimeEntity {
         this.postId = postId;
         this.commentId = commentId;
     }
+
+    public void readAlarm(final boolean read) {
+        this.isRead = read;
+    }
 }

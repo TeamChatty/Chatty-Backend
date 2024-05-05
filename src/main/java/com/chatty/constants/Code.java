@@ -46,6 +46,7 @@ public enum Code {
     ALREADY_EXIST_BOOKMARK(HttpStatus.BAD_REQUEST, "북마크가 이미 존재합니다.","E037"),
     NOT_FOUND_BOOKMARK(HttpStatus.NOT_FOUND, "북마크가 존재하지 않습니다.", "E038"),
     ALREADY_BLOCK_USER(HttpStatus.CONFLICT, "이미 차단한 유저입니다.", "E039"),
+    NOT_EXIST_ALARM(HttpStatus.NOT_FOUND, "존재하지 않는 알람입니다.", "E040"),
 
     // ratelimit
     TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "너무 많은 요청을 보냈습니다.","E098");
