@@ -31,4 +31,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUserAndIdLessThanOrderByIdDesc(User user, Long postId, Pageable pageable);
 
     List<Post> findAllByUserIdNotInOrderByIdDesc(List<Long> users);
+
+    Page<Post> findByIdLessThanAndUserIdNotInOrderByIdDesc(Long postId, List<Long> users, Pageable pageable);
 }
