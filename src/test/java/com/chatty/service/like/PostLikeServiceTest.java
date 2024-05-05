@@ -8,6 +8,7 @@ import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
@@ -40,8 +41,12 @@ class PostLikeServiceTest {
     @Autowired
     private PostLikeRepository postLikeRepository;
 
+    @Autowired
+    private AlarmRepository alarmRepository;
+
     @AfterEach
     void tearDown() {
+        alarmRepository.deleteAllInBatch();
         postLikeRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();

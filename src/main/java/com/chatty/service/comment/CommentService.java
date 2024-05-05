@@ -11,6 +11,7 @@ import com.chatty.entity.user.User;
 import com.chatty.repository.comment.CommentRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
+import com.chatty.service.alarm.AlarmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final AlarmService alarmService;
 
     @Transactional
     public CommentResponse createComment(final Long postId, final CommentCreateRequest request, final String mobileNumber) {
@@ -36,6 +38,9 @@ public class CommentService {
         User user = userRepository.getByMobileNumber(mobileNumber);
 
         Comment comment = commentRepository.save(request.toEntity(post, user));
+
+        alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser(), comment.getId());
+
         return CommentResponse.of(comment, post, user);
     }
 

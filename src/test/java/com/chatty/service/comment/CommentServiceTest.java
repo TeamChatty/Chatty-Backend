@@ -11,6 +11,7 @@ import com.chatty.entity.post.Post;
 import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
+import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.comment.CommentRepository;
 import com.chatty.repository.post.PostImageRepository;
 import com.chatty.repository.post.PostRepository;
@@ -44,8 +45,12 @@ class CommentServiceTest {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private AlarmRepository alarmRepository;
+
     @AfterEach
     void tearDown() {
+        alarmRepository.deleteAllInBatch();
         commentRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();

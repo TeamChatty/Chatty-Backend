@@ -9,6 +9,7 @@ import com.chatty.exception.CustomException;
 import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
+import com.chatty.service.alarm.AlarmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class PostLikeService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
+    private final AlarmService alarmService;
 
     @Transactional
     public PostLikeResponse likePost(final Long postId, final String mobileNumber) {
@@ -38,6 +40,8 @@ public class PostLikeService {
                 .post(post)
                 .user(user)
                 .build());
+
+        alarmService.createLikeAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser());
 
         return PostLikeResponse.of(postLike);
     }
