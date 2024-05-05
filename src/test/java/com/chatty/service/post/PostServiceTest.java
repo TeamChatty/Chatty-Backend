@@ -320,6 +320,38 @@ class PostServiceTest {
                 );
     }
 
+    @DisplayName("게시글 목록을 페이징 처리하여 조회할 때, 차단한 유저의 게시글은 제외한다.")
+    @Test
+    void getPostListPagesWithBlockedUser() throws IOException {
+        // given
+        User user = createUser("닉네임", "01012345678");
+        User blocked = createUser("닉네임2", "01011112222");
+        userRepository.saveAll(List.of(user, blocked));
+
+        Post post1 = createPost("내용1", user);
+        Post post2 = createPost("내용2", user);
+        Post post3 = createPost("내용3", user);
+        Post post4 = createPost("내용4", blocked);
+        Post post5 = createPost("내용5", blocked);
+        Post post6 = createPost("내용6", blocked);
+        postRepository.saveAll(List.of(post1, post2, post3, post4, post5, post6));
+
+        Block block = createBlock(user, blocked);
+        blockRepository.save(block);
+
+        // when
+        List<PostListResponse> postList = postService.getPostListPages(post5.getId(), 4, user.getMobileNumber());
+
+        // then
+        assertThat(postList).hasSize(3)
+                .extracting("postId", "content")
+                .containsExactlyInAnyOrder(
+                        tuple(post1.getId(), "내용1"),
+                        tuple(post2.getId(), "내용2"),
+                        tuple(post3.getId(), "내용3")
+                );
+    }
+
     @DisplayName("게시글 목록을 좋아요 높은 순으로 정렬, 페이징 처리하여 조회한다. 좋아요 개수를 기준으로 No-Offset")
     @Test
     void getPostListPagesOrderByTopLiked() throws IOException {
