@@ -8,6 +8,7 @@ import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.ProfileUnlock;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.profileUnlock.ProfileUnlockRepository;
 import com.chatty.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -34,8 +35,12 @@ class ProfileUnlockServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AlarmRepository alarmRepository;
+
     @AfterEach
     void tearDown() {
+        alarmRepository.deleteAllInBatch();
         profileUnlockRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
     }
