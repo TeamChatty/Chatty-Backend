@@ -2,7 +2,6 @@ package com.chatty.controller.auth;
 
 import com.chatty.dto.ApiResponse;
 import com.chatty.dto.auth.request.AuthRequestDto;
-import com.chatty.dto.auth.request.CheckTokenDto;
 import com.chatty.dto.auth.response.AuthResponseDto;
 import com.chatty.dto.sms.request.UserSmsRequestDto;
 import com.chatty.dto.sms.response.SmsUserResponseDto;

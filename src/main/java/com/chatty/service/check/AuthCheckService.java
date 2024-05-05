@@ -46,8 +46,12 @@ public class AuthCheckService {
                 Code.NOT_EXIST_USER));
         String nickname = user.getNickname();
 
-        AuthCheck authCheck = AuthCheck.of(user.getId(), false, false);
-        authCheckRepository.save(authCheck);
+        AuthCheck authCheck = authCheckRepository.findAuthCheckByUserId(user.getId()).orElse(null);
+
+        if(authCheck == null) {
+            AuthCheck newAuthCheck = AuthCheck.of(user.getId(), false, false);
+            authCheckRepository.save(newAuthCheck);
+        }
 
         return ProblemResponseDto.of(CheckUtils.createNicknameProblem(nickname));
     }
@@ -74,7 +78,7 @@ public class AuthCheckService {
             message = ANSWER;
         }
 
-        updateCheck(mobileNumber, NICKNAME, true);
+        updateCheck(mobileNumber, NICKNAME, isAnswer);
 
         return CheckResponseDto.builder()
                 .message(message)
@@ -96,7 +100,7 @@ public class AuthCheckService {
             message = ANSWER;
         }
 
-        updateCheck(mobileNumber, BIRTH, true);
+        updateCheck(mobileNumber, BIRTH, isAnswer);
 
         return CheckResponseDto.builder()
                 .message(message)
