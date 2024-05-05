@@ -18,6 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByMobileNumber(String mobileNumber);
 
+    @Query("select u.nickname from User u where u.mobileNumber = :mobileNumber")
+    Optional<String> findNicknameByMobileNumber(String mobileNumber);
+
     Boolean existsUserByMobileNumber(String mobileNumber);
 
     Optional<User> findUserById(long id);
