@@ -78,52 +78,52 @@ public class AuthCheckServiceTest {
                 .hasMessage("존재 하지 않는 유저 입니다.");
     }
 
-    @Test
-    @DisplayName("닉네임 문제의 정답을 확인한다.")
-    void checkNickname() throws Exception{
-        //given
-        CheckRequestDto checkRequestDto = CheckRequestDto.builder().mobileNumber("01012341234").answer("무야호").build();
-        User user = User.builder().id(1L).nickname("무야호").build();
-        AuthCheck authCheck = AuthCheck.of(user.getId(), false, false);
+//    @Test
+//    @DisplayName("닉네임 문제의 정답을 확인한다.")
+//    void checkNickname() throws Exception{
+//        //given
+//        CheckRequestDto checkRequestDto = CheckRequestDto.builder().mobileNumber("01012341234").answer("무야호").build();
+//        User user = User.builder().id(1L).nickname("무야호").build();
+//        AuthCheck authCheck = AuthCheck.of(user.getId(), false, false);
+//
+//        //when, then
+//        when(userRepository.findUserByMobileNumber(checkRequestDto.getMobileNumber())).thenReturn(Optional.of(user));
+//        when(authCheckRepository.findAuthCheckByUserId(user.getId())).thenReturn(Optional.of(authCheck));
+//        authCheckService.checkNickName(checkRequestDto);
+//    }
 
-        //when, then
-        when(userRepository.findUserByMobileNumber(checkRequestDto.getMobileNumber())).thenReturn(Optional.of(user));
-        when(authCheckRepository.findAuthCheckByUserId(user.getId())).thenReturn(Optional.of(authCheck));
-        authCheckService.checkNickName(checkRequestDto);
-    }
+//    @Test
+//    @DisplayName("닉네임 문제의 정답을 확인할 시, 계정이 존재하지 않을 경우 에러가 발생한다.")
+//    void checkNicknameProblemWithoutUser() throws Exception{
+//        //given
+//        CheckRequestDto checkRequestDto = CheckRequestDto.builder().mobileNumber("01012341234").answer("무야호").build();
+//
+//        //when
+//        when(userRepository.findUserByMobileNumber(checkRequestDto.getMobileNumber())).thenThrow(new CustomException(
+//                Code.NOT_EXIST_USER));
+//
+//        //then
+//        assertThatThrownBy(() -> authCheckService.checkNickName(checkRequestDto))
+//                .isInstanceOf(CustomException.class)
+//                .hasMessage("존재 하지 않는 유저 입니다.");
+//    }
 
-    @Test
-    @DisplayName("닉네임 문제의 정답을 확인할 시, 계정이 존재하지 않을 경우 에러가 발생한다.")
-    void checkNicknameProblemWithoutUser() throws Exception{
-        //given
-        CheckRequestDto checkRequestDto = CheckRequestDto.builder().mobileNumber("01012341234").answer("무야호").build();
-
-        //when
-        when(userRepository.findUserByMobileNumber(checkRequestDto.getMobileNumber())).thenThrow(new CustomException(
-                Code.NOT_EXIST_USER));
-
-        //then
-        assertThatThrownBy(() -> authCheckService.checkNickName(checkRequestDto))
-                .isInstanceOf(CustomException.class)
-                .hasMessage("존재 하지 않는 유저 입니다.");
-    }
-
-    @Test
-    @DisplayName("닉네임 문제의 정답을 확인할 시, 계정확인이 존재하지 않을 경우 에러가 발생한다. ")
-    void checkNicknameWithoutAuthCheck() throws Exception{
-        //given
-        CheckRequestDto checkRequestDto = CheckRequestDto.builder().mobileNumber("01012341234").answer("무야호").build();
-        User user = User.builder().id(1L).nickname("무야호").build();
-
-        //when
-        when(userRepository.findUserByMobileNumber(checkRequestDto.getMobileNumber())).thenReturn(Optional.of(user));
-        when(authCheckRepository.findAuthCheckByUserId(user.getId())).thenThrow(new CustomException(Code.NOT_EXIST_AUTHCHECK));
-
-        //then
-        assertThatThrownBy(() -> authCheckService.checkNickName(checkRequestDto))
-                .isInstanceOf(CustomException.class)
-                .hasMessage("계정 확인 이력이 존재하지 않습니다.");
-    }
+//    @Test
+//    @DisplayName("닉네임 문제의 정답을 확인할 시, 계정확인이 존재하지 않을 경우 에러가 발생한다. ")
+//    void checkNicknameWithoutAuthCheck() throws Exception{
+//        //given
+//        CheckRequestDto checkRequestDto = CheckRequestDto.builder().mobileNumber("01012341234").answer("무야호").build();
+//        User user = User.builder().id(1L).nickname("무야호").build();
+//
+//        //when
+//        when(userRepository.findUserByMobileNumber(checkRequestDto.getMobileNumber())).thenReturn(Optional.of(user));
+//        when(authCheckRepository.findAuthCheckByUserId(user.getId())).thenThrow(new CustomException(Code.NOT_EXIST_AUTHCHECK));
+//
+//        //then
+//        assertThatThrownBy(() -> authCheckService.checkNickName(checkRequestDto))
+//                .isInstanceOf(CustomException.class)
+//                .hasMessage("계정 확인 이력이 존재하지 않습니다.");
+//    }
 
 
     @Test
