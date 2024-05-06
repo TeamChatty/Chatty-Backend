@@ -2,6 +2,7 @@ package com.chatty.service.like;
 
 import com.chatty.constants.Authority;
 import com.chatty.dto.like.response.PostLikeResponse;
+import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
 import com.chatty.entity.like.PostLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.Coordinate;
@@ -12,12 +13,14 @@ import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
+import com.chatty.service.notification.NotificationReceiveService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +28,8 @@ import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class PostLikeServiceTest {
@@ -44,6 +49,9 @@ class PostLikeServiceTest {
     @Autowired
     private AlarmRepository alarmRepository;
 
+    @MockBean
+    private NotificationReceiveService notificationReceiveService;
+
     @AfterEach
     void tearDown() {
         alarmRepository.deleteAllInBatch();
@@ -62,6 +70,15 @@ class PostLikeServiceTest {
 
         Post post = createPost("내용", writer);
         postRepository.save(post);
+
+        // stubbing
+        when(notificationReceiveService.getNotificationReceive(any(String.class)))
+                .thenReturn(NotificationReceiveResponse.builder()
+                        .userId(post.getId())
+                        .feedNotification(false)
+                        .marketingNotification(false)
+                        .chattingNotification(false)
+                        .build());
 
         // when
         PostLikeResponse postLikeResponse = postLikeService.likePost(post.getId(), user.getMobileNumber());
