@@ -1,6 +1,7 @@
 package com.chatty.service.profileUnlock;
 
 import com.chatty.constants.Authority;
+import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
 import com.chatty.dto.profileUnlock.request.ProfileUnlockRequest;
 import com.chatty.dto.profileUnlock.response.ProfileUnlockResponse;
 import com.chatty.dto.user.response.UserProfileResponse;
@@ -11,17 +12,21 @@ import com.chatty.exception.CustomException;
 import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.profileUnlock.ProfileUnlockRepository;
 import com.chatty.repository.user.UserRepository;
+import com.chatty.service.notification.NotificationReceiveService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class ProfileUnlockServiceTest {
@@ -37,6 +42,9 @@ class ProfileUnlockServiceTest {
 
     @Autowired
     private AlarmRepository alarmRepository;
+
+    @MockBean
+    private NotificationReceiveService notificationReceiveService;
 
     @AfterEach
     void tearDown() {
@@ -57,6 +65,15 @@ class ProfileUnlockServiceTest {
         ProfileUnlockRequest request = ProfileUnlockRequest.builder()
                 .unlockMethod("candy")
                 .build();
+
+        // stubbing
+        when(notificationReceiveService.getNotificationReceive(any(String.class)))
+                .thenReturn(NotificationReceiveResponse.builder()
+                        .userId(unlockedUser.getId())
+                        .feedNotification(false)
+                        .marketingNotification(false)
+                        .chattingNotification(false)
+                        .build());
 
         // when
         ProfileUnlockResponse profileUnlockResponse = profileUnlockService.unlockProfile(unlockedUser.getId(), unlocker.getMobileNumber(), request, now);
@@ -125,6 +142,15 @@ class ProfileUnlockServiceTest {
         ProfileUnlockRequest request = ProfileUnlockRequest.builder()
                 .unlockMethod("ticket")
                 .build();
+
+        // stubbing
+        when(notificationReceiveService.getNotificationReceive(any(String.class)))
+                .thenReturn(NotificationReceiveResponse.builder()
+                        .userId(unlockedUser.getId())
+                        .feedNotification(false)
+                        .marketingNotification(false)
+                        .chattingNotification(false)
+                        .build());
 
         // when
         ProfileUnlockResponse profileUnlockResponse = profileUnlockService.unlockProfile(unlockedUser.getId(), unlocker.getMobileNumber(), request, now);
