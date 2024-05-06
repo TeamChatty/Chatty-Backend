@@ -39,7 +39,9 @@ public class CommentService {
 
         Comment comment = commentRepository.save(request.toEntity(post, user));
 
-        alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser(), comment.getId());
+        if (!post.getUser().getId().equals(user.getId())) {
+            alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser(), comment.getId());
+        }
 
         return CommentResponse.of(comment, post, user);
     }
@@ -53,6 +55,15 @@ public class CommentService {
         Comment parent = commentRepository.getById(commentId);
 
         Comment comment = commentRepository.save(request.toEntity(post, user, parent));
+
+        if (!parent.getUser().getId().equals(user.getId())) {
+            alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), parent.getUser(), comment.getId());
+        }
+
+        if (!post.getUser().getId().equals(user.getId())) {
+            alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser(), comment.getId());
+        }
+
         return CommentResponse.of(comment, post, user);
     }
 

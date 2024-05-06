@@ -121,4 +121,12 @@ public class AlarmService {
             alarm.readAlarm(true);
         }
     }
+
+    @Transactional
+    public void deleteAlarm(final Long userId) {
+        Alarm alarm = alarmRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_ALARM));
+
+        alarmRepository.delete(alarm);
+    }
 }

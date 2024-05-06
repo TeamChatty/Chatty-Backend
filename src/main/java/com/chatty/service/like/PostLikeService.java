@@ -41,7 +41,9 @@ public class PostLikeService {
                 .user(user)
                 .build());
 
-        alarmService.createLikeAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser());
+        if (!post.getUser().getId().equals(user.getId())) {
+            alarmService.createLikeAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser());
+        }
 
         return PostLikeResponse.of(postLike);
     }
