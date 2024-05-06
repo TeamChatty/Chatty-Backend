@@ -1,6 +1,7 @@
 package com.chatty.service.profileUnlock;
 
 import com.chatty.constants.Code;
+import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
 import com.chatty.dto.profileUnlock.request.ProfileUnlockRequest;
 import com.chatty.dto.profileUnlock.response.ProfileUnlockResponse;
 import com.chatty.dto.user.response.UserProfileResponse;
@@ -10,6 +11,8 @@ import com.chatty.exception.CustomException;
 import com.chatty.repository.profileUnlock.ProfileUnlockRepository;
 import com.chatty.repository.user.UserRepository;
 import com.chatty.service.alarm.AlarmService;
+import com.chatty.service.fcm.FcmService;
+import com.chatty.service.notification.NotificationReceiveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,9 @@ public class ProfileUnlockService {
     private final ProfileUnlockRepository profileUnlockRepository;
     private final UserRepository userRepository;
     private final AlarmService alarmService;
+
+    private final NotificationReceiveService notificationReceiveService;
+    private final FcmService fcmService;
 
     @Transactional
     public ProfileUnlockResponse unlockProfile(final Long unlockedUserId, final String mobileNumber, final ProfileUnlockRequest request, final LocalDateTime now) {
@@ -57,6 +63,13 @@ public class ProfileUnlockService {
         profileUnlockRepository.save(profileUnlock);
 
         alarmService.createProfileAlarm(unlocker.getId(), unlocker.getNickname(), unlockedUser);
+
+        NotificationReceiveResponse notificationReceiveResponse =
+                notificationReceiveService.getNotificationReceive(unlockedUser.getMobileNumber());
+
+        if (notificationReceiveResponse.isFeedNotification()) {
+            fcmService.sendNotificationWithProfileUnlock(unlockedUser, unlocker);
+        }
 
         return ProfileUnlockResponse.of(profileUnlock);
     }

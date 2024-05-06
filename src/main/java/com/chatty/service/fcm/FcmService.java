@@ -36,4 +36,68 @@ public class FcmService {
 
         return firebaseMessaging.send(message);
     }
+
+    public void sendNotificationWithComment(final User postWriter, final User commentWriter, final String content) {
+        if (existDeviceToken(postWriter)) return;
+        Notification notification = Notification.builder()
+                .setTitle(commentWriter.getNickname() + "님이 댓글을 남겼습니다.")
+                .setBody(content)
+                .build();
+
+        Message message = Message.builder()
+                .setToken(postWriter.getDeviceToken())
+                .setNotification(notification)
+                .build();
+
+        try {
+            firebaseMessaging.send(message);
+        } catch (FirebaseMessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendNotificationWithPostLike(final User postWriter, final User commentWriter) {
+        if (existDeviceToken(postWriter)) return;
+        Notification notification = Notification.builder()
+                .setTitle(commentWriter.getNickname())
+                .setBody("회원님의 게시글을 좋아합니다.")
+                .build();
+
+        Message message = Message.builder()
+                .setToken(postWriter.getDeviceToken())
+                .setNotification(notification)
+                .build();
+
+        try {
+            firebaseMessaging.send(message);
+        } catch (FirebaseMessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendNotificationWithProfileUnlock(final User postWriter, final User commentWriter) {
+        if (existDeviceToken(postWriter)) return;
+        Notification notification = Notification.builder()
+                .setTitle(commentWriter.getNickname())
+                .setBody("회원님의 프로필 잠금을 해제했습니다.")
+                .build();
+
+        Message message = Message.builder()
+                .setToken(postWriter.getDeviceToken())
+                .setNotification(notification)
+                .build();
+
+        try {
+            firebaseMessaging.send(message);
+        } catch (FirebaseMessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean existDeviceToken(final User postWriter) {
+        if (postWriter.getDeviceToken() == null) {
+            return true;
+        }
+        return false;
+    }
 }
