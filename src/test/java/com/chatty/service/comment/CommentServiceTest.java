@@ -140,6 +140,40 @@ class CommentServiceTest {
                 );
     }
 
+    @DisplayName("등록된 댓글 목록을 조회한다. 좋아요 개수 및 여부, 댓글 작성자 여부를 알 수 있다.")
+    @Test
+    void getCommentListWithIsLikeAndIsOwner() {
+        // given
+        User user = createUser("닉네임", "01012345678");
+        User user2 = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(user, user2));
+
+        Post post = createPost("내용", user);
+        postRepository.save(post);
+
+        Comment comment1 = createComment(post, user, "내용1", null);
+        Comment comment2 = createComment(post, user, "내용2", null);
+        Comment comment3 = createComment(post, user, "내용3", null);
+        Comment comment4 = createComment(post, user2, "내용4", null);
+        Comment comment5 = createComment(post, user2, "내용5", null);
+        commentRepository.saveAll(List.of(comment1, comment2, comment3, comment4, comment5));
+
+        // when
+        List<CommentListResponse> commentList = commentService.getCommentList(post.getId(), user.getMobileNumber());
+
+        // then
+        assertThat(commentList).hasSize(5);
+        assertThat(commentList)
+                .extracting("postId", "userId", "content", "childCount", "likeCount", "isLike", "isOwner")
+                .containsExactlyInAnyOrder(
+                        tuple(post.getId(), user.getId(), "내용1", 0, 0L, false, true),
+                        tuple(post.getId(), user.getId(), "내용2", 0, 0L, false, true),
+                        tuple(post.getId(), user.getId(), "내용3", 0, 0L, false, true),
+                        tuple(post.getId(), user2.getId(), "내용4", 0, 0L, false, false),
+                        tuple(post.getId(), user2.getId(), "내용5", 0, 0L, false, false)
+                );
+    }
+
     @DisplayName("등록된 댓글 목록을 조회할 때, 대댓글이 존재하면 개수만큼 childCount가 존재한다.")
     @Test
     void getCommentListWithChildCount() {
