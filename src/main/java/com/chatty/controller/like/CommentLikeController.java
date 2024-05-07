@@ -5,6 +5,7 @@ import com.chatty.dto.like.response.CommentLikeResponse;
 import com.chatty.service.like.CommentLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,5 +20,11 @@ public class CommentLikeController {
     public ApiResponse<CommentLikeResponse> likeComment(@PathVariable Long commentId,
                                                         Authentication authentication) {
         return ApiResponse.ok(commentLikeService.likeComment(commentId, authentication.getName()));
+    }
+
+    @DeleteMapping("/v1/comment-like/{commentId}")
+    public ApiResponse<CommentLikeResponse> unlikeComment(@PathVariable Long commentId,
+                                                          Authentication authentication) {
+        return ApiResponse.ok(commentLikeService.unlikeComment(commentId, authentication.getName()));
     }
 }
