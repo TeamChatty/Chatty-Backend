@@ -91,12 +91,12 @@ public class CommentService {
     public List<CommentListResponse> getCommentList(final Long postId, final String mobileNumber) {
 //        Post post = postRepository.getById(postId);
 
-//        User user = userRepository.getByMobileNumber(mobileNumber);
+        User user = userRepository.getByMobileNumber(mobileNumber);
 
         List<Comment> result = commentRepository.findAllByPostIdAndParentIsNullOrderByIdDesc(postId);
 
         return result.stream()
-                .map(CommentListResponse::of)
+                .map(comment -> CommentListResponse.of(comment, user))
                 .collect(Collectors.toList());
     }
 
