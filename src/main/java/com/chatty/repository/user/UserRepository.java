@@ -43,4 +43,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
         return findUserByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
     }
+
+    default User getById(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+    }
 }
