@@ -118,14 +118,14 @@ public class CommentService {
     public List<CommentReplyListResponse> getCommentReplyList(final Long postId, final Long commentId, final String mobileNumber) {
 //        Post post = postRepository.getById(postId);
 
-//        User user = userRepository.getByMobileNumber(mobileNumber);
+        User user = userRepository.getByMobileNumber(mobileNumber);
 
 //        Comment comment = commentRepository.getById(commentId);
 
         List<Comment> result = commentRepository.findAllByParentIdOrderByIdAsc(commentId);
 
         return result.stream()
-                .map(CommentReplyListResponse::of)
+                .map(comment -> CommentReplyListResponse.of(comment, user))
                 .collect(Collectors.toList());
     }
 }
