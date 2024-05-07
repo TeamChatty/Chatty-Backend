@@ -272,6 +272,38 @@ class CommentServiceTest {
                 );
     }
 
+    @DisplayName("등록된 댓글의 대댓글 목록을 조회한다. 좋아요 개수 및 여부, 작성자 여부를 알 수 있다.")
+    @Test
+    void getCommentReplyListWithIsLikeAndIsOwner() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        User user2 = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(user, user2));
+
+        Post post = createPost("내용", user);
+        postRepository.save(post);
+
+        Comment comment = createComment(post, user, "내용1", null);
+        commentRepository.save(comment);
+
+        Comment reply1 = createComment(post, user, "대댓글1", comment);
+        Comment reply2 = createComment(post, user2, "대댓글2", comment);
+        commentRepository.saveAll(List.of(reply1, reply2));
+
+        // when
+        List<CommentReplyListResponse> commentReplyList =
+                commentService.getCommentReplyList(post.getId(), comment.getId(), user.getMobileNumber());
+
+        // then
+        assertThat(commentReplyList).hasSize(2);
+        assertThat(commentReplyList)
+                .extracting("postId", "userId", "commentId", "content", "parentId", "likeCount", "isLike", "isOwner")
+                .containsExactlyInAnyOrder(
+                        tuple(post.getId(), user.getId(), reply1.getId(), "대댓글1", comment.getId(), 0L, false, true),
+                        tuple(post.getId(), user2.getId(), reply2.getId(), "대댓글2", comment.getId(), 0L, false, false)
+                );
+    }
+
     private User createUser(final String nickname, final String mobileNumber) {
         return User.builder()
                 .mobileNumber(mobileNumber)
