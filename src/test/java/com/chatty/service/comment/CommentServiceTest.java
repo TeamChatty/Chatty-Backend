@@ -174,6 +174,39 @@ class CommentServiceTest {
                 );
     }
 
+    @DisplayName("등록된 댓글을 페이징 처리하여 조회한다. 마지막 댓글은4, 사이즈는 3이다.")
+    @Test
+    void getCommentListPages() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        User user2 = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(user, user2));
+
+        Post post = createPost("내용", user);
+        postRepository.save(post);
+
+        Comment comment1 = createComment(post, user, "내용1", null);
+        Comment comment2 = createComment(post, user, "내용2", null);
+        Comment comment3 = createComment(post, user2, "내용3", null);
+        Comment comment4 = createComment(post, user2, "내용4", null);
+        Comment comment5 = createComment(post, user2, "내용5", null);
+        commentRepository.saveAll(List.of(comment1, comment2, comment3, comment4, comment5));
+
+        // when
+        List<CommentListResponse> commentList =
+                commentService.getCommentListPages(post.getId(), comment4.getId(), 3, user.getMobileNumber());
+
+        // then
+        assertThat(commentList).hasSize(3);
+        assertThat(commentList)
+                .extracting("postId", "userId", "content", "childCount", "likeCount", "isLike", "isOwner")
+                .containsExactly(
+                        tuple(post.getId(), user2.getId(), "내용3", 0, 0L, false, false),
+                        tuple(post.getId(), user.getId(), "내용2", 0, 0L, false, true),
+                        tuple(post.getId(), user.getId(), "내용1", 0, 0L, false, true)
+                );
+    }
+
     @DisplayName("등록된 댓글 목록을 조회할 때, 대댓글이 존재하면 개수만큼 childCount가 존재한다.")
     @Test
     void getCommentListWithChildCount() {
