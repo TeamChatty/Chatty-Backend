@@ -17,6 +17,8 @@ import com.chatty.service.fcm.FcmService;
 import com.chatty.service.notification.NotificationReceiveService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,6 +100,19 @@ public class CommentService {
         return result.stream()
                 .map(comment -> CommentListResponse.of(comment, user))
                 .collect(Collectors.toList());
+    }
+
+    public List<CommentListResponse> getCommentListPages(final Long postId, final Long lastCommentId, final int size, final String mobileNumber) {
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        Page<Comment> comments =
+                commentRepository.findByPostIdAndIdLessThanAndParentIsNullOrderByIdDesc(postId, lastCommentId, pageRequest);
+
+        return comments.getContent().stream()
+                .map(comment -> CommentListResponse.of(comment, user))
+                .toList();
     }
 
     public List<CommentReplyListResponse> getCommentReplyList(final Long postId, final Long commentId, final String mobileNumber) {
