@@ -128,4 +128,18 @@ public class CommentService {
                 .map(comment -> CommentReplyListResponse.of(comment, user))
                 .collect(Collectors.toList());
     }
+
+    public List<CommentReplyListResponse> getCommentReplyListPages(final Long parentId, final Long lastCommentId, final int size, final String mobileNumber) {
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+//        Comment parent = commentRepository.getById(commentId);
+
+        Page<Comment> comments = commentRepository.findByParentIdAndIdGreaterThanOrderByIdAsc(parentId, lastCommentId, pageRequest);
+
+        return comments.getContent().stream()
+                .map(comment -> CommentReplyListResponse.of(comment, user))
+                .collect(Collectors.toList());
+    }
 }
