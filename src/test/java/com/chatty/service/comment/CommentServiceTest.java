@@ -353,6 +353,40 @@ class CommentServiceTest {
                 );
     }
 
+    @DisplayName("내가 작성한 댓글 목록을 페이징하여 조회한다.")
+    @Test
+    void getMyCommentListPages() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        User user2 = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(user, user2));
+
+        Post post = createPost("내용", user2);
+        postRepository.save(post);
+
+        Comment comment1 = createComment(post, user, "내용1", null);
+        Comment comment2 = createComment(post, user, "내용2", null);
+        Comment comment3 = createComment(post, user, "내용3", null);
+        Comment comment4 = createComment(post, user, "내용4", comment1);
+        Comment comment5 = createComment(post, user, "내용5", null);
+        commentRepository.saveAll(List.of(comment1, comment2, comment3, comment4, comment5));
+
+        // when
+        List<CommentListResponse> commentListResponse =
+                commentService.getMyCommentListPages(comment5.getId(), 3, user.getMobileNumber());
+
+        // then
+        assertThat(commentListResponse).hasSize(3);
+        assertThat(commentListResponse)
+                .extracting("postId", "userId", "commentId", "content", "isOwner")
+                .containsExactly(
+                        tuple(post.getId(), user.getId(), comment4.getId(), "내용4", true),
+                        tuple(post.getId(), user.getId(), comment3.getId(), "내용3", true),
+                        tuple(post.getId(), user.getId(), comment2.getId(), "내용2", true)
+                );
+
+    }
+
     private User createUser(final String nickname, final String mobileNumber) {
         return User.builder()
                 .mobileNumber(mobileNumber)
