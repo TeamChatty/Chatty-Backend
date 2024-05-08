@@ -6,6 +6,7 @@ import com.chatty.dto.comment.request.CommentReplyCreateRequest;
 import com.chatty.dto.comment.response.CommentListResponse;
 import com.chatty.dto.comment.response.CommentReplyListResponse;
 import com.chatty.dto.comment.response.CommentResponse;
+import com.chatty.entity.block.Block;
 import com.chatty.entity.comment.Comment;
 import com.chatty.entity.like.CommentLike;
 import com.chatty.entity.post.Post;
@@ -13,6 +14,7 @@ import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
 import com.chatty.repository.alarm.AlarmRepository;
+import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.comment.CommentRepository;
 import com.chatty.repository.like.CommentLikeRepository;
 import com.chatty.repository.post.PostImageRepository;
@@ -53,9 +55,13 @@ class CommentServiceTest {
     @Autowired
     private CommentLikeRepository commentLikeRepository;
 
+    @Autowired
+    private BlockRepository blockRepository;
+
     @AfterEach
     void tearDown() {
         alarmRepository.deleteAllInBatch();
+        blockRepository.deleteAllInBatch();
         commentLikeRepository.deleteAllInBatch();
         commentRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
@@ -213,6 +219,46 @@ class CommentServiceTest {
                 );
     }
 
+    @DisplayName("등록된 댓글을 페이징 처리하여 조회할 때, 차단한 사람의 댓글은 보이지 않는다.")
+    @Test
+    void getCommentListPagesWithoutBlockedUser() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        User user2 = createUser("강혜원", "01011112222");
+        User user3 = createUser("김연아", "01033333333");
+        User user4 = createUser("손흥민", "01044444444");
+        User blocked = createUser("이강인", "01055555555");
+        userRepository.saveAll(List.of(user, user2, user3, user4, blocked));
+
+        Post post = createPost("내용", user);
+        postRepository.save(post);
+
+        Comment comment1 = createComment(post, user, "내용1", null);
+        Comment comment2 = createComment(post, user2, "내용2", null);
+        Comment comment3 = createComment(post, user3, "내용3", null);
+        Comment comment4 = createComment(post, user4, "내용4", null);
+        Comment comment5 = createComment(post, blocked, "내용5", null);
+        commentRepository.saveAll(List.of(comment1, comment2, comment3, comment4, comment5));
+
+        Block block = createBlock(user, blocked);
+        blockRepository.save(block);
+
+        // when
+        List<CommentListResponse> commentList =
+                commentService.getCommentListPages(post.getId(), comment5.getId() + 1L, 5, user.getMobileNumber());
+
+        // then
+        assertThat(commentList).hasSize(4);
+        assertThat(commentList)
+                .extracting("postId", "userId", "content", "childCount", "likeCount", "isLike", "isOwner")
+                .containsExactly(
+                        tuple(post.getId(), user4.getId(), "내용4", 0, 0L, false, false),
+                        tuple(post.getId(), user3.getId(), "내용3", 0, 0L, false, false),
+                        tuple(post.getId(), user2.getId(), "내용2", 0, 0L, false, false),
+                        tuple(post.getId(), user.getId(), "내용1", 0, 0L, false, true)
+                );
+    }
+
     @DisplayName("등록된 댓글 목록을 조회할 때, 대댓글이 존재하면 개수만큼 childCount가 존재한다.")
     @Test
     void getCommentListWithChildCount() {
@@ -353,6 +399,49 @@ class CommentServiceTest {
                 );
     }
 
+    @DisplayName("대댓글을 페이징 처리하여 조회할 때, 차단한 사람의 댓글은 보이지 않는다.")
+    @Test
+    void getCommentReplyListPagesWithoutBlockedUser() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        User user2 = createUser("강혜원", "01011112222");
+        User user3 = createUser("김연아", "01022221111");
+        User user4 = createUser("손흥민", "01044444444");
+        User blocked = createUser("윤병1", "01055555555");
+        userRepository.saveAll(List.of(user, user2, user3, user4, blocked));
+
+        Post post = createPost("내용", user);
+        postRepository.save(post);
+
+        Comment comment = createComment(post, user, "내용1", null);
+        commentRepository.save(comment);
+
+        Comment reply1 = createComment(post, user, "대댓글1", comment);
+        Comment reply2 = createComment(post, user2, "대댓글2", comment);
+        Comment reply3 = createComment(post, user3, "대댓글3", comment);
+        Comment reply4 = createComment(post, user4, "대댓글4", comment);
+        Comment reply5 = createComment(post, blocked, "대댓글5", comment);
+        commentRepository.saveAll(List.of(reply1, reply2, reply3, reply4, reply5));
+
+        Block block = createBlock(user, blocked);
+        blockRepository.save(block);
+
+        // when
+        List<CommentReplyListResponse> commentReplyListPages =
+                commentService.getCommentReplyListPages(comment.getId(), 0L, 5, user.getMobileNumber());
+
+        // then
+        assertThat(commentReplyListPages).hasSize(4);
+        assertThat(commentReplyListPages)
+                .extracting("postId", "userId", "commentId", "content", "parentId", "isLike", "isOwner")
+                .containsExactly(
+                        tuple(post.getId(), user.getId(), reply1.getId(), "대댓글1", comment.getId(), false, true),
+                        tuple(post.getId(), user2.getId(), reply2.getId(), "대댓글2", comment.getId(), false, false),
+                        tuple(post.getId(), user3.getId(), reply3.getId(), "대댓글3", comment.getId(), false, false),
+                        tuple(post.getId(), user4.getId(), reply4.getId(), "대댓글4", comment.getId(), false, false)
+                );
+    }
+
     @DisplayName("내가 작성한 댓글 목록을 페이징하여 조회한다.")
     @Test
     void getMyCommentListPages() {
@@ -427,6 +516,13 @@ class CommentServiceTest {
         return CommentLike.builder()
                 .comment(comment)
                 .user(user)
+                .build();
+    }
+
+    private Block createBlock(final User blocker, final User blocked) {
+        return Block.builder()
+                .blocker(blocker)
+                .blocked(blocked)
                 .build();
     }
 
