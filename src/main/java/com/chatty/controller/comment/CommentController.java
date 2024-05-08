@@ -67,4 +67,11 @@ public class CommentController {
                                                                            Authentication authentication) {
         return ApiResponse.ok(commentService.getCommentReplyListPages(commentId, lastCommentId, size, authentication.getName()));
     }
+
+    @GetMapping("/v1/my-comments")
+    public ApiResponse<List<CommentListResponse>> getMyCommentListPages(@RequestParam Long lastCommentId,
+                                                                        @RequestParam int size,
+                                                                        Authentication authentication) {
+        return ApiResponse.ok(commentService.getMyCommentListPages(lastCommentId, size, authentication.getName()));
+    }
 }

@@ -142,4 +142,17 @@ public class CommentService {
                 .map(comment -> CommentReplyListResponse.of(comment, user))
                 .collect(Collectors.toList());
     }
+
+    public List<CommentListResponse> getMyCommentListPages(final Long lastCommentId, final int size, final String mobileNumber) {
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        Page<Comment> comments =
+                commentRepository.findByUserAndIdLessThanOrderByIdDesc(user, lastCommentId, pageRequest);
+
+        return comments.getContent().stream()
+                .map(comment -> CommentListResponse.of(comment, user))
+                .toList();
+    }
 }
