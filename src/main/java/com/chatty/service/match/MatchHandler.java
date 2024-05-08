@@ -9,6 +9,7 @@ import com.chatty.entity.match.MatchHistory;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.match.MatchHistoryRepository;
 import com.chatty.repository.user.UserRepository;
@@ -42,6 +43,7 @@ public class MatchHandler extends TextWebSocketHandler {
     private final MatchHistoryRepository matchHistoryRepository;
 
     private final ChatRoomRepository chatRoomRepository;
+    private final BlockRepository blockRepository;
 
     @Override
     public void afterConnectionEstablished(final WebSocketSession session) throws Exception {
@@ -81,6 +83,12 @@ public class MatchHandler extends TextWebSocketHandler {
 
             Long senderId = Long.parseLong(session.getAttributes().get("userId").toString());
             Long receiverId = Long.parseLong(connected.getAttributes().get("userId").toString());
+
+            if (blockRepository.existsByBlockerIdAndBlockedId(senderId, receiverId) ||
+                    blockRepository.existsByBlockerIdAndBlockedId(receiverId, senderId)) {
+                log.info("{}번 유저와 {}번 유저는 차단되어있습니다. ", senderId, receiverId);
+                continue;
+            }
 
             // 이미 매칭 기록이 존재하면 Skip
             if (matchHistoryRepository.existsBySenderIdAndReceiverId(senderId, receiverId) ||
