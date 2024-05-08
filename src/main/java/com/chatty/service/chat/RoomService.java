@@ -3,9 +3,11 @@ package com.chatty.service.chat;
 import com.chatty.constants.Code;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
+import com.chatty.dto.chat.request.DeleteRoomDto;
 import com.chatty.dto.chat.response.ChatRoomDataResponse;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.dto.chat.response.ChatRoomResponse;
+import com.chatty.dto.chat.response.RoomResponseDto;
 import com.chatty.entity.chat.ChatRoom;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
@@ -58,18 +60,19 @@ public class RoomService {
         return ChatRoomResponse.of(chatRoom);
     }
 
-//    @Transactional
-//    public RoomResponseDto deleteRoom(DeleteRoomDto deleteRoomDto) {
-//
-//        ChatRoom chatRoom = isExistedRoomByRoomId(deleteRoomDto.getRoomId());
-//
-//        isValidUserInRoom(deleteRoomDto.getUserId(), chatRoom);
-//
-//        chatRoomRepository.delete(chatRoom);
-//        log.info("채팅방을 삭제했습니다.");
-//
-//        return RoomResponseDto.of(chatRoom);
-//    }
+    @Transactional
+    public RoomResponseDto deleteRoom(final Long roomId, final String mobileNumber) {
+
+        ChatRoom chatRoom = isExistedRoomByRoomId(roomId);
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        isValidUserInRoom(user.getId(), chatRoom);
+
+        chatRoomRepository.delete(chatRoom);
+        log.info("채팅방을 삭제했습니다.");
+
+        return RoomResponseDto.of(chatRoom);
+    }
 
 //    @Transactional
 //    public RoomResponseDto findChatRoom(long roomId){
@@ -77,7 +80,7 @@ public class RoomService {
 //    }
 
     private void isValidUserInRoom(Long userId, ChatRoom chatRoom){
-        if(!(chatRoom.getReceiver().getId() == userId || chatRoom.getSender().getId() == userId)){
+        if(!(chatRoom.getReceiver().getId().equals(userId) || chatRoom.getSender().getId().equals(userId))){
             throw new CustomException(Code.NOT_IN_USER_ROOM);
         }
     }

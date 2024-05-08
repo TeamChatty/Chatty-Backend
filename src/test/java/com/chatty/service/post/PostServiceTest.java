@@ -322,7 +322,7 @@ class PostServiceTest {
 
     @DisplayName("게시글 목록을 페이징 처리하여 조회할 때, 차단한 유저의 게시글은 제외한다.")
     @Test
-    void getPostListPagesWithBlockedUser() throws IOException {
+    void getPostListPagesWithoutBlockedUser() throws IOException {
         // given
         User user = createUser("닉네임", "01012345678");
         User blocked = createUser("닉네임2", "01011112222");

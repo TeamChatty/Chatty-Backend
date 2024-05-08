@@ -9,6 +9,7 @@ import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
 import com.chatty.entity.comment.Comment;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.User;
+import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.comment.CommentRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
@@ -35,6 +36,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final AlarmService alarmService;
+    private final BlockRepository blockRepository;
 
     private final NotificationReceiveService notificationReceiveService;
     private final FcmService fcmService;
@@ -106,9 +108,15 @@ public class CommentService {
         PageRequest pageRequest = PageRequest.of(0, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
+        List<Long> blockedIds = blockRepository.customFindAllByBlocker(user);
 
-        Page<Comment> comments =
-                commentRepository.findByPostIdAndIdLessThanAndParentIsNullOrderByIdDesc(postId, lastCommentId, pageRequest);
+        Page<Comment> comments;
+        if (blockedIds == null || blockedIds.isEmpty()) {
+            comments = commentRepository.findByPostIdAndIdLessThanAndParentIsNullOrderByIdDesc(postId, lastCommentId, pageRequest);
+        } else {
+            comments =
+                    commentRepository.findByPostIdAndIdLessThanAndParentIsNullAndUserIdNotInOrderByIdDesc(postId, lastCommentId, blockedIds, pageRequest);
+        }
 
         return comments.getContent().stream()
                 .map(comment -> CommentListResponse.of(comment, user))
@@ -133,10 +141,17 @@ public class CommentService {
         PageRequest pageRequest = PageRequest.of(0, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
+        List<Long> blockedIds = blockRepository.customFindAllByBlocker(user);
 
 //        Comment parent = commentRepository.getById(commentId);
 
-        Page<Comment> comments = commentRepository.findByParentIdAndIdGreaterThanOrderByIdAsc(parentId, lastCommentId, pageRequest);
+        Page<Comment> comments;
+        if (blockedIds == null || blockedIds.isEmpty()) {
+            comments = commentRepository.findByParentIdAndIdGreaterThanOrderByIdAsc(parentId, lastCommentId, pageRequest);
+        } else {
+            comments =
+                    commentRepository.findByParentIdAndIdGreaterThanAndUserIdNotInOrderByIdAsc(parentId, lastCommentId, blockedIds, pageRequest);
+        }
 
         return comments.getContent().stream()
                 .map(comment -> CommentReplyListResponse.of(comment, user))

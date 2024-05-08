@@ -3,10 +3,15 @@ package com.chatty.controller.chat;
 import com.chatty.dto.ApiResponse;
 import com.chatty.dto.chat.request.ChatRoomCreateRequest;
 import com.chatty.dto.chat.request.ChatRoomUpdateExtendRequest;
+import com.chatty.dto.chat.request.DeleteRoomDto;
 import com.chatty.dto.chat.response.ChatRoomDataResponse;
 import com.chatty.dto.chat.response.ChatRoomListResponse;
 import com.chatty.dto.chat.response.ChatRoomResponse;
+import com.chatty.dto.chat.response.RoomResponseDto;
 import com.chatty.service.chat.RoomService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,39 +69,40 @@ public class RoomController {
         return ApiResponse.ok(roomService.createRoom(request, authentication.getName()));
     }
 
-//    @Operation(summary = "채팅방 삭제", description = "채팅방을 삭제해줍니다.")
-//    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "회원가입 실패",
-//            content = @Content(mediaType = "application/json",
-//                    examples = {
-//                            @ExampleObject(name = "E-001", value = """
-//                                    {
-//                                        "errorCode": "001",
-//                                        "status": "400",
-//                                        "message": "accessToken 유효성 검증을 실패했습니다."
-//                                    }
-//                                    """),
-//                            @ExampleObject(name = "E-011", value = """
-//                                    {
-//                                        "errorCode": "011",
-//                                        "status": "400",
-//                                        "message": "채팅방이 존재하지 않습니다."
-//                                    }
-//                                    """),
-//                            @ExampleObject(name = "E-015", value = """
-//                                    {
-//                                        "errorCode": "015",
-//                                        "status": "400",
-//                                        "message": "유저가 채팅방에 존재하지 않습니다."
-//                                    }
-//                                    """)
-//                    }
-//            )
-//    )
-//    @DeleteMapping("/room")
-//    public ApiResponse<RoomResponseDto> deleteRoom(@Valid @RequestBody DeleteRoomDto deleteRoomDto){
-//        log.info("채팅방 삭제");
-//        return ApiResponse.ok(roomService.deleteRoom(deleteRoomDto));
-//    }
+    @Operation(summary = "채팅방 삭제", description = "채팅방을 삭제해줍니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "회원가입 실패",
+            content = @Content(mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(name = "E-001", value = """
+                                    {
+                                        "errorCode": "001",
+                                        "status": "400",
+                                        "message": "accessToken 유효성 검증을 실패했습니다."
+                                    }
+                                    """),
+                            @ExampleObject(name = "E-011", value = """
+                                    {
+                                        "errorCode": "011",
+                                        "status": "400",
+                                        "message": "채팅방이 존재하지 않습니다."
+                                    }
+                                    """),
+                            @ExampleObject(name = "E-015", value = """
+                                    {
+                                        "errorCode": "015",
+                                        "status": "400",
+                                        "message": "유저가 채팅방에 존재하지 않습니다."
+                                    }
+                                    """)
+                    }
+            )
+    )
+    @DeleteMapping("/room/{roomId}")
+    public ApiResponse<RoomResponseDto> deleteRoom(@PathVariable Long roomId,
+                                                   Authentication authentication){
+        log.info("채팅방 삭제");
+        return ApiResponse.ok(roomService.deleteRoom(roomId, authentication.getName()));
+    }
 
 //    @Operation(summary = "채팅방 찾기", description = "채팅방을 찾아 채팅방에 대한 정보를 획득합니다.")
 //    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "회원가입 실패",
