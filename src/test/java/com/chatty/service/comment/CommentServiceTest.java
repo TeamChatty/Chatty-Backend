@@ -7,12 +7,14 @@ import com.chatty.dto.comment.response.CommentListResponse;
 import com.chatty.dto.comment.response.CommentReplyListResponse;
 import com.chatty.dto.comment.response.CommentResponse;
 import com.chatty.entity.comment.Comment;
+import com.chatty.entity.like.CommentLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
 import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.comment.CommentRepository;
+import com.chatty.repository.like.CommentLikeRepository;
 import com.chatty.repository.post.PostImageRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
@@ -48,9 +50,13 @@ class CommentServiceTest {
     @Autowired
     private AlarmRepository alarmRepository;
 
+    @Autowired
+    private CommentLikeRepository commentLikeRepository;
+
     @AfterEach
     void tearDown() {
         alarmRepository.deleteAllInBatch();
+        commentLikeRepository.deleteAllInBatch();
         commentRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
@@ -304,6 +310,49 @@ class CommentServiceTest {
                 );
     }
 
+    @DisplayName("대댓글을 페이징 처리하여 조회한다. 좋아요 개수 및 여부, 작성자 여부, 정렬 순서를 알 수 있다.")
+    @Test
+    void getCommentReplyListPagesWithIsLikeAndIsOwner() {
+        // given
+        User user = createUser("박지성", "01012345678");
+        User user2 = createUser("강혜원", "01011112222");
+        User user3 = createUser("김연아", "01022221111");
+        userRepository.saveAll(List.of(user, user2, user3));
+
+        Post post = createPost("내용", user);
+        postRepository.save(post);
+
+        Comment comment = createComment(post, user, "내용1", null);
+        commentRepository.save(comment);
+
+        Comment reply1 = createComment(post, user, "대댓글1", comment);
+        Comment reply2 = createComment(post, user2, "대댓글2", comment);
+        Comment reply3 = createComment(post, user3, "대댓글3", comment);
+        Comment reply4 = createComment(post, user3, "대댓글4", comment);
+        Comment reply5 = createComment(post, user3, "대댓글5", comment);
+        commentRepository.saveAll(List.of(reply1, reply2, reply3, reply4, reply5));
+
+        CommentLike commentLike1 = createCommentLike(user, reply1);
+        CommentLike commentLike2 = createCommentLike(user, reply2);
+        CommentLike commentLike3 = createCommentLike(user, reply3);
+        CommentLike commentLike4 = createCommentLike(user2, reply3);
+        commentLikeRepository.saveAll(List.of(commentLike1, commentLike2, commentLike3, commentLike4));
+
+        // when
+        List<CommentReplyListResponse> commentReplyListPages =
+                commentService.getCommentReplyListPages(comment.getId(), reply1.getId(), 3, user.getMobileNumber());
+
+        // then
+        assertThat(commentReplyListPages).hasSize(3);
+        assertThat(commentReplyListPages)
+                .extracting("postId", "userId", "commentId", "content", "parentId", "likeCount", "isLike", "isOwner")
+                .containsExactly(
+                        tuple(post.getId(), user2.getId(), reply2.getId(), "대댓글2", comment.getId(), 1L, true, false),
+                        tuple(post.getId(), user3.getId(), reply3.getId(), "대댓글3", comment.getId(), 2L, true, false),
+                        tuple(post.getId(), user3.getId(), reply4.getId(), "대댓글4", comment.getId(), 0L, false, false)
+                );
+    }
+
     private User createUser(final String nickname, final String mobileNumber) {
         return User.builder()
                 .mobileNumber(mobileNumber)
@@ -337,6 +386,13 @@ class CommentServiceTest {
                 .post(post)
                 .content(content)
                 .parent(parent)
+                .build();
+    }
+
+    private CommentLike createCommentLike(final User user, final Comment comment) {
+        return CommentLike.builder()
+                .comment(comment)
+                .user(user)
                 .build();
     }
 
