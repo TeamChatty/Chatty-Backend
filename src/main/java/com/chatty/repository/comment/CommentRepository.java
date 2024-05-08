@@ -3,6 +3,8 @@ package com.chatty.repository.comment;
 import com.chatty.constants.Code;
 import com.chatty.entity.comment.Comment;
 import com.chatty.exception.CustomException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,4 +18,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findAllByPostIdAndParentIsNullOrderByIdDesc(Long postId);
     List<Comment> findAllByParentIdOrderByIdAsc(Long parentId);
+
+    Page<Comment> findByPostIdAndIdLessThanAndParentIsNullOrderByIdDesc(Long postId, Long lastCommentId, Pageable pageable);
+    Page<Comment> findByParentIdAndIdGreaterThanOrderByIdAsc(Long parentId, Long lastCommentId, Pageable pageable);
 }

@@ -40,7 +40,7 @@ public enum Code {
     NOT_EXIST_POST(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다.", "E031"),
     NOT_EXIST_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.", "E032"),
     EXPIRED_CHAT_TIME(HttpStatus.BAD_REQUEST, "제한 시간을 초과했습니다.", "E033"),
-    ALREADY_LIKE_POST(HttpStatus.BAD_REQUEST, "이미 좋아요를 눌렀습니다.", "E034"),
+    ALREADY_LIKE_POST(HttpStatus.CONFLICT, "이미 좋아요를 눌렀습니다.", "E034"),
     NOT_EXIST_LIKE_POST(HttpStatus.NOT_FOUND, "좋아요가 존재하지 않습니다.", "E035"),
     AUTH_NUMBER_LIMIT(HttpStatus.BAD_REQUEST, "요청 일일횟수 제한은 5번입니다.", "E036"),
     ALREADY_EXIST_BOOKMARK(HttpStatus.BAD_REQUEST, "북마크가 이미 존재합니다.","E037"),
@@ -49,6 +49,8 @@ public enum Code {
     NOT_EXIST_ALARM(HttpStatus.NOT_FOUND, "존재하지 않는 알람입니다.", "E040"),
     ALREADY_REPORT_USER(HttpStatus.CONFLICT, "이미 신고한 유저입니다.", "E041"),
     NOT_SELF_REPORT(HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수 없습니다.", "E042"),
+    ALREADY_LIKE_COMMENT(HttpStatus.CONFLICT, "이미 좋아요를 눌렀습니다.", "E043"),
+    NOT_EXIST_LIKE_COMMENT(HttpStatus.NOT_FOUND, "좋아요가 존재하지 않습니다.", "E044"),
 
     // ratelimit
     TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "너무 많은 요청을 보냈습니다.","E098");

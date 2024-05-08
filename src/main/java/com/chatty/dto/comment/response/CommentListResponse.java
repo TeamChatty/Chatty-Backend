@@ -21,13 +21,18 @@ public class CommentListResponse {
     private LocalDateTime createdAt;
     private int childCount;
 
-
     private Long userId;
     private String nickname;
     private String imageUrl;
 
+    private long likeCount;
+
+    private boolean isLike;
+
+    private boolean isOwner;
+
     @Builder
-    public CommentListResponse(final Long postId, final Long commentId, final String content, final LocalDateTime createdAt, final int childCount, final Long userId, final String nickname, final String imageUrl) {
+    public CommentListResponse(final Long postId, final Long commentId, final String content, final LocalDateTime createdAt, final int childCount, final Long userId, final String nickname, final String imageUrl, final long likeCount, final boolean isLike, final boolean isOwner) {
         this.postId = postId;
         this.commentId = commentId;
         this.content = content;
@@ -36,9 +41,12 @@ public class CommentListResponse {
         this.userId = userId;
         this.nickname = nickname;
         this.imageUrl = imageUrl;
+        this.likeCount = likeCount;
+        this.isLike = isLike;
+        this.isOwner = isOwner;
     }
 
-    public static CommentListResponse of(final Comment comment) {
+    public static CommentListResponse of(final Comment comment, final User user) {
         return CommentListResponse.builder()
                 .postId(comment.getPost().getId())
                 .commentId(comment.getId())
@@ -48,6 +56,10 @@ public class CommentListResponse {
                 .userId(comment.getUser().getId())
                 .nickname(comment.getUser().getNickname())
                 .imageUrl(comment.getUser().getImageUrl())
+                .likeCount(comment.getCommentLikes().size())
+                .isLike(comment.getCommentLikes().stream()
+                        .anyMatch(commentLike -> commentLike.getUser().getId().equals(user.getId())))
+                .isOwner(comment.getUser().getId().equals(user.getId()))
                 .build();
     }
 }

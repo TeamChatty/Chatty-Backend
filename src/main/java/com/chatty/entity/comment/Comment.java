@@ -1,6 +1,7 @@
 package com.chatty.entity.comment;
 
 import com.chatty.entity.BaseTimeEntity;
+import com.chatty.entity.like.CommentLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.User;
 import jakarta.persistence.*;
@@ -42,6 +43,9 @@ public class Comment extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "parent")
     private List<Comment> children = new ArrayList<>();
+
+    @OneToMany(mappedBy = "comment")
+    private List<CommentLike> commentLikes = new ArrayList<>();
 
     @Builder
     public Comment(final Post post, final User user, final String content, final Comment parent, final List<Comment> children) {

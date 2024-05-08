@@ -75,6 +75,25 @@ public class FcmService {
         }
     }
 
+    public void sendNotificationWithCommentLike(final User postWriter, final User commentWriter) {
+        if (existDeviceToken(postWriter)) return;
+        Notification notification = Notification.builder()
+                .setTitle(commentWriter.getNickname())
+                .setBody("회원님의 게시글을 좋아합니다.")
+                .build();
+
+        Message message = Message.builder()
+                .setToken(postWriter.getDeviceToken())
+                .setNotification(notification)
+                .build();
+
+        try {
+            firebaseMessaging.send(message);
+        } catch (FirebaseMessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void sendNotificationWithProfileUnlock(final User postWriter, final User commentWriter) {
         if (existDeviceToken(postWriter)) return;
         Notification notification = Notification.builder()

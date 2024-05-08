@@ -45,10 +45,26 @@ public class CommentController {
         return ApiResponse.ok(commentService.getCommentList(postId, authentication.getName()));
     }
 
+    @GetMapping("/v2/post/{postId}/comments")
+    public ApiResponse<List<CommentListResponse>> getCommentListPages(@PathVariable Long postId,
+                                                                      @RequestParam Long lastCommentId,
+                                                                      @RequestParam int size,
+                                                                      Authentication authentication) {
+        return ApiResponse.ok(commentService.getCommentListPages(postId, lastCommentId, size, authentication.getName()));
+    }
+
     @GetMapping("/v1/post/{postId}/comment/{commentId}/comment-replies")
     public ApiResponse<List<CommentReplyListResponse>> getCommentReplyList(@PathVariable Long postId,
                                                                            @PathVariable Long commentId,
                                                                            Authentication authentication) {
         return ApiResponse.ok(commentService.getCommentReplyList(postId, commentId, authentication.getName()));
+    }
+
+    @GetMapping("/v2/comment-replies/{commentId}")
+    public ApiResponse<List<CommentReplyListResponse>> getCommentReplyListPages(@PathVariable Long commentId,
+                                                                           @RequestParam Long lastCommentId,
+                                                                           @RequestParam int size,
+                                                                           Authentication authentication) {
+        return ApiResponse.ok(commentService.getCommentReplyListPages(commentId, lastCommentId, size, authentication.getName()));
     }
 }

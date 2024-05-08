@@ -71,6 +71,22 @@ public class AlarmService {
     }
 
     @Transactional
+    public AlarmResponse createCommentLikeAlarm(Long commentId, Long fromUser, String fromUserNickname, User toUser) {
+        Alarm alarm = Alarm.builder()
+                .isRead(false)
+                .alarmType(AlarmType.FEED)
+                .fromUser(fromUser)
+                .content(fromUserNickname + "님이 좋아요를 눌렀습니다.")
+//                .postId(postId)
+                .commentId(commentId)
+                .user(toUser)
+                .build();
+
+        alarmRepository.save(alarm);
+        return AlarmResponse.of(alarm);
+    }
+
+    @Transactional
     public AlarmResponse createProfileAlarm(Long fromUser, String fromUserNickname, User toUser) {
         Alarm alarm = Alarm.builder()
                 .isRead(false)
