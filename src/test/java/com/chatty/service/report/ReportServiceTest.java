@@ -7,6 +7,7 @@ import com.chatty.entity.report.Report;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.report.ReportRepository;
 import com.chatty.repository.user.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -34,8 +35,12 @@ class ReportServiceTest {
     @Autowired
     private ReportRepository reportRepository;
 
+    @Autowired
+    private BlockRepository blockRepository;
+
     @AfterEach
     void tearDown() {
+        blockRepository.deleteAllInBatch();
         reportRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
     }
@@ -99,6 +104,32 @@ class ReportServiceTest {
         assertThatThrownBy(() -> reportService.createReport(reporter.getId(), reporter.getMobileNumber(), request))
                 .isInstanceOf(CustomException.class)
                 .hasMessage("자기 자신을 신고할 수 없습니다.");
+    }
+
+    @DisplayName("유저를 신고할 때, 차단 유무를 확인 후 차단까지 진행한다.")
+    @Test
+    void createReportWithBlock() {
+        // given
+        User reporter = createUser("박지성", "01012345678");
+        User reported = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(reporter, reported));
+
+        ReportCreateRequest request = ReportCreateRequest.builder()
+                .content("신고 사유")
+                .build();
+
+        // when
+        ReportResponse reportResponse =
+                reportService.createReport(reported.getId(), reporter.getMobileNumber(), request);
+
+        // then
+        assertThat(reportResponse.getReportId()).isNotNull();
+        assertThat(reportResponse)
+                .extracting("reporterId", "reportedId", "content")
+                .containsExactly(reporter.getId(), reported.getId(), "신고 사유");
+
+        boolean isBlock = blockRepository.existsByBlockerIdAndBlockedId(reporter.getId(), reported.getId());
+        assertThat(isBlock).isTrue();
     }
 
     private Report createReport(User reporter, User reported, String content) {
