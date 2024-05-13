@@ -4,16 +4,23 @@ import com.chatty.constants.Authority;
 import com.chatty.constants.Code;
 import com.chatty.entity.BaseTimeEntity;
 import com.chatty.entity.CommonEntity;
+import com.chatty.entity.alarm.Alarm;
+import com.chatty.entity.block.Block;
+import com.chatty.entity.bookmark.Bookmark;
+import com.chatty.entity.chat.ChatRoom;
 import com.chatty.entity.check.AuthCheck;
+import com.chatty.entity.comment.Comment;
+import com.chatty.entity.like.CommentLike;
+import com.chatty.entity.like.PostLike;
+import com.chatty.entity.match.Match;
+import com.chatty.entity.match.MatchHistory;
 import com.chatty.entity.notification.NotificationReceive;
+import com.chatty.entity.post.Post;
 import com.chatty.exception.CustomException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import lombok.*;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -68,8 +75,53 @@ public class User extends BaseTimeEntity implements UserDetails{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserInterest> userInterests = new HashSet<>();
 
-//    @OneToMany(mappedBy = "user")
-//    private Set<ProfileUnlock> unlocks = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLike> postLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Block> blocked = new ArrayList<>();
+
+    @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Block> blocker = new ArrayList<>();
+
+//    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private NotificationReceive notificationReceive;
+
+    @OneToMany(mappedBy = "unlocker", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProfileUnlock> unlocker = new ArrayList<>();
+
+    @OneToMany(mappedBy = "unlockedUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProfileUnlock> unlocked = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentLike> commentLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bookmark> bookmarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Match> matches = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Alarm> alarms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MatchHistory> matchHistoriesSender = new ArrayList<>();
+
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MatchHistory> matchHistoriesReceiver = new ArrayList<>();
+
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoom> chatRoomsReceiver = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatRoom> chatRoomsSender = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Authority authority;

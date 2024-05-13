@@ -8,6 +8,7 @@ import com.chatty.dto.user.response.UserResponse;
 import com.chatty.dto.user.response.UserResponseDto;
 import com.chatty.constants.Authority;
 import com.chatty.entity.notification.NotificationReceive;
+import com.chatty.entity.post.Post;
 import com.chatty.entity.user.Interest;
 import com.chatty.entity.user.User;
 import com.chatty.entity.user.UserInterest;
@@ -15,6 +16,7 @@ import com.chatty.exception.CustomException;
 import com.chatty.jwt.JwtTokenProvider;
 import com.chatty.repository.interest.InterestRepository;
 import com.chatty.repository.notification.NotificationReceiveRepository;
+import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.token.RefreshTokenRepository;
 import com.chatty.repository.user.UserRepository;
 import com.chatty.service.sms.SmsService;
@@ -45,6 +47,7 @@ public class UserService {
     private final S3Service s3Service;
     private final InterestRepository interestRepository;
     private final NotificationReceiveRepository notificationReceiveRepository;
+    private final PostRepository postRepository;
 
     private static final String ACCESS_TOKEN = "accessToken";
     private static final String REFRESH_TOKEN = "refreshToken";
@@ -352,4 +355,15 @@ public class UserService {
         return userRepository.findUserById(userId).orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
     }
 
+    @Transactional
+    public UserResponse cancelMembership(final String mobileNumber) {
+        User user = userRepository.getByMobileNumber(mobileNumber);
+
+        NotificationReceive notificationReceive = notificationReceiveRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+        notificationReceiveRepository.delete(notificationReceive);
+
+        userRepository.delete(user);
+        return UserResponse.of(user);
+    }
 }

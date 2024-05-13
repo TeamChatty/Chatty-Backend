@@ -293,4 +293,8 @@ public class UserController {
         return ApiResponse.ok(userService.getMyProfile(authentication.getName()));
     }
 
+    @DeleteMapping("/cancel-membership")
+    public ApiResponse<UserResponse> cancelMembership(Authentication authentication) {
+        return ApiResponse.ok(userService.cancelMembership(authentication.getName()));
+    }
 }
