@@ -297,4 +297,10 @@ public class UserController {
     public ApiResponse<UserResponse> cancelMembership(Authentication authentication) {
         return ApiResponse.ok(userService.cancelMembership(authentication.getName()));
     }
+
+    @PutMapping("/change-number")
+    public ApiResponse<UserResponseDto> changeNumber(@Valid @RequestBody UserRequestDto request,
+                                                     Authentication authentication) {
+        return ApiResponse.ok(userService.changeNumber(request, authentication.getName()));
+    }
 }
