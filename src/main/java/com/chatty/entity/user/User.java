@@ -230,6 +230,10 @@ public class User extends BaseTimeEntity implements UserDetails{
         this.ticket = this.gender.getGender().equals("남") ? 5 : 11;
     }
 
+    public void changeNumber(final String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + authority.name()));

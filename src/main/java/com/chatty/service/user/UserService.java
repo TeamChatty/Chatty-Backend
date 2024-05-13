@@ -366,4 +366,31 @@ public class UserService {
         userRepository.delete(user);
         return UserResponse.of(user);
     }
+
+    @Transactional
+    public UserResponseDto changeNumber(UserRequestDto userRequestDto,final String mobileNumber) {
+        log.info("[UserService/changeNumber] 번호 변경 시작");
+        User findedUser = userRepository.getByMobileNumber(mobileNumber);
+
+        boolean isExistedUser = isAlreadyExistedUser(userRequestDto.getMobileNumber());
+
+        String key = userRequestDto.getMobileNumber();
+        String authNumber = userRequestDto.getAuthenticationNumber();
+
+        if(!smsService.checkAuthNumber(key,authNumber)){
+            log.error("인증 번호가 일치하지 않는다.");
+            throw new CustomException(Code.INVALID_AUTH_NUMBER);
+        }
+
+        if(isExistedUser){
+            log.error("이미 존재 하는 유저 입니다.");
+            throw new CustomException(Code.ALREADY_EXIST_USER);
+        }
+
+        findedUser.changeNumber(userRequestDto.getMobileNumber());
+        log.info("[UserService/join] 번호 변경 완료");
+
+        Map<String,String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
+        return UserResponseDto.of(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
+    }
 }
