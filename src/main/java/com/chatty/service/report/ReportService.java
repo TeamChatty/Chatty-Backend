@@ -3,9 +3,11 @@ package com.chatty.service.report;
 import com.chatty.constants.Code;
 import com.chatty.dto.report.request.ReportCreateRequest;
 import com.chatty.dto.report.response.ReportResponse;
+import com.chatty.entity.block.Block;
 import com.chatty.entity.report.Report;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.report.ReportRepository;
 import com.chatty.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final BlockRepository blockRepository;
 
     @Transactional
     public ReportResponse createReport(final Long userId, final String mobileNumber, ReportCreateRequest request) {
@@ -37,6 +40,15 @@ public class ReportService {
         Report report = request.toEntity(reporter, reported);
         reportRepository.save(report);
 
+        if (!isBlock(reporter, reported)) {
+            Block block = Block.create(reporter, reported);
+            blockRepository.save(block);
+        }
+
         return ReportResponse.of(report);
+    }
+
+    private boolean isBlock(final User reporter, final User reported) {
+        return blockRepository.existsByBlockerIdAndBlockedId(reporter.getId(), reported.getId());
     }
 }
