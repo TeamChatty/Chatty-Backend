@@ -3,11 +3,13 @@ package com.chatty.service.report;
 import com.chatty.constants.Authority;
 import com.chatty.dto.report.request.ReportCreateRequest;
 import com.chatty.dto.report.response.ReportResponse;
+import com.chatty.entity.chat.ChatRoom;
 import com.chatty.entity.report.Report;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
 import com.chatty.repository.block.BlockRepository;
+import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.report.ReportRepository;
 import com.chatty.repository.user.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -38,8 +40,12 @@ class ReportServiceTest {
     @Autowired
     private BlockRepository blockRepository;
 
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
+
     @AfterEach
     void tearDown() {
+        chatRoomRepository.deleteAllInBatch();
         blockRepository.deleteAllInBatch();
         reportRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
@@ -132,6 +138,38 @@ class ReportServiceTest {
         assertThat(isBlock).isTrue();
     }
 
+    @DisplayName("유저를 신고할 때, 차단을 하고 존재하는 채팅방을 삭제한다.")
+    @Test
+    void createReportWithBlockAndChatRoomDelete() {
+        // given
+        User reporter = createUser("박지성", "01012345678");
+        User reported = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(reporter, reported));
+
+        ReportCreateRequest request = ReportCreateRequest.builder()
+                .content("신고 사유")
+                .build();
+
+        ChatRoom chatRoom = createChatRoom(reporter, reported);
+        chatRoomRepository.save(chatRoom);
+
+        // when
+        ReportResponse reportResponse =
+                reportService.createReport(reported.getId(), reporter.getMobileNumber(), request);
+
+        // then
+        assertThat(reportResponse.getReportId()).isNotNull();
+        assertThat(reportResponse)
+                .extracting("reporterId", "reportedId", "content")
+                .containsExactly(reporter.getId(), reported.getId(), "신고 사유");
+
+        boolean isBlock = blockRepository.existsByBlockerIdAndBlockedId(reporter.getId(), reported.getId());
+        assertThat(isBlock).isTrue();
+
+        List<ChatRoom> chatRooms = chatRoomRepository.findAll();
+        assertThat(chatRooms).hasSize(0);
+    }
+
     private Report createReport(User reporter, User reported, String content) {
         return Report.builder()
                 .reporter(reporter)
@@ -152,6 +190,13 @@ class ReportServiceTest {
                 .nickname(nickname)
                 .candy(10)
                 .ticket(10)
+                .build();
+    }
+
+    private ChatRoom createChatRoom(final User sender, final User receiver) {
+        return ChatRoom.builder()
+                .sender(sender)
+                .receiver(receiver)
                 .build();
     }
 }
