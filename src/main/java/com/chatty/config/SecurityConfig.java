@@ -66,7 +66,8 @@ public class SecurityConfig {
                 "/index.html",
                 "/matching/**",
                 "/ws/**",
-                "/signaling/**"
+                "/signaling/**",
+                "/actuator/**"
         );
     }
 }
