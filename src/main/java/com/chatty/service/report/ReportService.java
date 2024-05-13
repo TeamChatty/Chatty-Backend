@@ -8,6 +8,7 @@ import com.chatty.entity.report.Report;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
 import com.chatty.repository.block.BlockRepository;
+import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.report.ReportRepository;
 import com.chatty.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final BlockRepository blockRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Transactional
     public ReportResponse createReport(final Long userId, final String mobileNumber, ReportCreateRequest request) {
@@ -43,6 +45,12 @@ public class ReportService {
         if (!isBlock(reporter, reported)) {
             Block block = Block.create(reporter, reported);
             blockRepository.save(block);
+
+            chatRoomRepository.findChatRoomBySenderAndReceiver(reporter, reported)
+                    .ifPresent(chatRoomRepository::delete);
+
+            chatRoomRepository.findChatRoomBySenderAndReceiver(reported, reporter)
+                    .ifPresent(chatRoomRepository::delete);
         }
 
         return ReportResponse.of(report);

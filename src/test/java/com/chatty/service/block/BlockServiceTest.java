@@ -4,11 +4,13 @@ import com.chatty.constants.Authority;
 import com.chatty.dto.block.response.BlockListResponse;
 import com.chatty.dto.block.response.BlockResponse;
 import com.chatty.entity.block.Block;
+import com.chatty.entity.chat.ChatRoom;
 import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
 import com.chatty.repository.block.BlockRepository;
+import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,8 +35,12 @@ class BlockServiceTest {
     @Autowired
     private BlockService blockService;
 
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
+
     @AfterEach
     void tearDown() {
+        chatRoomRepository.deleteAllInBatch();
         blockRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
     }
@@ -75,6 +81,32 @@ class BlockServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage("이미 차단한 유저입니다.");
 
+    }
+
+    @DisplayName("유저를 차단할 때, 채팅방이 존재하면 채팅방을 삭제한다.")
+    @Test
+    void createBlockWithChatRoomDelete() {
+        // given
+        User blocker = createUser("박지성", "01012345678", "이미지");
+        User blocked = createUser("강혜원", "01011112222", "이미지");
+        userRepository.saveAll(List.of(blocker, blocked));
+
+        ChatRoom chatRoom = createChatRoom(blocker, blocked);
+        chatRoomRepository.save(chatRoom);
+
+        // when
+        BlockResponse blockResponse = blockService.createBlock(blocked.getId(), blocker.getMobileNumber());
+
+        // then
+        assertThat(blockResponse.getBlockId()).isNotNull();
+        assertThat(blockResponse)
+                .extracting("blockerId", "blockedId")
+                .containsExactly(
+                        blocker.getId(), blocked.getId()
+                );
+
+        List<ChatRoom> chatRooms = chatRoomRepository.findAll();
+        assertThat(chatRooms).hasSize(0);
     }
 
     @DisplayName("차단한 유저 목록을 불러온다.")
@@ -132,6 +164,13 @@ class BlockServiceTest {
         return Block.builder()
                 .blocker(blocker)
                 .blocked(blocked)
+                .build();
+    }
+
+    private ChatRoom createChatRoom(final User sender, final User receiver) {
+        return ChatRoom.builder()
+                .sender(sender)
+                .receiver(receiver)
                 .build();
     }
 }
