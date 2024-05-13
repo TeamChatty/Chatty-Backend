@@ -7,6 +7,7 @@ import com.chatty.entity.block.Block;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
 import com.chatty.repository.block.BlockRepository;
+import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class BlockService {
 
     private final BlockRepository blockRepository;
     private final UserRepository userRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Transactional
     public BlockResponse createBlock(final Long userId, final String mobileNumber) {
@@ -37,6 +39,12 @@ public class BlockService {
 
         Block block = Block.create(blocker, blocked);
         Block savedBlock = blockRepository.save(block);
+
+        chatRoomRepository.findChatRoomBySenderAndReceiver(blocker, blocked)
+                .ifPresent(chatRoomRepository::delete);
+
+        chatRoomRepository.findChatRoomBySenderAndReceiver(blocked, blocker)
+                .ifPresent(chatRoomRepository::delete);
 
         return BlockResponse.of(savedBlock);
     }
