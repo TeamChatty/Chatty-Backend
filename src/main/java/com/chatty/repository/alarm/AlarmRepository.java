@@ -24,4 +24,7 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     List<Alarm> findAllByUserAndIsReadIsFalse(User user);
 
     Optional<Alarm> findByPostIdAndUserIdAndFromUser(Long postId, Long userId, Long fromUser);
+
+    Optional<Alarm> findByCommentIdAndUserIdAndFromUser(Long commentId, Long userId, Long fromUser);
+
 }
