@@ -7,6 +7,7 @@ import com.chatty.entity.comment.Comment;
 import com.chatty.entity.like.CommentLike;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.comment.CommentRepository;
 import com.chatty.repository.like.CommentLikeRepository;
 import com.chatty.repository.user.UserRepository;
@@ -26,6 +27,7 @@ public class CommentLikeService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final AlarmService alarmService;
+    private final AlarmRepository alarmRepository;
 
     private final NotificationReceiveService notificationReceiveService;
     private final FcmService fcmService;
@@ -69,6 +71,9 @@ public class CommentLikeService {
         CommentLike commentLike = commentLikeRepository.findByCommentAndUser(comment, user)
                 .orElseThrow(() -> new CustomException(Code.NOT_EXIST_LIKE_COMMENT));
         commentLikeRepository.delete(commentLike);
+
+        alarmRepository.findByCommentIdAndUserIdAndFromUser(commentId, comment.getUser().getId(), user.getId())
+                .ifPresent(alarmRepository::delete);
 
         return CommentLikeResponse.of(commentLike);
     }

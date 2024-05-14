@@ -3,6 +3,7 @@ package com.chatty.service.like;
 import com.chatty.constants.Authority;
 import com.chatty.dto.like.response.CommentLikeResponse;
 import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
+import com.chatty.entity.alarm.Alarm;
 import com.chatty.entity.comment.Comment;
 import com.chatty.entity.like.CommentLike;
 import com.chatty.entity.post.Post;
@@ -175,6 +176,37 @@ class CommentLikeServiceTest {
                 .isInstanceOf(NoSuchElementException.class);
     }
 
+    @DisplayName("댓글 좋아요를 취소할 때, 작성자의 알람도 같이 삭제된다.")
+    @Test
+    void unlikeCommentWithAlarmDelete() {
+        // given
+        User writer = createUser("박지성", "01012345678");
+        User user = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(writer, user));
+
+        Post post = createPost("글내용", writer);
+        postRepository.save(post);
+
+        Comment comment = createComment(null, "댓글내용", writer, post);
+        commentRepository.save(comment);
+
+        CommentLike commentLike = createCommentLike(user, comment);
+        commentLikeRepository.save(commentLike);
+
+        Alarm alarm = createAlarm(writer, comment.getId(), user.getId());
+        alarmRepository.save(alarm);
+
+        // when
+        commentLikeService.unlikeComment(comment.getId(), user.getMobileNumber());
+
+        // then
+        assertThatThrownBy(() -> commentLikeRepository.findById(commentLike.getId()).get())
+                .isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() ->
+                alarmRepository.findByCommentIdAndUserIdAndFromUser(comment.getId(), comment.getUser().getId(), user.getId()).get())
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
     private User createUser(final String nickname, final String mobileNumber) {
         return User.builder()
                 .mobileNumber(mobileNumber)
@@ -215,6 +247,15 @@ class CommentLikeServiceTest {
         return CommentLike.builder()
                 .comment(comment)
                 .user(user)
+                .build();
+    }
+
+    private Alarm createAlarm(final User user, final Long commentId, final Long fromUser) {
+        return Alarm.builder()
+                .user(user)
+                .content("알람")
+                .commentId(commentId)
+                .fromUser(fromUser)
                 .build();
     }
 }

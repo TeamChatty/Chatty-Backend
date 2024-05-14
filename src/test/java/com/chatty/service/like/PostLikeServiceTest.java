@@ -3,6 +3,7 @@ package com.chatty.service.like;
 import com.chatty.constants.Authority;
 import com.chatty.dto.like.response.PostLikeResponse;
 import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
+import com.chatty.entity.alarm.Alarm;
 import com.chatty.entity.like.PostLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.Coordinate;
@@ -151,6 +152,35 @@ class PostLikeServiceTest {
                 .hasMessage("좋아요가 존재하지 않습니다.");
     }
 
+    @DisplayName("게시글에 좋아요를 취소할 때, 작성자의 알람도 같이 삭제된다.")
+    @Test
+    void unlikePostWithAlarmDelete() {
+        // given
+        User writer = createUser("박지성", "01012345678");
+        User user = createUser("김연아", "01098765432");
+        userRepository.saveAll(List.of(writer, user));
+
+        Post post = createPost("내용", writer);
+        postRepository.save(post);
+
+        PostLike postLike = createPostLike(user, post);
+        postLikeRepository.save(postLike);
+
+        Alarm alarm = createAlarm(writer, post.getId(), user.getId());
+        alarmRepository.save(alarm);
+
+        // when
+        postLikeService.unlikePost(post.getId(), user.getMobileNumber());
+
+        // then
+        assertThatThrownBy(() -> postLikeRepository.findById(postLike.getId()).get())
+                .isInstanceOf(NoSuchElementException.class);
+
+        assertThatThrownBy(() ->
+                alarmRepository.findByPostIdAndUserIdAndFromUser(post.getId(), post.getUser().getId(), user.getId()).get())
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
 
     private User createUser(final String nickname, final String mobileNumber) {
         return User.builder()
@@ -183,6 +213,15 @@ class PostLikeServiceTest {
         return PostLike.builder()
                 .user(user)
                 .post(post)
+                .build();
+    }
+
+    private Alarm createAlarm(final User user, final Long postId, final Long fromUser) {
+        return Alarm.builder()
+                .user(user)
+                .content("알람")
+                .postId(postId)
+                .fromUser(fromUser)
                 .build();
     }
 

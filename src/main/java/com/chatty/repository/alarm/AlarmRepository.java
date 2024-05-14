@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AlarmRepository extends JpaRepository<Alarm, Long> {
 
@@ -21,4 +22,9 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     Page<Alarm> findByIdLessThanAndUserOrderByIdDesc(Long id, User user, PageRequest pageRequest);
 
     List<Alarm> findAllByUserAndIsReadIsFalse(User user);
+
+    Optional<Alarm> findByPostIdAndUserIdAndFromUser(Long postId, Long userId, Long fromUser);
+
+    Optional<Alarm> findByCommentIdAndUserIdAndFromUser(Long commentId, Long userId, Long fromUser);
+
 }

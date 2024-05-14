@@ -6,9 +6,12 @@ import com.chatty.dto.comment.request.CommentReplyCreateRequest;
 import com.chatty.dto.comment.response.CommentListResponse;
 import com.chatty.dto.comment.response.CommentReplyListResponse;
 import com.chatty.dto.comment.response.CommentResponse;
+import com.chatty.entity.alarm.Alarm;
+import com.chatty.entity.alarm.AlarmType;
 import com.chatty.entity.block.Block;
 import com.chatty.entity.comment.Comment;
 import com.chatty.entity.like.CommentLike;
+import com.chatty.entity.notification.NotificationReceive;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.Coordinate;
 import com.chatty.entity.user.Gender;
@@ -17,6 +20,7 @@ import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.comment.CommentRepository;
 import com.chatty.repository.like.CommentLikeRepository;
+import com.chatty.repository.notification.NotificationReceiveRepository;
 import com.chatty.repository.post.PostImageRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
@@ -58,6 +62,9 @@ class CommentServiceTest {
     @Autowired
     private BlockRepository blockRepository;
 
+    @Autowired
+    private NotificationReceiveRepository notificationReceiveRepository;
+
     @AfterEach
     void tearDown() {
         alarmRepository.deleteAllInBatch();
@@ -65,10 +72,11 @@ class CommentServiceTest {
         commentLikeRepository.deleteAllInBatch();
         commentRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
+        notificationReceiveRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
     }
 
-    @DisplayName("댓글을 등록한다.")
+    @DisplayName("댓글을 등록한다. 본인이 작성한 게시글에는 알람이 생기지 않는다.")
     @Test
     void createComment() {
         // given
@@ -90,6 +98,43 @@ class CommentServiceTest {
         assertThat(commentResponse)
                 .extracting("postId", "userId", "content")
                 .containsExactlyInAnyOrder(post.getId(), user.getId(), request.getContent());
+
+        List<Alarm> alarms = alarmRepository.findAll();
+        assertThat(alarms).hasSize(0);
+    }
+
+    @DisplayName("댓글을 등록한다. 본인이 작성한 게시글이 아니면 작성자에게 알람이 생성된다.")
+    @Test
+    void createCommentWithAlarm() {
+        // given
+        User writer = createUser("박지성", "01012345678");
+        User user = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(writer, user));
+
+        NotificationReceive notificationReceive = createNotificationReceive(writer, true, true, true);
+        notificationReceiveRepository.save(notificationReceive);
+
+        Post post = createPost("내용", writer);
+        postRepository.save(post);
+
+        CommentCreateRequest request = CommentCreateRequest.builder()
+                .content("댓글")
+                .build();
+
+        // when
+        CommentResponse commentResponse = commentService.createComment(post.getId(), request, user.getMobileNumber());
+
+        // then
+        assertThat(commentResponse.getCommentId()).isNotNull();
+        assertThat(commentResponse)
+                .extracting("postId", "userId", "content")
+                .containsExactlyInAnyOrder(post.getId(), user.getId(), request.getContent());
+
+        List<Alarm> alarms = alarmRepository.findAllByUserAndIsReadIsFalse(writer);
+        assertThat(alarms).hasSize(1)
+                .extracting("alarmType", "fromUser", "postId")
+                .containsExactlyInAnyOrder(
+                        tuple(AlarmType.FEED, user.getId(), post.getId()));
     }
 
     @DisplayName("대댓글(Reply)을 등록한다.")
@@ -523,6 +568,15 @@ class CommentServiceTest {
         return Block.builder()
                 .blocker(blocker)
                 .blocked(blocked)
+                .build();
+    }
+
+    private NotificationReceive createNotificationReceive(final User user, boolean chatting, boolean marketing, boolean feed) {
+        return NotificationReceive.builder()
+                .user(user)
+                .chattingNotification(chatting)
+                .marketingNotification(marketing)
+                .feedNotification(feed)
                 .build();
     }
 
