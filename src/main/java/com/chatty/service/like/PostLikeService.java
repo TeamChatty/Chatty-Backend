@@ -3,10 +3,12 @@ package com.chatty.service.like;
 import com.chatty.constants.Code;
 import com.chatty.dto.like.response.PostLikeResponse;
 import com.chatty.dto.notification.receive.response.NotificationReceiveResponse;
+import com.chatty.entity.alarm.Alarm;
 import com.chatty.entity.like.PostLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
+import com.chatty.repository.alarm.AlarmRepository;
 import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
@@ -28,6 +30,7 @@ public class PostLikeService {
     private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
     private final AlarmService alarmService;
+    private final AlarmRepository alarmRepository;
 
     private final NotificationReceiveService notificationReceiveService;
     private final FcmService fcmService;
@@ -70,6 +73,9 @@ public class PostLikeService {
         PostLike postLike = postLikeRepository.findByPostAndUser(post, user)
                 .orElseThrow(() -> new CustomException(Code.NOT_EXIST_LIKE_POST));
         postLikeRepository.delete(postLike);
+
+        alarmRepository.findByPostIdAndUserIdAndFromUser(postId, post.getUser().getId(), user.getId())
+                        .ifPresent(alarmRepository::delete);
 
         return PostLikeResponse.of(postLike);
     }
