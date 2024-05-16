@@ -127,10 +127,11 @@ class PostServiceTest {
     @Test
     void getPost() throws IOException {
         // given
-        User user = createUser("닉네임", "01012345678");
-        userRepository.save(user);
+        User writer = createUser("닉네임", "01012345678");
+        User user = createUser("강혜원", "01011112222");
+        userRepository.saveAll(List.of(writer, user));
 
-        Post post = createPost("내용", user);
+        Post post = createPost("내용", writer);
         postRepository.save(post);
 
         PostImage postImage = PostImage.builder()
@@ -148,9 +149,9 @@ class PostServiceTest {
         // then
         assertThat(postResponse.getPostId()).isNotNull();
         assertThat(postResponse)
-                .extracting("postId", "content", "isOwner", "isLike", "isBookmark")
+                .extracting("postId", "userId", "nickname", "content", "isOwner", "isLike", "isBookmark")
                 .containsExactlyInAnyOrder(
-                        post.getId(), post.getContent(), true, false, true
+                        post.getId(), writer.getId(), writer.getNickname(), post.getContent(), false, false, true
                 );
         assertThat(postResponse.getPostImages()).hasSize(1)
                 .containsExactlyInAnyOrder(
