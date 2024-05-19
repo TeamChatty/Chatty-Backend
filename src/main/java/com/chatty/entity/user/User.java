@@ -177,6 +177,10 @@ public class User extends BaseTimeEntity implements UserDetails{
         this.deviceToken = deviceToken;
     }
 
+    public void updateDeviceId(final String deviceId) {
+        this.deviceId = deviceId;
+    }
+
     public static Point createPoint(final Coordinate coordinate) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
         return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(coordinate.getLng(), coordinate.getLat()));
