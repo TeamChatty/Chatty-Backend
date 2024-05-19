@@ -21,9 +21,11 @@ import com.chatty.utils.check.CheckUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -185,5 +187,17 @@ public class AuthCheckService {
             LocalDate nextTry = authCheck.getRegisteredTime().plusDays(3);
             throw new CustomException(Code.CHECK_LIMIT_EXCEEDED, "2번 이상 틀렸습니다. " + nextTry + "에 가능합니다.");
         }
+    }
+
+    /**
+     * 계정 확인 엔티티가 3일 이상 지났을 때, 삭제해주는 기능
+     */
+    @Scheduled(cron = "0 0 0 * * *")
+    @Transactional
+    public void resetAuthCheck() {
+        LocalDate localDate = LocalDate.now().minusDays(3);
+        List<AuthCheck> allByCutoffDate = authCheckRepository.findAllByCutoffDate(localDate);
+
+        authCheckRepository.deleteAll(allByCutoffDate);
     }
 }
