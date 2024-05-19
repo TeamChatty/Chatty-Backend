@@ -51,6 +51,7 @@ public enum Code {
     NOT_SELF_REPORT(HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수 없습니다.", "E042"),
     ALREADY_LIKE_COMMENT(HttpStatus.CONFLICT, "이미 좋아요를 눌렀습니다.", "E043"),
     NOT_EXIST_LIKE_COMMENT(HttpStatus.NOT_FOUND, "좋아요가 존재하지 않습니다.", "E044"),
+    CHECK_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "계정 확인 횟수 제한을 초과했습니다.", "E045"),
 
     // ratelimit
     TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "너무 많은 요청을 보냈습니다.","E098");
