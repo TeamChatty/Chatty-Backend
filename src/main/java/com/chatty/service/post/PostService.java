@@ -127,9 +127,9 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(0, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
-        Page<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(lastLikeCount, pageRequest);
+        List<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(lastLikeCount, pageRequest);
 
-        return posts.getContent().stream()
+        return posts.stream()
                 .map(post -> PostListResponse.of(post, user))
                 .toList();
     }
