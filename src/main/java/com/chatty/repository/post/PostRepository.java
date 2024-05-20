@@ -26,7 +26,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "group by p.post_id " +
             "having LikeCount < :lastLikeCount " +
             "order by LikeCount Desc, p.post_id Desc", nativeQuery = true)
-    Page<Post> customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(Long lastLikeCount, Pageable pageable);
+    List<Post> customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(Long lastLikeCount, Pageable pageable);
 
     Page<Post> findByUserAndIdLessThanOrderByIdDesc(User user, Long postId, Pageable pageable);
 
