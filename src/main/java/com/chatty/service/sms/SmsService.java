@@ -99,7 +99,7 @@ public class SmsService {
         String limitValue = checkAuthLimitNumber(key);
 
         log.info("번호 인증 요청 정보 저장 완료 : {}", authNumber);
-        //sendSms(MessageRequestDto.builder().to(userSmsRequestDto.getMobileNumber()).content(authNumber).build());
+        sendSms(MessageRequestDto.builder().to(userSmsRequestDto.getMobileNumber()).content(authNumber).build());
         return SmsUserResponseDto.of(authNumber, Integer.parseInt(limitValue));
     }
 
