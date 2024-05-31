@@ -199,7 +199,7 @@ public class MatchHandler extends TextWebSocketHandler {
             ChatRoomCreateRequest request = ChatRoomCreateRequest.builder()
                     .receiverId(connectedUserId)
                     .build();
-            ChatRoomResponse room = roomService.createRoom(request, mobileNumber);
+            ChatRoomResponse room = roomService.createRoomForMatching(request, mobileNumber);
             String json = gson.toJson(room);
             TextMessage textMessage2 = new TextMessage(json);
             session.sendMessage(textMessage2);

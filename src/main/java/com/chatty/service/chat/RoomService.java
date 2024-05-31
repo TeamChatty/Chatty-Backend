@@ -54,7 +54,23 @@ public class RoomService {
 
         isExistedRoomByUserId(sender,receiver);
 
-        ChatRoom chatRoom = chatRoomRepository.save(request.toEntity(sender, receiver));
+        ChatRoom chatRoom = chatRoomRepository.save(request.toEntity(sender, receiver, true));
+        log.info("매칭을 통한 채팅방을 생성했습니다.");
+
+        return ChatRoomResponse.of(chatRoom);
+    }
+
+    @Transactional
+    public ChatRoomResponse createRoomForMatching(final ChatRoomCreateRequest request, final String mobileNumber){
+        User sender = userRepository.findUserByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+
+        User receiver = userRepository.findById(request.getReceiverId())
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+
+        isExistedRoomByUserId(sender,receiver);
+
+        ChatRoom chatRoom = chatRoomRepository.save(request.toEntity(sender, receiver, false));
         log.info("매칭을 통한 채팅방을 생성했습니다.");
 
         return ChatRoomResponse.of(chatRoom);
