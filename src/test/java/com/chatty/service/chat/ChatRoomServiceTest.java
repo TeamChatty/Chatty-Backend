@@ -110,7 +110,7 @@ class ChatRoomServiceTest {
                 .build();
 
         // when
-        ChatRoomResponse chatRoomResponse = chatRoomService.createRoom(request, sender.getMobileNumber());
+        ChatRoomResponse chatRoomResponse = chatRoomService.createRoomForMatching(request, sender.getMobileNumber());
 
         // then
         assertThat(chatRoomResponse.getRoomId()).isNotNull();
@@ -131,7 +131,7 @@ class ChatRoomServiceTest {
         ChatRoomCreateRequest request = ChatRoomCreateRequest.builder()
                 .receiverId(user2.getId())
                 .build();
-        chatRoomRepository.save(request.toEntity(user1, user2));
+        chatRoomRepository.save(request.toEntity(user1, user2, false));
 
         return List.of(
                 DynamicTest.dynamicTest("user1이 채팅방을 생성할 때, 이미 존재하기 때문에 예외가 발생한다.", () -> {

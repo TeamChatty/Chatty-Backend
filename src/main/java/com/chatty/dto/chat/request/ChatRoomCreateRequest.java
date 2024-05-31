@@ -21,11 +21,11 @@ public class ChatRoomCreateRequest {
         this.receiverId = receiverId;
     }
 
-    public ChatRoom toEntity(final User sender, final User receiver) {
+    public ChatRoom toEntity(final User sender, final User receiver, final boolean isExtend) {
         return ChatRoom.builder()
                 .sender(sender)
                 .receiver(receiver)
-                .isExtend(false)
+                .isExtend(isExtend)
                 .build();
     }
 }
