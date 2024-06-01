@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="true">
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
 
     <property name="CONSOLE_LOG_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %clr(%5level) %cyan(%logger) - %msg%n"/>
@@ -9,14 +10,14 @@
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %level %logger - %msg%n"/> <!-- 파일 로그 패턴 추가 -->
 
     <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./logs/info.log</file>
+        <file>./logs/all/all-${BY_DATE}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- INFO 로그 파일에 대한 일별 롤오버 -->
-            <fileNamePattern>./logs/info.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
+            <fileNamePattern>./logs/all/all-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
+                <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder>
@@ -25,14 +26,14 @@
     </appender>
 
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./logs/error.log</file>
+        <file>./logs/error/error-${BY_DATE}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- ERROR 로그 파일에 대한 일별 롤오버 -->
-            <fileNamePattern>./logs/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap> <!-- 롤오버 파일의 최대 총 크기 -->
+            <fileNamePattern>./logs/error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap> <!-- 롤오버 파일의 최대 총 크기 -->
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
+                <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder>

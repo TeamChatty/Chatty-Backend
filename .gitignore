@@ -39,3 +39,4 @@ out/
 
 /src/main/resources/application.yml
 /src/main/resources/chatty-lab-firebase-adminsdk-wxe5z-fa16ef3d12.json
+/logs/*
