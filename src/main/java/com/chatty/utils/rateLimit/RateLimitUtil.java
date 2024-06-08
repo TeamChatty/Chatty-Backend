@@ -19,18 +19,6 @@ public class RateLimitUtil {
     };
 
     public static String getClientIp(HttpServletRequest request){
-        String ssss = Arrays.stream(IP_HEADER)
-                .map(request::getHeader)
-                .filter(ipAddress -> ipAddress != null && !ipAddress.isEmpty() && !"unknown".equalsIgnoreCase(ipAddress))
-                .map(ipAddress -> ipAddress.split(":")[0])
-                .findFirst()
-                .orElseGet(request::getRemoteAddr);
-        System.out.println("ssss = " + ssss);
-        System.out.println("ssss = " + ssss);
-        System.out.println("ssss = " + ssss);
-        System.out.println("ssss = " + ssss);
-        System.out.println("ssss = " + ssss);
-        System.out.println("ssss = " + ssss);
         return Arrays.stream(IP_HEADER)
                 .map(request::getHeader)
                 .filter(ipAddress -> ipAddress != null && !ipAddress.isEmpty() && !"unknown".equalsIgnoreCase(ipAddress))
