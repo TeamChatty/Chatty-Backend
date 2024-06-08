@@ -30,6 +30,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         log.info("요청 URI: {}", request.getRequestURI());
+        log.info("요청 IP: {}", request.getRemoteAddr());
         String accessToken = jwtTokenProvider.resolveAccessToken(request);
 
         try {
