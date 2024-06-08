@@ -60,26 +60,35 @@ public class UserService {
         String key = userRequestDto.getMobileNumber();
         String authNumber = userRequestDto.getAuthenticationNumber();
 
-        if(!smsService.checkAuthNumber(key,authNumber)){
+        if (!smsService.checkAuthNumber(key, authNumber)) {
             log.error("인증 번호가 일치하지 않는다.");
             throw new CustomException(Code.INVALID_AUTH_NUMBER);
         }
 
-        if(!isAlreadyExistedUser(userRequestDto.getMobileNumber())) {
+        if (!isAlreadyExistedUser(userRequestDto.getMobileNumber())) {
             log.error("존재 하지 않는 유저 입니다.");
             throw new CustomException(Code.NOT_EXIST_USER);
         }
 
+        // 기기 번호가 테스터 계정이면 Skip
+        if (userRequestDto.getMobileNumber().equals("01000000001") ||
+                userRequestDto.getMobileNumber().equals("01000000002") ||
+                userRequestDto.getMobileNumber().equals("01000000003")) {
+            Map<String, String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
+            return UserResponseDto.of(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
+        }
+
+
         User user = userRepository.findUserByMobileNumber(userRequestDto.getMobileNumber()).get();
 
-        if(!user.getDeviceId().equals(userRequestDto.getDeviceId())){
+        if (!user.getDeviceId().equals(userRequestDto.getDeviceId())) {
             log.error("기기 번호가 일치하지 않습니다.");
             throw new CustomException(Code.INVALID_DEVICE_NUMER);
         }
 
         user.updateDeviceToken(userRequestDto.getDeviceToken());
-        deleteToken(JwtTokenUtils.getRefreshTokenUuid(userRequestDto.getMobileNumber(),userRequestDto.getDeviceId()));
-        Map<String,String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
+        deleteToken(JwtTokenUtils.getRefreshTokenUuid(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId()));
+        Map<String, String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
         return UserResponseDto.of(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
     }
 
@@ -104,16 +113,16 @@ public class UserService {
         String key = userRequestDto.getMobileNumber();
         String authNumber = userRequestDto.getAuthenticationNumber();
 
-        if(!smsService.checkAuthNumber(key,authNumber)){
+        if (!smsService.checkAuthNumber(key, authNumber)) {
             log.error("인증 번호가 일치하지 않는다.");
             throw new CustomException(Code.INVALID_AUTH_NUMBER);
         }
 
-        if(isExistedUser){
+        if (isExistedUser) {
             log.error("이미 존재 하는 유저 입니다.");
             User user = userRepository.findUserByMobileNumber(userRequestDto.getMobileNumber()).get();
 
-            if(!user.getDeviceId().equals(userRequestDto.getDeviceId())){
+            if (!user.getDeviceId().equals(userRequestDto.getDeviceId())) {
                 log.error("이미 등록된 계정이 존재합니다.");
                 throw new CustomException(Code.INVALID_DEVICE_NUMER);
             }
@@ -128,7 +137,7 @@ public class UserService {
                 .deviceToken(userRequestDto.getDeviceToken())
                 .build();
 
-        if(!isExistedUser) {
+        if (!isExistedUser) {
             User savedUser = userRepository.save(user);
             notificationReceiveRepository.save(NotificationReceive.builder()
                     .chattingNotification(true)
@@ -139,23 +148,23 @@ public class UserService {
         }
         log.info("[UserService/join] 회원 가입 완료");
 
-        Map<String,String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
+        Map<String, String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
         return UserResponseDto.of(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
     }
 
-    private Map<String,String> createTokens(String mobileNumber, String uuid){
+    private Map<String, String> createTokens(String mobileNumber, String uuid) {
 
         log.info("[UserService/createTokens] AccessToken, RefreshToken 생성");
-        Map<String,String> tokens = new HashMap<>();
-        String accessToken = jwtTokenProvider.createAccessToken(mobileNumber,uuid);
+        Map<String, String> tokens = new HashMap<>();
+        String accessToken = jwtTokenProvider.createAccessToken(mobileNumber, uuid);
         String refreshToken = jwtTokenProvider.createRefreshToken(mobileNumber, uuid);
-        log.info("[UserService/createTokens] 생성한 accessToken : {}",accessToken);
-        log.info("[UserService/createTokens] 생성한 refreshToken : {}",refreshToken);
+        log.info("[UserService/createTokens] 생성한 accessToken : {}", accessToken);
+        log.info("[UserService/createTokens] 생성한 refreshToken : {}", refreshToken);
         tokens.put(ACCESS_TOKEN, accessToken);
         tokens.put(REFRESH_TOKEN, refreshToken);
 
         log.info("[UserService/createTokens] RefreshToken Redis 저장");
-        refreshTokenRepository.save(jwtTokenProvider.getDeviceIdByRefreshToken(refreshToken),refreshToken);
+        refreshTokenRepository.save(jwtTokenProvider.getDeviceIdByRefreshToken(refreshToken), refreshToken);
 
         return tokens;
     }
@@ -332,11 +341,11 @@ public class UserService {
                 });
     }
 
-    private void deleteToken(String id){
+    private void deleteToken(String id) {
         refreshTokenRepository.delete(id);
     }
 
-    private boolean isAlreadyExistedUser(String mobileNumber){
+    private boolean isAlreadyExistedUser(String mobileNumber) {
         log.info("[UserService/isAlreadyExistedUser] 이미 가입한 유저인지 확인");
         return userRepository.existsUserByMobileNumber(mobileNumber);
     }
@@ -368,7 +377,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto changeNumber(UserRequestDto userRequestDto,final String mobileNumber) {
+    public UserResponseDto changeNumber(UserRequestDto userRequestDto, final String mobileNumber) {
         log.info("[UserService/changeNumber] 번호 변경 시작");
         User findedUser = userRepository.getByMobileNumber(mobileNumber);
 
@@ -377,12 +386,12 @@ public class UserService {
         String key = userRequestDto.getMobileNumber();
         String authNumber = userRequestDto.getAuthenticationNumber();
 
-        if(!smsService.checkAuthNumber(key,authNumber)){
+        if (!smsService.checkAuthNumber(key, authNumber)) {
             log.error("인증 번호가 일치하지 않는다.");
             throw new CustomException(Code.INVALID_AUTH_NUMBER);
         }
 
-        if(isExistedUser){
+        if (isExistedUser) {
             log.error("이미 존재 하는 유저 입니다.");
             throw new CustomException(Code.ALREADY_EXIST_USER);
         }
@@ -390,7 +399,7 @@ public class UserService {
         findedUser.changeNumber(userRequestDto.getMobileNumber());
         log.info("[UserService/join] 번호 변경 완료");
 
-        Map<String,String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
+        Map<String, String> tokens = createTokens(userRequestDto.getMobileNumber(), userRequestDto.getDeviceId());
         return UserResponseDto.of(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
     }
 }
