@@ -30,6 +30,26 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         log.info("요청 URI: {}", request.getRequestURI());
+        String header = request.getHeader("X-Forwarded-For");
+        String header1 = request.getHeader("Proxy-Client-IP");
+        String header2 = request.getHeader("WL-Proxy-Client-IP");
+        String header3 = request.getHeader("HTTP_X_FORWARDED_FOR");
+        String header4 = request.getHeader("HTTP_X_FORWARDED");
+        String header5 = request.getHeader("HTTP_X_CLUSTER_CLIENT_IP");
+        String header6 = request.getHeader("HTTP_CLIENT_IP");
+        String header7 = request.getHeader("HTTP_FORWARDED_FOR");
+        String httpForwarded = request.getHeader("HTTP_FORWARDED");
+        String httpVia = request.getHeader("HTTP_VIA");
+        log.info("header: {}", header);
+        log.info("header1: {}", header1);
+        log.info("header2: {}", header2);
+        log.info("header3: {}", header3);
+        log.info("header4: {}", header4);
+        log.info("header5: {}", header5);
+        log.info("header6: {}", header6);
+        log.info("header7: {}", header7);
+        log.info("httpForwarded: {}", httpForwarded);
+        log.info("httpVia: {}", httpVia);
         log.info("요청 IP: {}", request.getRemoteAddr());
         String accessToken = jwtTokenProvider.resolveAccessToken(request);
 
