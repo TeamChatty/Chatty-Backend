@@ -117,8 +117,9 @@ public class SmsService {
         }
 
         authNumberRepository.updateAuthLimitNumber(authNumber, limitValue);
+        int result = Integer.parseInt(limitValue) + 1;
 
-        return limitValue;
+        return String.valueOf(result);
     }
 
     public boolean checkAuthNumber(String key, String authNumber) {
