@@ -15,6 +15,7 @@ import com.chatty.repository.user.UserRepository;
 import com.chatty.service.alarm.AlarmService;
 import com.chatty.service.fcm.FcmService;
 import com.chatty.service.notification.NotificationReceiveService;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,13 +52,21 @@ public class PostLikeService {
                 .build());
 
         if (!post.getUser().getId().equals(user.getId())) {
-            alarmService.createLikeAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser());
+            try {
+                alarmService.createLikeAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser());
+            } catch (RuntimeException e) {
+                log.info("postLikeService - createLikeAlarm 예외 발생");
+            }
 
             NotificationReceiveResponse notificationReceiveResponse =
                     notificationReceiveService.getNotificationReceive(post.getUser().getMobileNumber());
 
             if (notificationReceiveResponse.isFeedNotification()) {
-                fcmService.sendNotificationWithPostLike(post.getUser(), user);
+                try {
+                    fcmService.sendNotificationWithPostLike(post.getUser(), user);
+                } catch (FirebaseMessagingException e) {
+                    log.info("postLikeService - fcmService 예외 발생");
+                }
             }
         }
 

@@ -13,12 +13,15 @@ import com.chatty.repository.user.UserRepository;
 import com.chatty.service.alarm.AlarmService;
 import com.chatty.service.fcm.FcmService;
 import com.chatty.service.notification.NotificationReceiveService;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -62,13 +65,21 @@ public class ProfileUnlockService {
         ProfileUnlock profileUnlock = request.toEntity(unlocker, unlockedUser, now);
         profileUnlockRepository.save(profileUnlock);
 
-        alarmService.createProfileAlarm(unlocker.getId(), unlocker.getNickname(), unlockedUser);
+        try {
+            alarmService.createProfileAlarm(unlocker.getId(), unlocker.getNickname(), unlockedUser);
+        } catch (RuntimeException e) {
+            log.info("profileUnlockService - createProfileAlarm 예외 발생");
+        }
 
         NotificationReceiveResponse notificationReceiveResponse =
                 notificationReceiveService.getNotificationReceive(unlockedUser.getMobileNumber());
 
         if (notificationReceiveResponse.isFeedNotification()) {
-            fcmService.sendNotificationWithProfileUnlock(unlockedUser, unlocker);
+            try {
+                fcmService.sendNotificationWithProfileUnlock(unlockedUser, unlocker);
+            } catch (FirebaseMessagingException e) {
+                log.info("profileUnlockService - fcmService 예외 발생");
+            }
         }
 
         return ProfileUnlockResponse.of(profileUnlock);

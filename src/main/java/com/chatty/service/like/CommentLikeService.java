@@ -14,10 +14,13 @@ import com.chatty.repository.user.UserRepository;
 import com.chatty.service.alarm.AlarmService;
 import com.chatty.service.fcm.FcmService;
 import com.chatty.service.notification.NotificationReceiveService;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -49,13 +52,21 @@ public class CommentLikeService {
         commentLikeRepository.save(commentLike);
 
         if (!comment.getUser().getId().equals(user.getId())) {
-            alarmService.createCommentLikeAlarm(comment.getId(), user.getId(), user.getNickname(), comment.getUser());
+            try {
+                alarmService.createCommentLikeAlarm(comment.getId(), user.getId(), user.getNickname(), comment.getUser());
+            } catch (RuntimeException e) {
+                log.info("commentLikeService - createCommentLikeAlarm 예외 발생");
+            }
 
             NotificationReceiveResponse notificationReceiveResponse =
                     notificationReceiveService.getNotificationReceive(comment.getUser().getMobileNumber());
 
             if (notificationReceiveResponse.isFeedNotification()) {
-                fcmService.sendNotificationWithPostLike(comment.getUser(), user);
+                try {
+                    fcmService.sendNotificationWithCommentLike(comment.getUser(), user);
+                } catch (FirebaseMessagingException e) {
+                    log.info("commentLikeService - fcmService 예외 발생");
+                }
             }
         }
 

@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class AlarmService {
         return AlarmResponse.of(alarm);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AlarmResponse createCommentAlarm(Long postId, Long fromUser, String fromUserNickname, User toUser, Long commentId) {
         Alarm alarm = Alarm.builder()
                 .isRead(false)
@@ -55,7 +56,7 @@ public class AlarmService {
         return AlarmResponse.of(alarm);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AlarmResponse createLikeAlarm(Long postId, Long fromUser, String fromUserNickname, User toUser) {
         Alarm alarm = Alarm.builder()
                 .isRead(false)
@@ -70,7 +71,7 @@ public class AlarmService {
         return AlarmResponse.of(alarm);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AlarmResponse createCommentLikeAlarm(Long commentId, Long fromUser, String fromUserNickname, User toUser) {
         Alarm alarm = Alarm.builder()
                 .isRead(false)
@@ -86,7 +87,7 @@ public class AlarmService {
         return AlarmResponse.of(alarm);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AlarmResponse createProfileAlarm(Long fromUser, String fromUserNickname, User toUser) {
         Alarm alarm = Alarm.builder()
                 .isRead(false)

@@ -16,6 +16,7 @@ import com.chatty.repository.user.UserRepository;
 import com.chatty.service.alarm.AlarmService;
 import com.chatty.service.fcm.FcmService;
 import com.chatty.service.notification.NotificationReceiveService;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -50,13 +51,21 @@ public class CommentService {
         Comment comment = commentRepository.save(request.toEntity(post, user));
 
         if (!post.getUser().getId().equals(user.getId())) {
-            alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser(), comment.getId());
+            try {
+                alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser(), comment.getId());
+            } catch (RuntimeException e) {
+                log.info("알람 저장 예외 발생");
+            }
 
             NotificationReceiveResponse notificationReceiveResponse =
                     notificationReceiveService.getNotificationReceive(post.getUser().getMobileNumber());
 
             if (notificationReceiveResponse.isFeedNotification()) {
-                fcmService.sendNotificationWithComment(post.getUser(), user, request.getContent());
+                try {
+                    fcmService.sendNotificationWithComment(post.getUser(), user, request.getContent());
+                } catch (FirebaseMessagingException e) {
+                    log.info("fcmService 예외 발생!");
+                }
             }
         }
 
@@ -74,20 +83,24 @@ public class CommentService {
         Comment comment = commentRepository.save(request.toEntity(post, user, parent));
 
         if (!parent.getUser().getId().equals(user.getId())) {
-            alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), parent.getUser(), comment.getId());
+            try {
+                alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), parent.getUser(), comment.getId());
+            } catch (RuntimeException e) {
+                log.info("알람 저장 예외 발생");
+            }
 
             NotificationReceiveResponse notificationReceiveResponse =
                     notificationReceiveService.getNotificationReceive(parent.getUser().getMobileNumber());
 
             if (notificationReceiveResponse.isFeedNotification()) {
-                fcmService.sendNotificationWithComment(parent.getUser(), user, request.getContent());
+                try {
+                    fcmService.sendNotificationWithComment(parent.getUser(), user, request.getContent());
+                } catch (FirebaseMessagingException e) {
+                    log.info("fcmService 예외 발생!");
+                }
             }
 
         }
-
-//        if (!post.getUser().getId().equals(user.getId())) {
-//            alarmService.createCommentAlarm(post.getId(), user.getId(), user.getNickname(), post.getUser(), comment.getId());
-//        }
 
         return CommentResponse.of(comment, post, user);
     }

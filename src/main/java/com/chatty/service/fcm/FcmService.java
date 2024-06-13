@@ -10,8 +10,12 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class FcmService {
@@ -37,7 +41,8 @@ public class FcmService {
         return firebaseMessaging.send(message);
     }
 
-    public void sendNotificationWithComment(final User postWriter, final User commentWriter, final String content) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendNotificationWithComment(final User postWriter, final User commentWriter, final String content) throws FirebaseMessagingException {
         if (existDeviceToken(postWriter)) return;
         Notification notification = Notification.builder()
                 .setTitle(commentWriter.getNickname() + "님이 댓글을 남겼습니다.")
@@ -49,14 +54,11 @@ public class FcmService {
                 .setNotification(notification)
                 .build();
 
-        try {
-            firebaseMessaging.send(message);
-        } catch (FirebaseMessagingException e) {
-            throw new RuntimeException(e);
-        }
+        firebaseMessaging.send(message);
     }
 
-    public void sendNotificationWithPostLike(final User postWriter, final User commentWriter) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendNotificationWithPostLike(final User postWriter, final User commentWriter) throws FirebaseMessagingException {
         if (existDeviceToken(postWriter)) return;
         Notification notification = Notification.builder()
                 .setTitle(commentWriter.getNickname())
@@ -68,18 +70,15 @@ public class FcmService {
                 .setNotification(notification)
                 .build();
 
-        try {
-            firebaseMessaging.send(message);
-        } catch (FirebaseMessagingException e) {
-            throw new RuntimeException(e);
-        }
+        firebaseMessaging.send(message);
     }
 
-    public void sendNotificationWithCommentLike(final User postWriter, final User commentWriter) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendNotificationWithCommentLike(final User postWriter, final User commentWriter) throws FirebaseMessagingException {
         if (existDeviceToken(postWriter)) return;
         Notification notification = Notification.builder()
                 .setTitle(commentWriter.getNickname())
-                .setBody("회원님의 게시글을 좋아합니다.")
+                .setBody("회원님의 댓글을 좋아합니다.")
                 .build();
 
         Message message = Message.builder()
@@ -87,14 +86,11 @@ public class FcmService {
                 .setNotification(notification)
                 .build();
 
-        try {
-            firebaseMessaging.send(message);
-        } catch (FirebaseMessagingException e) {
-            throw new RuntimeException(e);
-        }
+        firebaseMessaging.send(message);
     }
 
-    public void sendNotificationWithProfileUnlock(final User postWriter, final User commentWriter) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendNotificationWithProfileUnlock(final User postWriter, final User commentWriter) throws FirebaseMessagingException {
         if (existDeviceToken(postWriter)) return;
         Notification notification = Notification.builder()
                 .setTitle(commentWriter.getNickname())
@@ -106,11 +102,7 @@ public class FcmService {
                 .setNotification(notification)
                 .build();
 
-        try {
-            firebaseMessaging.send(message);
-        } catch (FirebaseMessagingException e) {
-            throw new RuntimeException(e);
-        }
+        firebaseMessaging.send(message);
     }
 
     private boolean existDeviceToken(final User postWriter) {
