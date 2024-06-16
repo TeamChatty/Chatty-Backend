@@ -105,6 +105,29 @@ public class FcmService {
         firebaseMessaging.send(message);
     }
 
+    public boolean sendReportNotification(final String reportReason, final Long reportedId, final String adminNumber) {
+        if (!adminNumber.equals("01012345678")) return false;
+        User admin = userRepository.getByMobileNumber(adminNumber);
+
+        Notification notification = Notification.builder()
+                .setTitle(reportedId + "님이 신고당했습니다.")
+                .setBody(reportReason)
+                .build();
+
+        Message message = Message.builder()
+                .setToken(admin.getDeviceToken())
+                .setNotification(notification)
+                .build();
+
+        try {
+            firebaseMessaging.send(message);
+        } catch (FirebaseMessagingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return true;
+    }
+
     private boolean existDeviceToken(final User postWriter) {
         if (postWriter.getDeviceToken() == null) {
             return true;

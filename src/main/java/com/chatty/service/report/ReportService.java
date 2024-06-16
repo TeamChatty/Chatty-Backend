@@ -11,6 +11,7 @@ import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.report.ReportRepository;
 import com.chatty.repository.user.UserRepository;
+import com.chatty.service.fcm.FcmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,8 @@ public class ReportService {
     private final UserRepository userRepository;
     private final BlockRepository blockRepository;
     private final ChatRoomRepository chatRoomRepository;
+
+    private final FcmService fcmService;
 
     @Transactional
     public ReportResponse createReport(final Long userId, final String mobileNumber, ReportCreateRequest request) {
@@ -53,6 +56,7 @@ public class ReportService {
                     .ifPresent(chatRoomRepository::delete);
         }
 
+        fcmService.sendReportNotification(request.getContent(), reported.getId(), "01012345678");
         return ReportResponse.of(report);
     }
 
