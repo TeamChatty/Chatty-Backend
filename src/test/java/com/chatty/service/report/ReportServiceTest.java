@@ -12,12 +12,17 @@ import com.chatty.repository.block.BlockRepository;
 import com.chatty.repository.chat.ChatRoomRepository;
 import com.chatty.repository.report.ReportRepository;
 import com.chatty.repository.user.UserRepository;
+import com.chatty.service.fcm.FcmService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -43,6 +48,9 @@ class ReportServiceTest {
     @Autowired
     private ChatRoomRepository chatRoomRepository;
 
+    @MockBean
+    private FcmService fcmService;
+
     @AfterEach
     void tearDown() {
         chatRoomRepository.deleteAllInBatch();
@@ -62,7 +70,8 @@ class ReportServiceTest {
         ReportCreateRequest request = ReportCreateRequest.builder()
                 .content("신고 사유")
                 .build();
-
+        BDDMockito.given(fcmService.sendReportNotification(request.getContent(), reported.getId(), "01012345678"))
+                .willReturn(true);
         // when
         ReportResponse reportResponse =
                 reportService.createReport(reported.getId(), reporter.getMobileNumber(), request);
@@ -72,6 +81,7 @@ class ReportServiceTest {
         assertThat(reportResponse)
                 .extracting("reporterId", "reportedId", "content")
                 .containsExactly(reporter.getId(), reported.getId(), "신고 사유");
+        BDDMockito.verify(fcmService, Mockito.times(1)).sendReportNotification(request.getContent(), reported.getId(), "01012345678");
     }
 
     @DisplayName("해당 유저를 신고할 때, 이미 신고한 유저면 예외가 발생한다.")
@@ -123,6 +133,8 @@ class ReportServiceTest {
         ReportCreateRequest request = ReportCreateRequest.builder()
                 .content("신고 사유")
                 .build();
+        BDDMockito.given(fcmService.sendReportNotification(request.getContent(), reported.getId(), "01012345678"))
+                .willReturn(true);
 
         // when
         ReportResponse reportResponse =
@@ -149,6 +161,8 @@ class ReportServiceTest {
         ReportCreateRequest request = ReportCreateRequest.builder()
                 .content("신고 사유")
                 .build();
+        BDDMockito.given(fcmService.sendReportNotification(request.getContent(), reported.getId(), "01012345678"))
+                .willReturn(true);
 
         ChatRoom chatRoom = createChatRoom(reporter, reported);
         chatRoomRepository.save(chatRoom);
