@@ -4,6 +4,7 @@ import com.chatty.constants.Code;
 import com.chatty.dto.interest.request.InterestRequest;
 import com.chatty.dto.interest.response.InterestResponse;
 import com.chatty.dto.user.request.*;
+import com.chatty.dto.user.response.UserForMatchResponse;
 import com.chatty.dto.user.response.UserResponse;
 import com.chatty.dto.user.response.UserResponseDto;
 import com.chatty.constants.Authority;
@@ -323,6 +324,13 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
 
         return UserResponse.of(user);
+    }
+
+    public UserForMatchResponse getMyProfileForMatch(final String mobileNumber) {
+        User user = userRepository.findUserByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new CustomException(Code.NOT_EXIST_USER));
+
+        return UserForMatchResponse.of(user);
     }
 
     @Scheduled(cron = "0 0 0 * * *")
