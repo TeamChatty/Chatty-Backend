@@ -82,7 +82,9 @@ public class PostService {
         boolean isBookmark = bookmarkRepository.existsByPostAndUser(post, user);
         post.addViewCount();
 
-        return PostResponse.of(post, user, isLike, isOwner, isBookmark);
+        int likeCount = postLikeRepository.countByPost(post);
+
+        return PostResponse.of(post, user, isLike, isOwner, isBookmark, likeCount);
     }
 
     public List<PostListResponse> getPostList(final String mobileNumber) {

@@ -55,7 +55,7 @@ public class PostResponse {
         this.isBookmark = isBookmark;
     }
 
-    public static PostResponse of(final Post post, final User user, final boolean isLike, final boolean isOwner, final boolean isBookmark) {
+    public static PostResponse of(final Post post, final User user, final boolean isLike, final boolean isOwner, final boolean isBookmark, final int likeCount) {
         return PostResponse.builder()
                 .postId(post.getId())
                 .content(post.getContent())
@@ -66,7 +66,7 @@ public class PostResponse {
                 .userId(post.getUser().getId())
                 .profileImage(post.getUser().getImageUrl())
                 .viewCount(post.getViewCount())
-                .likeCount(post.getPostLikes().size())
+                .likeCount(likeCount)
                 .commentCount(post.getComments().size())
                 .isLike(isLike)
                 .isOwner(isOwner)
