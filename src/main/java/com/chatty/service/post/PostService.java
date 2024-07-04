@@ -132,8 +132,15 @@ public class PostService {
         List<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(lastLikeCount, pageRequest);
 
         return posts.stream()
-                .map(post -> PostListResponse.of(post, user))
+                .map(post -> test(post, user))
                 .toList();
+    }
+
+    private PostListResponse test(Post post, User user) {
+        boolean isLike = postLikeRepository.existsByPostAndUser(post, user);
+        int likeCount = postLikeRepository.countByPost(post);
+
+        return PostListResponse.ofTest(post, user, likeCount, isLike);
     }
 
     public List<PostListResponse> getMyPostListPages(final Long lastPostId, final int size, final String mobileNumber) {
