@@ -66,13 +66,17 @@ public class PostListResponse {
                 .userId(post.getUser().getId())
                 .nickname(post.getUser().getNickname())
                 .imageUrl(post.getUser().getImageUrl())
-                .likeCount(post.getPostLikes().size())
-                .commentCount(post.getComments().size())
-                .isLike(post.getPostLikes().stream()
-                        .anyMatch(postLike -> postLike.getUser().getId().equals(user.getId())))
+                .likeCount(1)
+//                .likeCount(post.getPostLikes().size())
+//                .commentCount(post.getComments().size())
+                .commentCount(1)
+                .isLike(true)
+//                .isLike(post.getPostLikes().stream()
+//                        .anyMatch(postLike -> postLike.getUser().getId().equals(user.getId())))
                 .isOwner(post.getUser().getId().equals(user.getId()))
-                .isBookmark(post.getBookmarks().stream()
-                        .anyMatch(bookmark -> bookmark.getUser().getId().equals(user.getId())))
+                .isBookmark(true)
+//                .isBookmark(post.getBookmarks().stream()
+//                        .anyMatch(bookmark -> bookmark.getUser().getId().equals(user.getId())))
                 .build();
     }
 
@@ -94,6 +98,27 @@ public class PostListResponse {
                 .isOwner(post.getUser().getId().equals(user.getId()))
 //                .isBookmark(post.getBookmarks().stream()
 //                        .anyMatch(bookmark -> bookmark.getUser().getId().equals(user.getId())))
+                .build();
+    }
+
+    public static PostListResponse ofTest2(final Post post, final User user, final boolean isLike, final Long likeCount) {
+        return PostListResponse.builder()
+                .postId(post.getId())
+                .content(post.getContent())
+                .postImages(post.getPostImages().stream()
+                        .map(PostImage::getImage)
+                        .collect(Collectors.toList()))
+                .viewCount(post.getViewCount())
+                .createdAt(post.getCreatedAt())
+                .userId(post.getUser().getId())
+                .nickname(post.getUser().getNickname())
+                .imageUrl(post.getUser().getImageUrl())
+                .likeCount(likeCount)
+                .commentCount(post.getComments().size())
+                .isLike(isLike)
+                .isOwner(post.getUser().getId().equals(user.getId()))
+                .isBookmark(post.getBookmarks().stream()
+                        .anyMatch(bookmark -> bookmark.getUser().getId().equals(user.getId())))
                 .build();
     }
 }

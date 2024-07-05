@@ -1,10 +1,13 @@
 package com.chatty.service.post;
 
 import com.chatty.constants.Code;
+import com.chatty.dto.like.response.PostLikeCountResponse;
+import com.chatty.dto.like.response.PostLikeResponse;
 import com.chatty.dto.post.request.PostRequest;
 import com.chatty.dto.post.response.PostCreateResponse;
 import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.dto.post.response.PostResponse;
+import com.chatty.entity.like.PostLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.post.PostImage;
 import com.chatty.entity.user.User;
@@ -26,7 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -129,11 +134,43 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(0, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
+        System.out.println("user.getId() = " + user.getId());
         List<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(lastLikeCount, pageRequest);
 
-        return posts.stream()
-                .map(post -> test(post, user))
+        List<Long> postIds = posts.stream()
+                .map(Post::getId)
                 .toList();
+        List<PostLike> byUserAndPostIds = postLikeRepository.findByUserAndPostIds(user, postIds);
+        Map<Long, Boolean> likeMap = new HashMap<>();
+        for (PostLike like : byUserAndPostIds) {
+            likeMap.put(like.getPost().getId(), true);
+        }
+
+        for (Long postId : postIds) {
+            likeMap.putIfAbsent(postId, false);
+        }
+
+        List<PostLikeCountResponse> likeCount = postLikeRepository.findByPostIdsAndLikeCount(postIds);
+        Map<Long, Long> likeCountMap = new HashMap<>();
+        for (PostLikeCountResponse postLikeCountResponse : likeCount) {
+            likeCountMap.put(postLikeCountResponse.getPostId(), postLikeCountResponse.getLikeCount());
+        }
+//        for (PostLikeCountResponse postLikeCountResponse : likeCount) {
+//            System.out.println("postLikeCountResponse.getPostId() = " + postLikeCountResponse.getPostId());
+//            System.out.println("postLikeCountResponse.getLikeCount() = " + postLikeCountResponse.getLikeCount());
+//            System.out.println("=========================================");
+//        }
+
+
+        return posts.stream()
+                .map(post -> test2(post, user, likeMap, likeCountMap))
+                .toList();
+//        return posts.stream()
+//                .map(post -> PostListResponse.of(post, user))
+//                .toList();
+//        return posts.stream()
+//                .map(post -> test(post, user))
+//                .toList();
     }
 
     private PostListResponse test(Post post, User user) {
@@ -141,6 +178,12 @@ public class PostService {
         int likeCount = postLikeRepository.countByPost(post);
 
         return PostListResponse.ofTest(post, user, likeCount, isLike);
+    }
+
+    private PostListResponse test2(Post post, User user, Map<Long, Boolean> likeMap, Map<Long, Long> likeCount) {
+
+        return PostListResponse.
+                ofTest2(post, user, likeMap.getOrDefault(post.getId(), false), likeCount.get(post.getId()));
     }
 
     public List<PostListResponse> getMyPostListPages(final Long lastPostId, final int size, final String mobileNumber) {
