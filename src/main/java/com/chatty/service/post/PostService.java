@@ -134,7 +134,7 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(0, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
-        System.out.println("user.getId() = " + user.getId());
+        log.info("userId = {}", user.getId());
         List<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(lastLikeCount, pageRequest);
 
         List<Long> postIds = posts.stream()
@@ -150,40 +150,15 @@ public class PostService {
             likeMap.putIfAbsent(postId, false);
         }
 
-        List<PostLikeCountResponse> likeCount = postLikeRepository.findByPostIdsAndLikeCount(postIds);
-        Map<Long, Long> likeCountMap = new HashMap<>();
-        for (PostLikeCountResponse postLikeCountResponse : likeCount) {
-            likeCountMap.put(postLikeCountResponse.getPostId(), postLikeCountResponse.getLikeCount());
-        }
-//        for (PostLikeCountResponse postLikeCountResponse : likeCount) {
-//            System.out.println("postLikeCountResponse.getPostId() = " + postLikeCountResponse.getPostId());
-//            System.out.println("postLikeCountResponse.getLikeCount() = " + postLikeCountResponse.getLikeCount());
-//            System.out.println("=========================================");
-//        }
-
-
         return posts.stream()
-                .map(post -> test2(post, user, likeMap, likeCountMap))
+                .map(post -> test2(post, user, likeMap))
                 .toList();
-//        return posts.stream()
-//                .map(post -> PostListResponse.of(post, user))
-//                .toList();
-//        return posts.stream()
-//                .map(post -> test(post, user))
-//                .toList();
     }
 
-    private PostListResponse test(Post post, User user) {
-        boolean isLike = postLikeRepository.existsByPostAndUser(post, user);
-        int likeCount = postLikeRepository.countByPost(post);
-
-        return PostListResponse.ofTest(post, user, likeCount, isLike);
-    }
-
-    private PostListResponse test2(Post post, User user, Map<Long, Boolean> likeMap, Map<Long, Long> likeCount) {
+    private PostListResponse test2(Post post, User user, Map<Long, Boolean> likeMap) {
 
         return PostListResponse.
-                ofTest2(post, user, likeMap.getOrDefault(post.getId(), false), likeCount.get(post.getId()));
+                ofTest2(post, user, likeMap.getOrDefault(post.getId(), false));
     }
 
     public List<PostListResponse> getMyPostListPages(final Long lastPostId, final int size, final String mobileNumber) {

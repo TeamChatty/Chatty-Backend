@@ -97,7 +97,7 @@ public class PostListResponse {
                 .build();
     }
 
-    public static PostListResponse ofTest2(final Post post, final User user, final boolean isLike, final Long likeCount) {
+    public static PostListResponse ofTest2(final Post post, final User user, final boolean isLike) {
         return PostListResponse.builder()
                 .postId(post.getId())
                 .content(post.getContent())
@@ -109,7 +109,7 @@ public class PostListResponse {
                 .userId(post.getUser().getId())
                 .nickname(post.getUser().getNickname())
                 .imageUrl(post.getUser().getImageUrl())
-                .likeCount(likeCount)
+                .likeCount(post.getLikeCount())
                 .commentCount(post.getComments().size())
                 .isLike(isLike)
                 .isOwner(post.getUser().getId().equals(user.getId()))

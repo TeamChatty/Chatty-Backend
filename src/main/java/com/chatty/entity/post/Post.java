@@ -36,6 +36,8 @@ public class Post extends BaseTimeEntity {
 
     private int viewCount;
 
+    private int likeCount;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> postImages = new ArrayList<>();
 
@@ -49,10 +51,11 @@ public class Post extends BaseTimeEntity {
     private List<Bookmark> bookmarks = new ArrayList<>();
 
     @Builder
-    public Post(final User user, final String content, final int viewCount) {
+    public Post(final User user, final String content, final int viewCount, final int likeCount) {
         this.user = user;
         this.content = content;
         this.viewCount = viewCount;
+        this.likeCount = likeCount;
     }
 
     public void addViewCount() {
