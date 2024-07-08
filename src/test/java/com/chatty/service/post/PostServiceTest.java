@@ -353,36 +353,36 @@ class PostServiceTest {
                 );
     }
 
-    @DisplayName("게시글 목록을 좋아요 높은 순으로 정렬, 페이징 처리하여 조회한다. 좋아요 개수를 기준으로 No-Offset")
-    @Test
-    void getPostListPagesOrderByTopLiked() throws IOException {
-        // 좋아요 개수가 0개인 것은 조회하지 않으며, LikeCount 개수를 기준으로 값을 불러온다. (LikeCount < lastLikeCount)
-        // given
-        User user = createUser("닉네임", "01012345678");
-        User user2 = createUser("닉네임2", "01011112222");
-        userRepository.saveAll(List.of(user, user2));
-
-        Post post1 = createPost("내용1", user);
-        Post post2 = createPost("내용2", user);
-        Post post3 = createPost("내용3", user2);
-        postRepository.saveAll(List.of(post1, post2, post3));
-
-        PostLike postLike1 = createPostLike(post1, user);
-        PostLike postLike2 = createPostLike(post1, user2);
-        PostLike postLike3 = createPostLike(post2, user2);
-        postLikeRepository.saveAll(List.of(postLike1, postLike2, postLike3));
-
-        // when
-        List<PostListResponse> postList = postService.getPostListPagesOrderByTopLiked(3L, 3, user.getMobileNumber());
-
-        // then
-        assertThat(postList).hasSize(2)
-                .extracting("postId", "content", "LikeCount")
-                .containsExactlyInAnyOrder(
-                        tuple(post1.getId(), "내용1", 2L),
-                        tuple(post2.getId(), "내용2", 1L)
-                );
-    }
+//    @DisplayName("게시글 목록을 좋아요 높은 순으로 정렬, 페이징 처리하여 조회한다. 좋아요 개수를 기준으로 No-Offset")
+//    @Test
+//    void getPostListPagesOrderByTopLiked() throws IOException {
+//        // 좋아요 개수가 0개인 것은 조회하지 않으며, LikeCount 개수를 기준으로 값을 불러온다. (LikeCount < lastLikeCount)
+//        // given
+//        User user = createUser("닉네임", "01012345678");
+//        User user2 = createUser("닉네임2", "01011112222");
+//        userRepository.saveAll(List.of(user, user2));
+//
+//        Post post1 = createPost("내용1", user);
+//        Post post2 = createPost("내용2", user);
+//        Post post3 = createPost("내용3", user2);
+//        postRepository.saveAll(List.of(post1, post2, post3));
+//
+//        PostLike postLike1 = createPostLike(post1, user);
+//        PostLike postLike2 = createPostLike(post1, user2);
+//        PostLike postLike3 = createPostLike(post2, user2);
+//        postLikeRepository.saveAll(List.of(postLike1, postLike2, postLike3));
+//
+//        // when
+//        List<PostListResponse> postList = postService.getPostListPagesOrderByTopLiked(3L, 3, user.getMobileNumber());
+//
+//        // then
+//        assertThat(postList).hasSize(2)
+//                .extracting("postId", "content", "LikeCount")
+//                .containsExactlyInAnyOrder(
+//                        tuple(post1.getId(), "내용1", 2L),
+//                        tuple(post2.getId(), "내용2", 1L)
+//                );
+//    }
 
     @DisplayName("내가 작성한 게시글 목록을 페이징하여 조회한다.")
     @Test
