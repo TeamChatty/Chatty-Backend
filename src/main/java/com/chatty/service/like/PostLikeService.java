@@ -50,6 +50,7 @@ public class PostLikeService {
                 .post(post)
                 .user(user)
                 .build());
+        post.addLikeCount();
 
         if (!post.getUser().getId().equals(user.getId())) {
             try {
@@ -82,6 +83,7 @@ public class PostLikeService {
         PostLike postLike = postLikeRepository.findByPostAndUser(post, user)
                 .orElseThrow(() -> new CustomException(Code.NOT_EXIST_LIKE_POST));
         postLikeRepository.delete(postLike);
+        post.minusLikeCount();
 
         alarmRepository.findByPostIdAndUserIdAndFromUser(postId, post.getUser().getId(), user.getId())
                         .ifPresent(alarmRepository::delete);

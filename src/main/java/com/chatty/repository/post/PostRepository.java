@@ -30,7 +30,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query(value = "select p.* " +
             "from post p " +
-            "where like_count >= 1 " +
+            "where p.like_count >= 1 " +
             "order by p.like_count Desc, p.post_id Desc", nativeQuery = true)
     List<Post> customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(Long lastLikeCount, Pageable pageable);
 
