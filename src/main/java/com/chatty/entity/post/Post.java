@@ -62,4 +62,12 @@ public class Post extends BaseTimeEntity {
         this.viewCount++;
         // 테스트 코드 작성?
     }
+
+    public void addLikeCount() {
+        this.likeCount++;
+    }
+
+    public void minusLikeCount() {
+        this.likeCount--;
+    }
 }
