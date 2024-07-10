@@ -130,12 +130,12 @@ public class PostService {
                 .toList();
     }
 
-    public List<PostListResponse> getPostListPagesOrderByTopLiked(final Long lastLikeCount, final int size, final String mobileNumber) {
-        PageRequest pageRequest = PageRequest.of(0, size);
+    public List<PostListResponse> getPostListPagesOrderByTopLiked(final int offset, final int size, final String mobileNumber) {
+        PageRequest pageRequest = PageRequest.of(offset, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
         log.info("userId = {}", user.getId());
-        List<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(lastLikeCount, pageRequest);
+        List<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(pageRequest);
 
         List<Long> postIds = posts.stream()
                 .map(Post::getId)
