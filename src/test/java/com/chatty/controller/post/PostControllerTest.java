@@ -187,12 +187,12 @@ class PostControllerTest {
         // given
         List<PostListResponse> result = List.of();
 
-        when(postService.getPostListPagesOrderByTopLiked(11L, 10, "01012341234")).thenReturn(result);
+        when(postService.getPostListPagesOrderByTopLiked(0, 10, "01012341234")).thenReturn(result);
 
         // when // then
         mockMvc.perform(
                         get("/v1/posts/top-liked")
-                                .param("lastLikeCount", "11")
+                                .param("offset", "0")
                                 .param("size", "10")
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
