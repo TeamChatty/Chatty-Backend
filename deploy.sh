@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+cd /home/ubuntu/chatty
 IS_DEV1=$(docker ps | grep chatty1)
 DEFAULT_CONF=" /etc/nginx/sites-available/dev.api.chattylab.org.conf"
 MAX_RETRIES=20
