@@ -27,10 +27,10 @@ if [ -z "$IS_DEV1" ];then
   echo "### DEV2 => DEV1 ###"
 
   echo "1. DEV1 이미지 받기"
-  docker-compose pull springBoot
+  docker compose pull springBoot
 
   echo "2. DEV1 컨테이너 실행"
-  docker-compose up -d springBoot
+  docker compose up -d springBoot
 
   echo "3. health check"
   if ! check_service "http://127.0.0.1:8080"; then
@@ -43,17 +43,17 @@ if [ -z "$IS_DEV1" ];then
   sudo nginx -s reload
 
   echo "5. DEV2 컨테이너 내리기"
-  docker-compose stop springBoot2
-  docker-compose rm -f springBoot2
+  docker compose stop springBoot2
+  docker compose rm -f springBoot2
 
 else
   echo "### DEV1 => DEV2 ###"
 
   echo "1. DEV2 이미지 받기"
-  docker-compose pull springBoot2
+  docker compose pull springBoot2
 
   echo "2. DEV2 컨테이너 실행"
-  docker-compose up -d springBoot2
+  docker compose up -d springBoot2
 
   echo "3. health check"
   if ! check_service "http://127.0.0.1:8081"; then
@@ -66,8 +66,8 @@ else
   sudo nginx -s reload
 
   echo "5. DEV1 컨테이너 내리기"
-  docker-compose stop springBoot
-  docker-compose rm -f springBoot
+  docker compose stop springBoot
+  docker compose rm -f springBoot
 fi
 #APP_NAME=chatty-api
 #cd /home/ubuntu/chatty
