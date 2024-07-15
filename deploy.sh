@@ -26,8 +26,8 @@ check_service() {
 if [ -z "$IS_DEV1" ];then
   echo "### DEV2 => DEV1 ###"
 
-  echo "1. DEV1 이미지 받기"
-  docker compose pull springBoot
+#  echo "1. DEV1 이미지 받기"
+#  docker compose pull springBoot
 
   echo "2. DEV1 컨테이너 실행"
   docker compose up -d springBoot
@@ -49,8 +49,8 @@ if [ -z "$IS_DEV1" ];then
 else
   echo "### DEV1 => DEV2 ###"
 
-  echo "1. DEV2 이미지 받기"
-  docker compose pull springBoot2
+#  echo "1. DEV2 이미지 받기"
+#  docker compose pull springBoot2
 
   echo "2. DEV2 컨테이너 실행"
   docker compose up -d springBoot2
