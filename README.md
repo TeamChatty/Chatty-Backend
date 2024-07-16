@@ -28,7 +28,7 @@
 
 |                백엔드                 |                   백엔드                   |
 |:----------------------------------:|:---------------------------------------:|
-| [윤병일](https://github.com/YunByungil) | [박상윤](https://github.com/sangyunpark99) |                                          [안세준](https://github.com/asjjun)                                           |||
+| [윤병일](https://github.com/YunByungil) | [박상윤](https://github.com/sangyunpark99) |
   
 |   IOS   |   IOS   |    
 |:-------:|:-------:| 
