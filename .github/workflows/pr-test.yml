@@ -46,15 +46,15 @@ jobs:
         run: mv temp/chatty-lab-firebase-adminsdk-wxe5z-fa16ef3d12.json src/main/resources/chatty-lab-firebase-adminsdk-wxe5z-fa16ef3d12.json
 
       # 빌드 캐시를 불러와요.
-      - name: Cache Gradle packages
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+#      - name: Cache Gradle packages
+#        uses: actions/cache@v2
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+#          restore-keys: |
+#            ${{ runner.os }}-gradle-
 
       # Gradlew 권한을 설정해요.
       - name: Grant execute permission for gradlew
