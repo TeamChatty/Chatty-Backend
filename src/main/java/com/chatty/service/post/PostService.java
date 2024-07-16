@@ -1,8 +1,6 @@
 package com.chatty.service.post;
 
 import com.chatty.constants.Code;
-import com.chatty.dto.like.response.PostLikeCountResponse;
-import com.chatty.dto.like.response.PostLikeResponse;
 import com.chatty.dto.post.request.PostRequest;
 import com.chatty.dto.post.response.PostCreateResponse;
 import com.chatty.dto.post.response.PostListResponse;
@@ -21,7 +19,6 @@ import com.chatty.repository.user.UserRepository;
 import com.chatty.utils.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -98,17 +95,19 @@ public class PostService {
         // 로그인 중인 사람 기준으로 차단한 사람을 List<Long> 으로 불러온다.
         List<Long> blockedIds = blockRepository.customFindAllByBlocker(user);
 
-        List<Post> postList;
+        List<Post> posts;
         // blockedIds 가 null 인 경우에는 쿼리가 제대로 작동하지 않기 때문에 if 조건이 필요하다.
         if (blockedIds == null || blockedIds.isEmpty()) {
-            postList = postRepository.findAll(Sort.by("id").descending());
+            posts = postRepository.findAll(Sort.by("id").descending());
         } else {
             // 불러온 사람들을 제외한 게시글을 검색해야 하기 때문에 where 절에 새로운 조건을 추가한다.
-            postList = postRepository.findAllByUserIdNotInOrderByIdDesc(blockedIds);
+            posts = postRepository.findAllByUserIdNotInOrderByIdDesc(blockedIds);
         }
 
-        return postList.stream()
-                .map(post -> PostListResponse.of(post, user))
+        Map<Long, Boolean> likeMap = createLikeMapBy(posts, user);
+
+        return posts.stream()
+                .map(post -> of(post, user, likeMap))
                 .collect(Collectors.toList());
     }
 
@@ -118,15 +117,17 @@ public class PostService {
         User user = userRepository.getByMobileNumber(mobileNumber);
         List<Long> blockedIds = blockRepository.customFindAllByBlocker(user);
 
-        Page<Post> posts;
+        List<Post> posts;
         if (blockedIds == null || blockedIds.isEmpty()) {
             posts = postRepository.findByIdLessThanOrderByIdDesc(lastPostId, pageRequest);
         } else {
             posts = postRepository.findByIdLessThanAndUserIdNotInOrderByIdDesc(lastPostId, blockedIds, pageRequest);
         }
 
-        return posts.getContent().stream()
-                .map(post -> PostListResponse.of(post, user))
+        Map<Long, Boolean> likeMap = createLikeMapBy(posts, user);
+
+        return posts.stream()
+                .map(post -> of(post, user, likeMap))
                 .toList();
     }
 
@@ -137,6 +138,36 @@ public class PostService {
         log.info("userId = {}", user.getId());
         List<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(pageRequest);
 
+        Map<Long, Boolean> likeMap = createLikeMapBy(posts, user);
+
+        return posts.stream()
+                .map(post -> of(post, user, likeMap))
+                .toList();
+    }
+
+    public List<PostListResponse> getMyPostListPages(final Long lastPostId, final int size, final String mobileNumber) {
+        PageRequest pageRequest = PageRequest.of(0, size);
+
+        User user = userRepository.getByMobileNumber(mobileNumber);
+        List<Post> posts = postRepository.findByUserAndIdLessThanOrderByIdDesc(user, lastPostId, pageRequest);
+
+        Map<Long, Boolean> likeMap = createLikeMapBy(posts, user);
+
+        return posts.stream()
+                .map(post -> of(post, user, likeMap))
+                .toList();
+    }
+
+    private void validateExtension(final String filename) {
+        String[] file = filename.split("\\.");
+        String extension = file[file.length - 1];
+
+        if (!extension.equals("jpg") && !extension.equals("jpeg") && !extension.equals("png")) {
+            throw new CustomException(Code.INVALID_EXTENSION);
+        }
+    }
+
+    private Map<Long, Boolean> createLikeMapBy(final List<Post> posts, final User user) {
         List<Long> postIds = posts.stream()
                 .map(Post::getId)
                 .toList();
@@ -149,35 +180,13 @@ public class PostService {
         for (Long postId : postIds) {
             likeMap.putIfAbsent(postId, false);
         }
-
-        return posts.stream()
-                .map(post -> test2(post, user, likeMap))
-                .toList();
+        return likeMap;
     }
 
-    private PostListResponse test2(Post post, User user, Map<Long, Boolean> likeMap) {
+    private PostListResponse of(Post post, User user, Map<Long, Boolean> likeMap) {
 
         return PostListResponse.
-                ofTest2(post, user, likeMap.getOrDefault(post.getId(), false));
+                of(post, user, likeMap.getOrDefault(post.getId(), false));
     }
 
-    public List<PostListResponse> getMyPostListPages(final Long lastPostId, final int size, final String mobileNumber) {
-        PageRequest pageRequest = PageRequest.of(0, size);
-
-        User user = userRepository.getByMobileNumber(mobileNumber);
-        Page<Post> posts = postRepository.findByUserAndIdLessThanOrderByIdDesc(user, lastPostId, pageRequest);
-
-        return posts.getContent().stream()
-                .map(post -> PostListResponse.of(post, user))
-                .toList();
-    }
-
-    private void validateExtension(final String filename) {
-        String[] file = filename.split("\\.");
-        String extension = file[file.length - 1];
-
-        if (!extension.equals("jpg") && !extension.equals("jpeg") && !extension.equals("png")) {
-            throw new CustomException(Code.INVALID_EXTENSION);
-        }
-    }
 }

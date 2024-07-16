@@ -3,11 +3,14 @@ package com.chatty.service.bookmark;
 import com.chatty.constants.Code;
 import com.chatty.dto.bookmark.response.BookmarkListResponse;
 import com.chatty.dto.bookmark.response.BookmarkResponse;
+import com.chatty.dto.post.response.PostListResponse;
 import com.chatty.entity.bookmark.Bookmark;
+import com.chatty.entity.like.PostLike;
 import com.chatty.entity.post.Post;
 import com.chatty.entity.user.User;
 import com.chatty.exception.CustomException;
 import com.chatty.repository.bookmark.BookmarkRepository;
+import com.chatty.repository.like.PostLikeRepository;
 import com.chatty.repository.post.PostRepository;
 import com.chatty.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +33,7 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
 
     @Transactional
     public BookmarkResponse createBookmark(final Long postId, final String mobileNumber) {
@@ -62,11 +68,30 @@ public class BookmarkService {
         PageRequest pageRequest = PageRequest.of(0, size);
         User user = userRepository.getByMobileNumber(mobileNumber);
 
-        Page<Bookmark> bookmarks =
+        List<Bookmark> bookmarks =
                 bookmarkRepository.findByUserAndIdLessThanOrderByCreatedAtDesc(user, lastBookmarkId, pageRequest);
 
-        return bookmarks.getContent().stream()
-                .map(bookmark -> BookmarkListResponse.of(bookmark, user))
+        List<Long> postIds = bookmarks.stream()
+                .map(bookmark -> bookmark.getPost().getId())
                 .toList();
+        List<PostLike> byUserAndPostIds = postLikeRepository.findByUserAndPostIds(user, postIds);
+        Map<Long, Boolean> likeMap = new HashMap<>();
+        for (PostLike like : byUserAndPostIds) {
+            likeMap.put(like.getPost().getId(), true);
+        }
+
+        for (Long postId : postIds) {
+            likeMap.putIfAbsent(postId, false);
+        }
+
+        return bookmarks.stream()
+                .map(bookmark -> of(bookmark, user, likeMap))
+                .toList();
+    }
+
+    private BookmarkListResponse of(Bookmark bookmark, User user, Map<Long, Boolean> likeMap) {
+
+        return BookmarkListResponse.
+                of(bookmark, user, likeMap.getOrDefault(bookmark.getPost().getId(), false));
     }
 }
