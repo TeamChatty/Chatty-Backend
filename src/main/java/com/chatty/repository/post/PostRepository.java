@@ -18,7 +18,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                 .orElseThrow(() -> new CustomException(Code.NOT_EXIST_POST));
     }
 
-    Page<Post> findByIdLessThanOrderByIdDesc(Long postId, Pageable pageable);
+    List<Post> findByIdLessThanOrderByIdDesc(Long postId, Pageable pageable);
 
 //    @Query(value = "select p.*, COUNT(pl.post_like_id) as LikeCount " +
 //            "from post p " +
@@ -41,9 +41,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 //            "having LikeCount < :lastLikeCount", nativeQuery = true)
 //    List<Post> customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(Long lastLikeCount, Pageable pageable);
 
-    Page<Post> findByUserAndIdLessThanOrderByIdDesc(User user, Long postId, Pageable pageable);
+    List<Post> findByUserAndIdLessThanOrderByIdDesc(User user, Long postId, Pageable pageable);
 
     List<Post> findAllByUserIdNotInOrderByIdDesc(List<Long> users);
 
-    Page<Post> findByIdLessThanAndUserIdNotInOrderByIdDesc(Long postId, List<Long> users, Pageable pageable);
+    List<Post> findByIdLessThanAndUserIdNotInOrderByIdDesc(Long postId, List<Long> users, Pageable pageable);
 }

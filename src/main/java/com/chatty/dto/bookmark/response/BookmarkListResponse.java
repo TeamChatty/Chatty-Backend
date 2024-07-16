@@ -27,10 +27,10 @@ public class BookmarkListResponse {
         this.postListResponse = postListResponse;
     }
 
-    public static BookmarkListResponse of(final Bookmark bookmark, final User user) {
+    public static BookmarkListResponse of(final Bookmark bookmark, final User user, final boolean isLike) {
         return BookmarkListResponse.builder()
                 .bookmarkId(bookmark.getId())
-                .postListResponse(PostListResponse.of(bookmark.getPost(), user))
+                .postListResponse(PostListResponse.of(bookmark.getPost(), user, isLike))
                 .build();
     }
 
