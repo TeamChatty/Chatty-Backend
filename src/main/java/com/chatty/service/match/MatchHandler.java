@@ -65,151 +65,248 @@ public class MatchHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(final WebSocketSession session, final TextMessage message) throws Exception {
         String payload = message.getPayload();
-        WebSocketSession destination = null;
-        if (payload.equals("accept") || payload.equals("reject")) {
-            log.info("들어오나?");
-            session.getAttributes().put("answer", payload);
-            for (WebSocketSession connected : sessions) {
-                if (session.getAttributes().get("destination").equals(connected.getId())) {
-                    destination = connected;
-                    break;
+        MatchResponse matchResponse = gson.fromJson(payload, MatchResponse.class);
+        matchService.createUserSession(session, matchResponse);
+
+        String mobileNumber = session.getAttributes().get("mobileNumber").toString();
+        Object myRequestGender = session.getAttributes().get("requestGender");
+        Object myGender = session.getAttributes().get("gender");
+
+        // TODO: matchService 로 넘길 필요가 없다.
+        for (WebSocketSession connected : sessions) {
+            log.info("session에 저장되어있는 requestGender 값 = {}", session.getAttributes().get("requestGender"));
+
+            if (session == connected || connected.getAttributes().get("nickname") == null) {
+                continue;
+            }
+
+            Long senderId = Long.parseLong(session.getAttributes().get("userId").toString());
+            Long receiverId = Long.parseLong(connected.getAttributes().get("userId").toString());
+
+            if (isBlocked(senderId, receiverId)) {
+                continue;
+            }
+
+            // 이미 매칭 기록이 존재하면 Skip
+            if (hasExistingMatch(senderId, receiverId)) {
+                continue;
+            }
+
+            // 이미 채팅 기록이 존재하면 Skip
+            if (hasExistingChatroom(senderId, receiverId)) {
+                continue;
+            }
+
+            // session requestBlueCheck 값 체크
+            Object requestBlueCheck = session.getAttributes().get("requestBlueCheck");
+            Object connectedBlueCheck = connected.getAttributes().get("isBlueCheck");
+            if (requestBlueCheck.equals(true)) {
+                if (connectedBlueCheck.equals(false)) {
+                    log.info("BlueCheck 사람과 매칭하고 싶은데 상대방은 BlueCheck 없다. -> continue");
+                    continue;
                 }
             }
 
-            String myAnswer = session.getAttributes().get("answer").toString();
-            if (destination != null) {
-                String destinationAnswer = String.valueOf(destination.getAttributes().get("answer"));
-                log.info("myAnswer ={}, destinationAnswer={}", myAnswer, destinationAnswer);
+            // 내 성별, 내가 원하는 성별, 상대 성별, 상대가 원하는 성별 체크
+            Object yourGender = connected.getAttributes().get("gender");
+            Object yourRequestGender = connected.getAttributes().get("requestGender");
 
-                if (myAnswer.equals("accept")) {
-                    if (destinationAnswer.equals("null")) {
-                        return;
-                    } else if (destinationAnswer.equals("accept")) {
-                        String mobileNumber = session.getAttributes().get("mobileNumber").toString();
-                        Long sessionMatchId = Long.parseLong(session.getAttributes().get("matchId").toString());
-                        Long connectedMatchId = Long.parseLong(destination.getAttributes().get("matchId").toString());
-
-                        Long sessionUserId = Long.parseLong(session.getAttributes().get("userId").toString());
-                        Long connectedUserId = Long.parseLong(destination.getAttributes().get("userId").toString());
-                        // 채팅방 생성
-                        createChatroom(session, destination, connectedUserId, mobileNumber);
-                        //
-
-                        // 매치 성공하면 true
-                        matchService.successMatch(sessionMatchId);
-                        matchService.successMatch(connectedMatchId);
-
-                        // 매치 성공하면 history에 저장
-                        createMatchHistory(sessionUserId, connectedUserId);
-
-                        log.info("매칭 완료!!!!");
-                        sessions.remove(session);
-                        sessions.remove(destination);
-                        session.close();
-                        destination.close();
-                        return;
-                    }
-                }
+            if (!matchGenderConditions(myRequestGender, yourRequestGender, myGender, yourGender)) {
+                continue;
             }
 
-            if (myAnswer.equals("reject")) {
-                Long sessionUserId = Long.parseLong(session.getAttributes().get("userId").toString());
-                Long connectedUserId = Long.parseLong(destination.getAttributes().get("userId").toString());
-                createMatchHistory(sessionUserId, connectedUserId);
+            // 1. 내가 원하는 최소 나이와 최대 나이, 그리고 상대방의 나이를 비교한다.
+            int myRequestMinAge = Integer.parseInt(session.getAttributes().get("requestMinAge").toString());
+            int myRequestMaxAge = Integer.parseInt(session.getAttributes().get("requestMaxAge").toString());
+            int myAge = Integer.parseInt(session.getAttributes().get("age").toString());
 
-                sessions.remove(session);
-                sessions.remove(destination);
+            int yourRequestMinAge = Integer.parseInt(connected.getAttributes().get("requestMinAge").toString());
+            int yourRequestMaxAge = Integer.parseInt(connected.getAttributes().get("requestMaxAge").toString());
+            int yourAge = Integer.parseInt(connected.getAttributes().get("age").toString());
 
-                session.close();
-                destination.close();
+            if (!matchAgeConditions(myRequestMinAge, yourAge, myRequestMaxAge, yourRequestMinAge, myAge, yourRequestMaxAge)) {
+                log.info("매칭 실패?");
+                continue;
             }
-        } else {
-            MatchResponse matchResponse = gson.fromJson(payload, MatchResponse.class);
 
-            // TODO: matchService 로 넘길 필요가 없다.
-            matchService.createUserSession(session, matchResponse);
+            Long sessionMatchId = Long.parseLong(session.getAttributes().get("matchId").toString());
+            Long connectedMatchId = Long.parseLong(connected.getAttributes().get("matchId").toString());
 
-            Object myRequestGender = session.getAttributes().get("requestGender");
-            Object myGender = session.getAttributes().get("gender");
+            Long sessionUserId = Long.parseLong(session.getAttributes().get("userId").toString());
+            Long connectedUserId = Long.parseLong(connected.getAttributes().get("userId").toString());
 
-            for (WebSocketSession connected : sessions) {
-                log.info("session에 저장되어있는 requestGender 값 = {}", session.getAttributes().get("requestGender"));
-                if (connected.getAttributes().containsKey("destination")) {
-                    log.info("목적지가 존재하기 때문에 매칭을 하지 않습니다.");
-                    continue;
-                }
+            // 매칭 성공하면 채팅방 생성
+            createChatroom(session, connected, connectedUserId, mobileNumber);
+            //
 
-                if (session == connected || connected.getAttributes().get("nickname") == null) {
-                    continue;
-                }
+            // 매치 성공하면 true
+            matchService.successMatch(sessionMatchId);
+            matchService.successMatch(connectedMatchId);
+            //
 
+            // 매치 성공하면 history에 저장
+            createMatchHistory(sessionUserId, connectedUserId);
+            //
 
-                Long senderId = Long.parseLong(session.getAttributes().get("userId").toString());
-                Long receiverId = Long.parseLong(connected.getAttributes().get("userId").toString());
+            sessions.remove(session);
+            sessions.remove(connected);
 
-                if (isBlocked(senderId, receiverId)) {
-                    continue;
-                }
+            session.close();
+            connected.close();
 
-                // 이미 매칭 기록이 존재하면 Skip
-                if (hasExistingMatch(senderId, receiverId)) {
-                    continue;
-                }
-
-                // 이미 채팅 기록이 존재하면 Skip
-                if (hasExistingChatroom(senderId, receiverId)) {
-                    continue;
-                }
-
-                // session requestBlueCheck 값 체크
-                Object requestBlueCheck = session.getAttributes().get("requestBlueCheck");
-                Object connectedBlueCheck = connected.getAttributes().get("isBlueCheck");
-                if (requestBlueCheck.equals(true)) {
-                    if (connectedBlueCheck.equals(false)) {
-//                    log.info("BlueCheck 사람과 매칭하고 싶은데 상대방은 BlueCheck 없다. -> continue");
-                        continue;
-                    }
-                }
-
-                // 내 성별, 내가 원하는 성별, 상대 성별, 상대가 원하는 성별 체크
-                Object yourGender = connected.getAttributes().get("gender");
-                Object yourRequestGender = connected.getAttributes().get("requestGender");
-                if (!matchGenderConditions(myRequestGender, yourRequestGender, myGender, yourGender)) {
-                    continue;
-                }
-
-                // 1. 내가 원하는 최소 나이와 최대 나이, 그리고 상대방의 나이를 비교한다.
-                int myRequestMinAge = Integer.parseInt(session.getAttributes().get("requestMinAge").toString());
-                int myRequestMaxAge = Integer.parseInt(session.getAttributes().get("requestMaxAge").toString());
-                int myAge = Integer.parseInt(session.getAttributes().get("age").toString());
-
-                int yourRequestMinAge = Integer.parseInt(connected.getAttributes().get("requestMinAge").toString());
-                int yourRequestMaxAge = Integer.parseInt(connected.getAttributes().get("requestMaxAge").toString());
-                int yourAge = Integer.parseInt(connected.getAttributes().get("age").toString());
-
-                if (!matchAgeConditions(myRequestMinAge, yourAge, myRequestMaxAge, yourRequestMinAge, myAge, yourRequestMaxAge)) {
-                    log.info("매칭 실패?");
-                    continue;
-                }
-
-                UserForMatchResponse sessionUser = userService.getMyProfileForMatch(session.getAttributes().get("mobileNumber").toString());
-                UserForMatchResponse connectedUser = userService.getMyProfileForMatch(connected.getAttributes().get("mobileNumber").toString());
-                String me = gson.toJson(sessionUser);
-                String you = gson.toJson(connectedUser);
-                TextMessage textMessage2 = new TextMessage(me);
-                TextMessage textMessage3 = new TextMessage(you);
-
-                session.sendMessage(textMessage3);
-                connected.sendMessage(textMessage2);
-
-                session.getAttributes().put("destination", connected.getId());
-                connected.getAttributes().put("destination", session.getId());
-
-                break;
-            }
+            break;
         }
 
     }
+//    @Synchronized
+//    @Override
+//    public void handleTextMessage(final WebSocketSession session, final TextMessage message) throws Exception {
+//        String payload = message.getPayload();
+//        WebSocketSession destination = null;
+//        if (payload.equals("accept") || payload.equals("reject")) {
+//            log.info("들어오나?");
+//            session.getAttributes().put("answer", payload);
+//            for (WebSocketSession connected : sessions) {
+//                if (session.getAttributes().get("destination").equals(connected.getId())) {
+//                    destination = connected;
+//                    break;
+//                }
+//            }
+//
+//            String myAnswer = session.getAttributes().get("answer").toString();
+//            if (destination != null) {
+//                String destinationAnswer = String.valueOf(destination.getAttributes().get("answer"));
+//                log.info("myAnswer ={}, destinationAnswer={}", myAnswer, destinationAnswer);
+//
+//                if (myAnswer.equals("accept")) {
+//                    if (destinationAnswer.equals("null")) {
+//                        return;
+//                    } else if (destinationAnswer.equals("accept")) {
+//                        String mobileNumber = session.getAttributes().get("mobileNumber").toString();
+//                        Long sessionMatchId = Long.parseLong(session.getAttributes().get("matchId").toString());
+//                        Long connectedMatchId = Long.parseLong(destination.getAttributes().get("matchId").toString());
+//
+//                        Long sessionUserId = Long.parseLong(session.getAttributes().get("userId").toString());
+//                        Long connectedUserId = Long.parseLong(destination.getAttributes().get("userId").toString());
+//                        // 채팅방 생성
+//                        createChatroom(session, destination, connectedUserId, mobileNumber);
+//                        //
+//
+//                        // 매치 성공하면 true
+//                        matchService.successMatch(sessionMatchId);
+//                        matchService.successMatch(connectedMatchId);
+//
+//                        // 매치 성공하면 history에 저장
+//                        createMatchHistory(sessionUserId, connectedUserId);
+//
+//                        log.info("매칭 완료!!!!");
+//                        sessions.remove(session);
+//                        sessions.remove(destination);
+//                        session.close();
+//                        destination.close();
+//                        return;
+//                    }
+//                }
+//            }
+//
+//            if (myAnswer.equals("reject")) {
+//                Long sessionUserId = Long.parseLong(session.getAttributes().get("userId").toString());
+//                Long connectedUserId = Long.parseLong(destination.getAttributes().get("userId").toString());
+//                createMatchHistory(sessionUserId, connectedUserId);
+//
+//                sessions.remove(session);
+//                sessions.remove(destination);
+//
+//                session.close();
+//                destination.close();
+//            }
+//        } else {
+//            MatchResponse matchResponse = gson.fromJson(payload, MatchResponse.class);
+//
+//            // TODO: matchService 로 넘길 필요가 없다.
+//            matchService.createUserSession(session, matchResponse);
+//
+//            Object myRequestGender = session.getAttributes().get("requestGender");
+//            Object myGender = session.getAttributes().get("gender");
+//
+//            for (WebSocketSession connected : sessions) {
+//                log.info("session에 저장되어있는 requestGender 값 = {}", session.getAttributes().get("requestGender"));
+//                if (connected.getAttributes().containsKey("destination")) {
+//                    log.info("목적지가 존재하기 때문에 매칭을 하지 않습니다.");
+//                    continue;
+//                }
+//
+//                if (session == connected || connected.getAttributes().get("nickname") == null) {
+//                    continue;
+//                }
+//
+//
+//                Long senderId = Long.parseLong(session.getAttributes().get("userId").toString());
+//                Long receiverId = Long.parseLong(connected.getAttributes().get("userId").toString());
+//
+//                if (isBlocked(senderId, receiverId)) {
+//                    continue;
+//                }
+//
+//                // 이미 매칭 기록이 존재하면 Skip
+//                if (hasExistingMatch(senderId, receiverId)) {
+//                    continue;
+//                }
+//
+//                // 이미 채팅 기록이 존재하면 Skip
+//                if (hasExistingChatroom(senderId, receiverId)) {
+//                    continue;
+//                }
+//
+//                // session requestBlueCheck 값 체크
+//                Object requestBlueCheck = session.getAttributes().get("requestBlueCheck");
+//                Object connectedBlueCheck = connected.getAttributes().get("isBlueCheck");
+//                if (requestBlueCheck.equals(true)) {
+//                    if (connectedBlueCheck.equals(false)) {
+////                    log.info("BlueCheck 사람과 매칭하고 싶은데 상대방은 BlueCheck 없다. -> continue");
+//                        continue;
+//                    }
+//                }
+//
+//                // 내 성별, 내가 원하는 성별, 상대 성별, 상대가 원하는 성별 체크
+//                Object yourGender = connected.getAttributes().get("gender");
+//                Object yourRequestGender = connected.getAttributes().get("requestGender");
+//                if (!matchGenderConditions(myRequestGender, yourRequestGender, myGender, yourGender)) {
+//                    continue;
+//                }
+//
+//                // 1. 내가 원하는 최소 나이와 최대 나이, 그리고 상대방의 나이를 비교한다.
+//                int myRequestMinAge = Integer.parseInt(session.getAttributes().get("requestMinAge").toString());
+//                int myRequestMaxAge = Integer.parseInt(session.getAttributes().get("requestMaxAge").toString());
+//                int myAge = Integer.parseInt(session.getAttributes().get("age").toString());
+//
+//                int yourRequestMinAge = Integer.parseInt(connected.getAttributes().get("requestMinAge").toString());
+//                int yourRequestMaxAge = Integer.parseInt(connected.getAttributes().get("requestMaxAge").toString());
+//                int yourAge = Integer.parseInt(connected.getAttributes().get("age").toString());
+//
+//                if (!matchAgeConditions(myRequestMinAge, yourAge, myRequestMaxAge, yourRequestMinAge, myAge, yourRequestMaxAge)) {
+//                    log.info("매칭 실패?");
+//                    continue;
+//                }
+//
+//                UserForMatchResponse sessionUser = userService.getMyProfileForMatch(session.getAttributes().get("mobileNumber").toString());
+//                UserForMatchResponse connectedUser = userService.getMyProfileForMatch(connected.getAttributes().get("mobileNumber").toString());
+//                String me = gson.toJson(sessionUser);
+//                String you = gson.toJson(connectedUser);
+//                TextMessage textMessage2 = new TextMessage(me);
+//                TextMessage textMessage3 = new TextMessage(you);
+//
+//                session.sendMessage(textMessage3);
+//                connected.sendMessage(textMessage2);
+//
+//                session.getAttributes().put("destination", connected.getId());
+//                connected.getAttributes().put("destination", session.getId());
+//
+//                break;
+//            }
+//        }
+//
+//    }
 
     private void createMatchHistory(final Long sessionUserId, final Long connectedUserId) {
         User sender = userRepository.findById(sessionUserId)
@@ -256,9 +353,9 @@ public class MatchHandler extends TextWebSocketHandler {
     }
 
     private boolean matchGenderConditions(final Object myRequestGender, final Object yourRequestGender, final Object myGender, final Object yourGender) {
-        if (myRequestGender.equals(Gender.ALL)) {
-            return yourRequestGender.equals(Gender.ALL) || yourRequestGender.equals(myGender);
-        }
+//        if (myRequestGender.equals(Gender.ALL)) {
+//            return yourRequestGender.equals(Gender.ALL) || yourRequestGender.equals(myGender);
+//        }
 
         if (myRequestGender.equals(Gender.MALE)) {
             return yourGender.equals(Gender.MALE) && (yourRequestGender.equals(Gender.ALL) || yourRequestGender.equals(myGender));

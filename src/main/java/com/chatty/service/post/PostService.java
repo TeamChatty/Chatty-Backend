@@ -112,18 +112,6 @@ public class PostService {
     }
 
     public List<PostListResponse> getPostListPages(final Long lastPostId, final int size, final String mobileNumber) {
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
-        log.info("test 완료");
         PageRequest pageRequest = PageRequest.of(0, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
