@@ -135,7 +135,6 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(offset, size);
 
         User user = userRepository.getByMobileNumber(mobileNumber);
-        log.info("userId = {}", user.getId());
         List<Post> posts = postRepository.customFindByLikeCountLessThanOrderByLikeCountDescAndIdDesc(pageRequest);
 
         Map<Long, Boolean> likeMap = createLikeMapBy(posts, user);
